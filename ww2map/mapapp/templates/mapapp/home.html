@@ -15,14 +15,20 @@
 <body>
     <!-- Navbar -->
     <nav>
-        <div class="logo">{% trans "Jewish Warrior Museum" %}</div>
+        <div class="logo-container">
+            <div class="logo">
+                <img src="{% static 'mapapp/images/logo.svg' %}" alt="{% trans 'Museum Logo' %}">
+            </div>
+            <span class="logo-text">{% trans "Jewish Warrior Museum" %}</span>
+        </div>
+        
         <div class="nav-buttons">
             <form method="POST" style="display: inline;">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="website">
                 <button type="submit">{% trans "Main Website" %}</button>
             </form>
-
+    
             <!-- כפתורי החלפת שפה -->
             <form method="POST" action="/i18n/setlang/" style="display: inline;">
                 {% csrf_token %}

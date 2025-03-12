@@ -5,6 +5,10 @@ from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from .models import Event
 from .forms import DateRangeForm  # ✅ זה מה שהיה חסר!
+import csv
+import os  # 🔥 הוסף את זה
+from django.http import JsonResponse
+from django.conf import settings
 
 class Home(View):
     template_name_en = 'mapapp/home.html'
@@ -77,3 +81,26 @@ def event_list(request):
         )
 
     return JsonResponse(list(events), safe=False)
+
+#בדיקת לוחמים
+def load_soldiers_data(request):
+    # נתיב לקובץ ה-CSV שנמצא באותה תיקייה כמו manage.py
+    csv_path = os.path.join(settings.BASE_DIR, "soldiers_data.csv")
+
+    soldiers = []
+    try:
+        with open(csv_path, encoding="UTF-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                soldiers.append({
+                    "id": row.get("ID"),
+                    "name": row.get("שם"),
+                    "country": row.get("מדינה"),
+                    "years": row.get("שנות פעילות"),
+                    "bio": row.get("קורות חיים"),
+                    "image": row.get("קישור לתמונה")
+                })
+    except Exception as e:
+        return JsonResponse({"error": f"Failed to load CSV: {str(e)}"}, status=500)
+
+    return JsonResponse(soldiers, safe=False)

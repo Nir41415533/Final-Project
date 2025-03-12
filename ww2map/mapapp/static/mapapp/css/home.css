@@ -123,6 +123,26 @@ nav .nav-buttons button:hover {
     border-radius: 5px;
 }
 
+/* סגנון קונטיינר שמכיל את הלוגו ואת הטקסט */
+.logo-container {
+    display: flex;
+    align-items: center;  /* מיישר את הלוגו והטקסט לאותו קו */
+    gap: 10px;  /* מרחק בין הלוגו לטקסט */
+}
+
+/* סגנון לתמונה של הלוגו */
+.logo img {
+    height: 50px;  /* גובה מתואם ללוגו */
+    width: auto;  /* יחס רוחב אוטומטי */
+}
+
+/* סגנון לטקסט של הלוגו */
+.logo-text {
+    font-size: 22px;  /* גודל הטקסט */
+    font-weight: bold;  /* הופך את הטקסט למודגש */
+    color: #333;  /* צבע כהה לטקסט */
+}
+
 /* Submit button */
 .form-container button {
     background-color: #4caf50;

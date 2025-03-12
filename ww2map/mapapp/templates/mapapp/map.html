@@ -21,15 +21,15 @@
 <body>
     <div class="main-container">
         <header class="map-header">
-            <h1>Interactive Timeline Map</h1>
-            <div class="timeline-controls">
-                <button id="prev-year">◀</button>
-                <input type="range" id="timeline" min="1939" max="1945" value="1939" />
-                <button id="next-year">▶</button>
-                <span id="current-year">1939</span>
+            <div class="logo-container">
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'mapapp/images/logo.svg' %}" alt="Museum Logo">
+                </a>
+                <span class="logo-text">Jewish Warrior Museum</span>
             </div>
         </header>
         <div id="map"></div>
+
     </div>
 
     <!-- Modal for Events -->
@@ -41,6 +41,10 @@
             <img id="eventImage" class="event-image" />
             <div id="eventDescription"></div>
             <video id="eventVideo" class="event-media" controls></video>
+    
+            <!-- ✅ הכותרת תופיע רק אם יש לוחמים -->
+            <h3 id="soldiersTitle" style="display: none;">לוחמים ממדינה זו:</h3>
+            <div id="soldiersContainer" class="soldiers-list" style="display: none;"></div>
         </div>
     </div>
 
