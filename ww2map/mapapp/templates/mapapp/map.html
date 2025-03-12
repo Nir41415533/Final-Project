@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>World War II Interactive Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!-- Showdown for Markdown conversion -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js" defer></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'mapapp/css/styles.css' %}">
+
+    <!-- Favicon (optional, to silence 404) -->
+    <link rel="icon" href="{% static 'mapapp/favicon.ico' %}" type="image/x-icon">
+</head>
+<body>
+    <div class="main-container">
+        <header class="map-header">
+            <h1>Interactive Timeline Map</h1>
+            <div class="timeline-controls">
+                <button id="prev-year">◀</button>
+                <input type="range" id="timeline" min="1939" max="1945" value="1939" />
+                <button id="next-year">▶</button>
+                <span id="current-year">1939</span>
+            </div>
+        </header>
+        <div id="map"></div>
+    </div>
+
+    <!-- Modal for Events -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">×</span>
+            <h2 id="eventTitle"></h2>
+            <div id="eventDate"></div>
+            <img id="eventImage" class="event-image" />
+            <div id="eventDescription"></div>
+            <video id="eventVideo" class="event-media" controls></video>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
+
+    <!-- MapTiler SDK (use specific version) -->
+    <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.umd.min.js" defer></script>
+
+    <!-- Custom JS -->
+    <script src="{% static 'mapapp/index.js' %}" defer></script>
+</body>
+</html>

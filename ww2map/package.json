@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@maptiler/leaflet-maptilersdk": "^4.0.2",
+    "leaflet": "^1.9.4"
+  }
+}

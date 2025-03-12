@@ -1,0 +1,72 @@
+{% load static %}
+{% load i18n %}
+
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% trans "Jewish Warrior Museum" %}</title>
+    <link rel="stylesheet" href="{% static 'mapapp/css/home.css' %}">
+    <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" />
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">{% trans "Jewish Warrior Museum" %}</div>
+        <div class="nav-buttons">
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="website">
+                <button type="submit">{% trans "Main Website" %}</button>
+            </form>
+
+            <!-- כפתורי החלפת שפה -->
+            <form method="POST" action="/i18n/setlang/" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="language" value="he">
+                <button type="submit">עברית</button>
+            </form>
+            <form method="POST" action="/i18n/setlang/" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="language" value="en">
+                <button type="submit">English</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Centered Title -->
+    <div class="centered-title">{% trans "Interactive Map" %}</div>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+    <div class="map-buttons">
+        <!-- Time Range Form -->
+        <div class="form-container" id="time-range-form" style="display: none;">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="start_date">{% trans "Start Date:" %}</label>
+                    <input type="date" id="start_date" name="start_date" min="1939-09-01" max="1945-05-08" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">{% trans "End Date:" %}</label>
+                    <input type="date" id="end_date" name="end_date" min="1939-09-01" max="1945-05-08" required>
+                </div>
+                <button type="submit">{% trans "Submit" %}</button>
+            </form>
+        </div>
+        <!-- Buttons -->
+        <button id="show-time-range">{% trans "Select Time Range" %}</button>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="explore_map">
+            <button type="submit">{% trans "Explore the Map" %}</button>
+        </form>
+    </div>
+
+    <script src="{% static 'mapapp/js/home.js' %}"></script>
+</body>
+</html>
