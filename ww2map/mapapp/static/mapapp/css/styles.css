@@ -88,9 +88,9 @@ html, body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4); /* רקע שקוף עם עמעום עדין */
+    background: rgba(0, 0, 0, 0.4);
     z-index: 2000;
-    overflow-y: auto; /* גלילה פנימית למודאל עצמו */
+    overflow-y: auto;
     padding: 20px;
     box-sizing: border-box;
     animation: fadeIn 0.5s ease-in-out;
@@ -99,8 +99,8 @@ html, body {
 /* כפתור סגירה (ימין למעלה) */
 .modal-controls {
     position: absolute;
-    top: 20px; /* קרוב לראש הדף */
-    right: 10px; /* מוצמד לצד ימין */
+    top: 20px;
+    right: 10px;
     display: flex;
     justify-content: flex-end;
     background: #f5e8c7;
@@ -111,11 +111,11 @@ html, body {
     opacity: 0;
     animation: fadeInElement 0.5s ease-in-out forwards;
     animation-delay: 0.6s;
-    z-index: 2200; /* גבוה יותר כדי שיהיה מעל ה-passport */
+    z-index: 2200;
 }
 
 .nav-button {
-    display: none; /* מסתיר את כפתורי הקודם והבא */
+    display: none;
 }
 
 .eventClose {
@@ -138,8 +138,8 @@ html, body {
 /* טבלת אירועים (ימין למעלה, מתחת לכפתור הסגירה) */
 .passport {
     position: absolute;
-    top: 100px; /* מתחת לכפתור הסגירה */
-    right: 20px; /* שומר אותו בצד ימין */
+    top: 100px;
+    right: 20px;
     width: 450px;
     height: 400px;
     background: #f5e8c7;
@@ -172,7 +172,7 @@ html, body {
     font-size: 1.5rem;
     font-weight: bold;
     text-transform: uppercase;
-    color: #4a2c2a; /* תיקון שגיאת צבע */
+    color: #4a2c2a;
     margin-bottom: 10px;
 }
 
@@ -263,16 +263,16 @@ html, body {
 /* גלריית לוחמים (שמאל למעלה, ליד ה-passport) */
 .soldiers-section {
     position: absolute;
-    top: 50px; /* מתחיל בגובה של ה-passport */
-    bottom: 20px; /* יימתח עד סוף המסך */
-    left: calc(20px + 530px); /* ממוקם משמאל ל-passport */
+    top: 50px;
+    bottom: 20px;
+    left: calc(20px + 530px);
     width: 300px;
     background: #f5e8c7;
     padding: 15px;
     border: 2px solid #d4af37;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    opacity: 0;
+    opacity: 0; /* Initial state */
     animation: fadeInElement 0.5s ease-in-out forwards;
     animation-delay: 0.1s;
     z-index: 2100;
@@ -282,10 +282,10 @@ html, body {
 
 .soldiers-list {
     display: flex;
-    flex-direction: column; /* כדי שהלוחמים יסתדרו אחד מתחת לשני */
+    flex-direction: column;
     gap: 10px;
-    overflow-y: auto; /* גלילה במקרה של הרבה לוחמים */
-    flex: 1; /* ממלא את כל השטח */
+    overflow-y: auto;
+    flex: 1;
     padding-right: 5px;
     scrollbar-width: thin;
     scrollbar-color: #d4af37 #f5e8c7;
@@ -328,45 +328,54 @@ html, body {
     font-weight: bold;
 }
 
-/* מפה קטנה (שמאל באמצע, מתחת לגלריית הלוחמים) */
 .insetMap {
     position: absolute;
-    top: 350px; /* 20px + 300px (גובה ה-multimedia) + 10px (padding עליון) + 10px (padding תחתון) + 10px (מרווח) */
-    left: 110px; /* מיושר עם ה-multimedia */
-    width: 400px; /* רוחב זהה ל-multimedia */
-    background: #f5e8c7;
-    padding: 10px;
-    border: 2px solid #d4af37;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    transform: rotate(-0.89deg);
+    top: 340px;
+    left: 200px;
+    width: 320px;
+    background: #fef8e6;
+    padding: 8px;
+    border: 2px solid #c9a63c;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: rotate(-0.5deg);
     opacity: 0;
-    animation: fadeInElement 0.5s ease-in-out forwards;
-    animation-delay: 0.5s;
+    animation: fadeInElement 0.6s ease-in-out forwards;
+    animation-delay: 0.4s;
     z-index: 2000;
 }
 
 .map-placeholder {
     width: 100%;
-    height: 200px;
-    background: #ddd;
-    border: 2px solid #d4af37;
-    border-radius: 5px;
+    height: 160px;
+    border: 1px solid #d4af37;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2em;
-    color: #666;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.map-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
 }
 
 
-/* תמונה או וידאו (שמאל למטה, מתחת למפה הקטנה) */
 /* תמונה או וידאו (שמאל למעלה) */
 .multimedia {
     position: absolute;
-    top: 20px; /* שמאל למעלה */
-    left: 110px; /* שמאל */
+    top: 100px;
+    left: 110px;
     width: 400px;
+    height:200px;
+
     background: #f5e8c7;
     padding: 10px;
     border: 2px solid #d4af37;
@@ -384,44 +393,6 @@ html, body {
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     border: 2px solid #d4af37;
-}
-
-/* אייקונים וינטג' */
-.vintage-stamp {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    background: #d4af37;
-    border-radius: 50%;
-    opacity: 0.7;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-}
-
-.stamp-multimedia {
-    top: -10px;
-    right: -10px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V7z"/></svg>');
-    background-size: 60%;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.stamp-soldiers {
-    top: -10px;
-    right: -10px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M12 2a5 5 0 00-5 5v2h10V7a5 5 0 00-5-5zm0 8H7v12h10V10h-5zm-2 4h4v2h-4v-2z"/></svg>');
-    background-size: 60%;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.stamp-map {
-    bottom: -10px;
-    right: -10px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2V7zm0 8h2v2h-2v-2z"/></svg>');
-    background-size: 60%;
-    background-position: center;
-    background-repeat: no-repeat;
 }
 
 /* אנימציות */

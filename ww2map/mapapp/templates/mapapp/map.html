@@ -34,49 +34,46 @@
         <div id="map"></div>
     </div>
 
-  <!-- מודאל משודרג -->
-<div id="eventModal" class="modal">
-    <!-- גלריית לוחמים (בצד שמאל) -->
-    <div class="soldiers-section">
-        <h3 id="soldiersTitle" style="display: none;">לוחמים ממדינה זו:</h3>
-        <div id="soldiersContainer" class="soldiers-list scrollable" style="display: none;"></div>
-        <div class="vintage-stamp stamp-soldiers"></div>
-    </div>
+    <!-- מודאל משודרג -->
+    <div id="eventModal" class="modal">
+        <!-- גלריית לוחמים (בצד שמאל) -->
+        <div class="soldiers-section">
+            <h3 id="soldiersTitle" style="display: none;">לוחמים ממדינה זו:</h3>
+            <div id="soldiersContainer" class="soldiers-list scrollable" style="display: none;"></div>
+        </div>
 
-    <!-- טבלת אירועים (בצד ימין) -->
-    <div class="passport">
-        <table>
-            <caption id="eventTitle" class="uppercase"></caption>
-            <thead>
-                <tr>
-                    <th class="notesHeading">תאריכים</th>
-                    <th class="summaryHeading">תיאור</th>
-                </tr>
-            </thead>
-            <tbody id="eventsTableBody" class="scrollable">
-                <!-- נתונים יתווספו דינמית -->
-            </tbody>
-        </table>
-    </div>
+        <!-- טבלת אירועים (בצד ימין) -->
+        <div class="passport">
+            <table>
+                <caption id="eventTitle" class="uppercase"></caption>
+                <thead>
+                    <tr>
+                        <th class="notesHeading">תאריכים</th>
+                        <th class="summaryHeading">תיאור</th>
+                    </tr>
+                </thead>
+                <tbody id="eventsTableBody" class="scrollable">
+                    <!-- נתונים יתווספו דינמית -->
+                </tbody>
+            </table>
+        </div>
 
-    <!-- תמונה או וידאו -->
-    <div class="multimedia">
-        <img id="eventImage" class="event-image" src="" alt="תמונה מהאירוע" style="display: none;"/>
-        <video id="eventVideo" class="event-media" controls preload="metadata" style="display: none;"></video>
-        <div class="vintage-stamp stamp-multimedia"></div>
+        <!-- תמונה או וידאו -->
+        <div class="multimedia">
+            <img id="eventImage" class="event-image" src="" alt="תמונה מהאירוע" style="display: none;"/>
+            <video id="eventVideo" class="event-media" controls preload="metadata" style="display: none;"></video>
+        </div>
+        
+        <!-- מפה קטנה -->
+        <div class="insetMap">
+            <div id="insetMapPlaceholder" class="map-placeholder">מפת הקרב</div>
+        </div>
+        
+        <!-- כפתור סגירה בלבד -->
+        <div class="modal-controls">
+            <button id="eventClose" class="eventClose" onclick="closeModal()"><span class="closeText">סגור</span> <span class="closeX">×</span></button>
+        </div>
     </div>
-    
-    <!-- מפה קטנה -->
-    <div class="insetMap">
-        <div id="insetMapPlaceholder" class="map-placeholder">מפת הקרב</div>
-        <div class="vintage-stamp stamp-map"></div>
-    </div>
-    
-    <!-- כפתור סגירה בלבד -->
-    <div class="modal-controls">
-        <button id="eventClose" class="eventClose" onclick="closeModal()"><span class="closeText">סגור</span> <span class="closeX">×</span></button>
-    </div>
-</div>
 
     <!-- Leaflet JS -->
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>

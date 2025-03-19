@@ -86,40 +86,81 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function handleCountryClick(country) {
-        const countryName = country.properties.name.trim().toLowerCase();
+        const countryName = country.properties.name.trim().toLowerCase(); // English name from GeoJSON
         console.log("🔍 מדינה שנבחרה מהמפה:", countryName);
-
-        const countryTranslations = {
-            "פולין": "poland",
-            "צרפת": "france",
-            "בלגיה": "belgium",
-            "הודו": "india",
-            "אמסטרדם": "netherlands",
-            "נמירוב": "ukraine",
-            "יקטרינוסלב": "russia",
-            "ליבק": "germany"
+    
+        const countryCodeMapping = {
+            "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad",
+            "angola": "ao", "argentina": "ar", "armenia": "am", "australia": "au",
+            "austria": "at", "azerbaijan": "az", "bangladesh": "bd", "belarus": "by",
+            "belgium": "be", "brazil": "br", "canada": "ca", "china": "cn",
+            "colombia": "co", "croatia": "hr", "cuba": "cu", "czech republic": "cz",
+            "denmark": "dk", "egypt": "eg", "finland": "fi", "france": "fr",
+            "germany": "de", "greece": "gr", "hungary": "hu", "india": "in",
+            "indonesia": "id", "iran": "ir", "iraq": "iq", "ireland": "ie",
+            "israel": "il", "italy": "it", "japan": "jp", "jordan": "jo",
+            "kazakhstan": "kz", "kenya": "ke", "latvia": "lv", "lebanon": "lb",
+            "libya": "ly", "lithuania": "lt", "luxembourg": "lu", "malaysia": "my",
+            "mexico": "mx", "morocco": "ma", "netherlands": "nl", "new zealand": "nz",
+            "nigeria": "ng", "norway": "no", "pakistan": "pk", "palestine": "ps",
+            "peru": "pe", "philippines": "ph", "poland": "pl", "portugal": "pt",
+            "qatar": "qa", "romania": "ro", "russia": "ru", "saudi arabia": "sa",
+            "serbia": "rs", "singapore": "sg", "slovakia": "sk", "south africa": "za",
+            "south korea": "kr", "spain": "es", "sri lanka": "lk", "sudan": "sd",
+            "sweden": "se", "switzerland": "ch", "syria": "sy", "thailand": "th",
+            "tunisia": "tn", "turkey": "tr", "ukraine": "ua", "united arab emirates": "ae",
+            "united kingdom": "gb", "united states": "us", "venezuela": "ve", "vietnam": "vn",
+            "yemen": "ye", "zambia": "zm", "zimbabwe": "zw"
         };
-
-        const translatedCountry = Object.keys(countryTranslations).find(
-            key => countryTranslations[key] === countryName
-        ) || countryName;
-
+    
+        // קבלת קוד המדינה להצגת הדגל
+        const countryCode = countryCodeMapping[countryName] || "";
+        const mapPlaceholder = document.getElementById("insetMapPlaceholder");
+        if (mapPlaceholder) {
+            mapPlaceholder.innerHTML = countryCode
+                ? `<img src="https://flagcdn.com/w320/${countryCode}.png" alt="דגל ${countryName}">`
+                : "מפת הקרב";
+        }
+    
+        // תרגום שמות מדינות מאנגלית לעברית (כי הנתונים של החיילים בעברית)
+        const countryTranslations = {
+            "poland": "פולין",
+            "france": "צרפת",
+            "belgium": "בלגיה",
+            "india": "הודו",
+            "netherlands": "הולנד",
+            "ukraine": "אוקראינה",
+            "russia": "רוסיה",
+            "germany": "גרמניה"
+        };
+    
+        // מצא את השם בעברית עבור המדינה שנבחרה
+        const translatedCountry = countryTranslations[countryName] || countryName;
+    
+        // שליפת הנתונים עבור המדינה שנבחרה
         Promise.all([
             fetch("/events/").then(response => response.json()),
             fetch("/soldiers/").then(response => response.json())
         ])
         .then(([events, soldiers]) => {
-            const countryEvents = events.filter(ev =>
-                ev.country__name.trim().toLowerCase() === countryName
-            );
-            const countrySoldiers = soldiers.filter(soldier => {
-                let soldierCountry = soldier.country ? soldier.country.trim().toLowerCase() : "";
-                return soldierCountry === translatedCountry || soldierCountry.includes(translatedCountry);
+            const countryEvents = events.filter(ev => {
+                const eventCountry = ev.country__name ? ev.country__name.trim().toLowerCase() : "";
+                return eventCountry === countryName || eventCountry === translatedCountry;
             });
-
+    
+            console.log("📋 כל החיילים מהשרת:", soldiers);
+            const countrySoldiers = soldiers.filter(soldier => {
+                const soldierCountry = soldier.country ? soldier.country.trim().toLowerCase() : "";
+                console.log(`🔎 בודק חייל: ${soldier.name || 'אלמוני'}, מדינה: ${soldierCountry}`);
+                return soldierCountry === translatedCountry || 
+                       soldierCountry.includes(translatedCountry) || 
+                       soldierCountry === countryName || 
+                       soldierCountry.includes(countryName);
+            });
+    
             console.log("🟢 אירועים במדינה שנבחרה:", countryEvents);
             console.log("🟢 לוחמים במדינה שנבחרה:", countrySoldiers);
-
+    
             currentEvents = countryEvents;
             currentSoldiers = countrySoldiers;
             currentIndex = 0;
@@ -130,20 +171,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function showCountryEventsModal(countryName, events, soldiers) {
         const modal = document.getElementById("eventModal");
-        document.getElementById("eventTitle").textContent = `אירועים ולוחמים ב-${countryName}`;
-        
+        if (!modal) {
+            console.error("❌ שגיאה: המודאל לא נמצא!");
+            return;
+        }
+    
+        const eventTitle = document.getElementById("eventTitle");
         const imageElement = document.getElementById("eventImage");
         const videoElement = document.getElementById("eventVideo");
         const eventsTableBody = document.getElementById("eventsTableBody");
         const soldiersContainer = document.getElementById("soldiersContainer");
         const soldiersTitle = document.getElementById("soldiersTitle");
-
+    
+        // בדיקת קיום האלמנטים
+        console.log("🔍 בודק אלמנטים ב-DOM:");
+        console.log("modal:", modal);
+        console.log("eventTitle:", eventTitle);
+        console.log("imageElement:", imageElement);
+        console.log("videoElement:", videoElement);
+        console.log("eventsTableBody:", eventsTableBody);
+        console.log("soldiersContainer:", soldiersContainer);
+        console.log("soldiersTitle:", soldiersTitle);
+    
+        if (!eventTitle || !imageElement || !videoElement || !eventsTableBody || !soldiersContainer || !soldiersTitle) {
+            console.error("❌ שגיאה: אחד או יותר מהאלמנטים ב-DOM חסרים!");
+            return;
+        }
+    
+        eventTitle.textContent = `אירועים ולוחמים ב-${countryName}`;
+        
         // ניקוי תוכן קודם
         eventsTableBody.innerHTML = "";
         imageElement.style.display = "none";
         videoElement.style.display = "none";
         soldiersContainer.innerHTML = "";
-
+    
         // מילוי טבלת אירועים
         if (events.length === 0) {
             eventsTableBody.innerHTML = `
@@ -152,14 +214,16 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             displayEvent(currentIndex);
         }
-
+    
         // הצגת לוחמים
+        console.log("🔍 מספר הלוחמים שנמצאו:", soldiers.length);
         soldiersTitle.style.display = soldiers.length > 0 ? "block" : "none";
         soldiersContainer.style.display = soldiers.length > 0 ? "block" : "none";
-
+    
         if (soldiers.length === 0) {
             soldiersContainer.innerHTML = "<p>לא נמצאו לוחמים למדינה זו</p>";
         } else {
+            console.log("🔍 מוסיף לוחמים ל-DOM:", soldiers);
             soldiers.forEach(soldier => {
                 const soldierDiv = document.createElement("div");
                 soldierDiv.classList.add("soldier");
@@ -170,11 +234,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 soldierDiv.onclick = () => showSoldierDetails(soldier);
                 soldiersContainer.appendChild(soldierDiv);
             });
+            // Force a reflow to ensure the DOM updates
+            soldiersContainer.offsetHeight; // Trigger reflow
+            console.log("🔍 תוכן ה-soldiersContainer לאחר הוספה:", soldiersContainer.innerHTML);
         }
-
+    
         modal.style.display = "block";
+        console.log("🔍 המודאל אמור להיות גלוי כעת");
     }
-
     function displayEvent(index) {
         const eventsTableBody = document.getElementById("eventsTableBody");
         const imageElement = document.getElementById("eventImage");
