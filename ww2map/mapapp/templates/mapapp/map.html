@@ -1,9 +1,9 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>World War II Interactive Map</title>
+    <title>מפה אינטראקטיבית של מלחמת העולם השנייה</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <!-- Showdown for Markdown conversion -->
@@ -11,6 +11,9 @@
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Google Fonts for historical font -->
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'mapapp/css/styles.css' %}">
@@ -23,35 +26,62 @@
         <header class="map-header">
             <div class="logo-container">
                 <a href="{% url 'home' %}">
-                    <img src="{% static 'mapapp/images/logo.svg' %}" alt="Museum Logo">
+                    <img src="{% static 'mapapp/images/logo.svg' %}" alt="לוגו המוזיאון">
                 </a>
-                <span class="logo-text">Jewish Warrior Museum</span>
+                <span class="logo-text">מוזיאון הלוחם היהודי</span>
             </div>
         </header>
         <div id="map"></div>
-
     </div>
 
-    <!-- Modal for Events -->
-    <div id="eventModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">×</span>
-            <h2 id="eventTitle"></h2>
-            <div id="eventDate"></div>
-            <img id="eventImage" class="event-image" />
-            <div id="eventDescription"></div>
-            <video id="eventVideo" class="event-media" controls></video>
+  <!-- מודאל משודרג -->
+<div id="eventModal" class="modal">
+    <!-- גלריית לוחמים (בצד שמאל) -->
+    <div class="soldiers-section">
+        <h3 id="soldiersTitle" style="display: none;">לוחמים ממדינה זו:</h3>
+        <div id="soldiersContainer" class="soldiers-list scrollable" style="display: none;"></div>
+        <div class="vintage-stamp stamp-soldiers"></div>
+    </div>
+
+    <!-- טבלת אירועים (בצד ימין) -->
+    <div class="passport">
+        <table>
+            <caption id="eventTitle" class="uppercase"></caption>
+            <thead>
+                <tr>
+                    <th class="notesHeading">תאריכים</th>
+                    <th class="summaryHeading">תיאור</th>
+                </tr>
+            </thead>
+            <tbody id="eventsTableBody" class="scrollable">
+                <!-- נתונים יתווספו דינמית -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- תמונה או וידאו -->
+    <div class="multimedia">
+        <img id="eventImage" class="event-image" src="" alt="תמונה מהאירוע" style="display: none;"/>
+        <video id="eventVideo" class="event-media" controls preload="metadata" style="display: none;"></video>
+        <div class="vintage-stamp stamp-multimedia"></div>
+    </div>
     
-            <!-- ✅ הכותרת תופיע רק אם יש לוחמים -->
-            <h3 id="soldiersTitle" style="display: none;">לוחמים ממדינה זו:</h3>
-            <div id="soldiersContainer" class="soldiers-list" style="display: none;"></div>
-        </div>
+    <!-- מפה קטנה -->
+    <div class="insetMap">
+        <div id="insetMapPlaceholder" class="map-placeholder">מפת הקרב</div>
+        <div class="vintage-stamp stamp-map"></div>
     </div>
+    
+    <!-- כפתור סגירה בלבד -->
+    <div class="modal-controls">
+        <button id="eventClose" class="eventClose" onclick="closeModal()"><span class="closeText">סגור</span> <span class="closeX">×</span></button>
+    </div>
+</div>
 
     <!-- Leaflet JS -->
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
 
-    <!-- MapTiler SDK (use specific version) -->
+    <!-- MapTiler SDK -->
     <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.umd.min.js" defer></script>
 
     <!-- Custom JS -->

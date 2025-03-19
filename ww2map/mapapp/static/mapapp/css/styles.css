@@ -6,41 +6,27 @@ html, body {
     padding: 0;
     width: 100vw;
     height: 100vh;
-    overflow: hidden; /* מונע גלילה */
-    font-family: Arial, sans-serif;
+    overflow: hidden;
+    font-family: 'Times New Roman', serif;
+    direction: rtl;
+    text-align: right;
 }
 
-.map-header {
-    background-color: rgba(255, 255, 255, 0.8); /* White with slight transparency */
-    color: #333;
-    padding: 5px 15px; /* צמצום הריווח האנכי */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* מיכל ראשי של הדף */
 .main-container {
     height: 100vh;
     width: 100vw;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* מונע חיתוך אלמנטים */
+    overflow: hidden;
 }
 
 /* ============================ */
-/* 2️⃣ NAVIGATION BAR */
+/* 2️⃣ HEADER */
 /* ============================ */
-nav {
-    background-color: rgba(255, 255, 255, 0.8); /* White with slight transparency */
+.map-header {
+    background-color: rgba(255, 255, 255, 0.8);
     color: #333;
-    padding: 10px 20px;
+    padding: 5px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -52,69 +38,48 @@ nav {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* 3️⃣ קונטיינר הלוגו */
 .logo-container {
     display: flex;
-    align-items: center;  /* מיישר את הלוגו והטקסט לאותו קו */
-    gap: 10px;  /* מרחק בין הלוגו לטקסט */
-    text-decoration: none; /* מסיר קו תחתון מהלוגו */
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
     cursor: pointer;
 }
 
-/* 4️⃣ תמונת הלוגו */
 .logo-container img {
-    height: 50px;  /* גובה מתואם ללוגו */
-    width: auto;  /* יחס רוחב אוטומטי */
+    height: 50px;
+    width: auto;
 }
 
-/* 5️⃣ טקסט הלוגו */
 .logo-text {
     font-size: 1.5rem;
     font-weight: bold;
     color: #4a4a4a;
 }
+
 .logo-container a:hover img {
     opacity: 0.8;
 }
 
 /* ============================ */
-/* 6️⃣ BUTTONS IN NAVBAR */
-/* ============================ */
-.nav-buttons button {
-    background-color: white;
-    color: #333;
-    border: 2px solid #ddd;
-    padding: 10px 20px;
-    border-radius: 30px; /* Elliptical shape */
-    margin: 0 5px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.nav-buttons button:hover {
-    background-color: #ddd;
-    color: #000;
-}
-
-/* ============================ */
-/* 7️⃣ LEAFLET MAP */
+/* 3️⃣ LEAFLET MAP */
 /* ============================ */
 #map {
     flex: 1;
     width: 100%;
     height: 100%;
 }
+
 .leaflet-control-zoom {
     position: absolute !important;
-    top: 70px; /* בדיוק מתחת ל-header */
-    left: 20px; /* מרחק מהצד השמאלי */
-    right: auto !important;
+    top: 70px;
+    right: 20px; /* שינוי לימין בגלל כיוון RTL */
+    left: auto !important;
     bottom: auto !important;
 }
 
 /* ============================ */
-/* 8️⃣ MODAL - EVENT DETAILS */
+/* 4️⃣ MODAL STYLING - WWII THEME */
 /* ============================ */
 .modal {
     display: none;
@@ -123,127 +88,349 @@ nav {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.4); /* רקע שקוף עם עמעום עדין */
     z-index: 2000;
-    animation: fadeIn 0.3s;
+    overflow-y: auto; /* גלילה פנימית למודאל עצמו */
+    padding: 20px;
+    box-sizing: border-box;
+    animation: fadeIn 0.5s ease-in-out;
 }
 
-/* תוכן המודאל */
-.modal-content {
-    background: rgba(40, 40, 40, 0.95);
-    color: #fff;
-    margin: 2% auto;
-    padding: 30px;
-    width: 80%;
-    max-width: 600px;
+/* כפתור סגירה (ימין למעלה) */
+.modal-controls {
+    position: absolute;
+    top: 20px; /* קרוב לראש הדף */
+    right: 10px; /* מוצמד לצד ימין */
+    display: flex;
+    justify-content: flex-end;
+    background: #f5e8c7;
+    padding: 10px;
+    border: 2px solid #d4af37;
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    position: relative;
-    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    animation: fadeInElement 0.5s ease-in-out forwards;
+    animation-delay: 0.6s;
+    z-index: 2200; /* גבוה יותר כדי שיהיה מעל ה-passport */
 }
 
-/* אם המודאל של אירוע, נשתמש ברקע מיוחד */
-.modal-content.event-active {
-    background: url('/static/mapapp/images/paper.jpg') no-repeat center center;
-    background-size: cover;
+.nav-button {
+    display: none; /* מסתיר את כפתורי הקודם והבא */
+}
+
+.eventClose {
+    padding: 10px 20px;
+    background: #d4af37;
+    color: #2c3e50;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.eventClose:hover {
+    transform: scale(0.95);
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+/* טבלת אירועים (ימין למעלה, מתחת לכפתור הסגירה) */
+.passport {
+    position: absolute;
+    top: 100px; /* מתחת לכפתור הסגירה */
+    right: 20px; /* שומר אותו בצד ימין */
+    width: 450px;
+    height: 400px;
+    background: #f5e8c7;
+    padding: 15px;
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    animation: fadeInElement 0.5s ease-in-out forwards;
+    animation-delay: 0.2s;
+    display: flex;
+    flex-direction: column;
+    z-index: 2000;
+}
+
+.passport table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    border: 1px solid #d4af37;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.passport caption {
+    font-family: 'Special Elite', cursive;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #4a2c2a; /* תיקון שגיאת צבע */
+    margin-bottom: 10px;
+}
+
+.passport th, .passport td {
+    padding: 10px;
+    border: 1px solid #d4af37;
+    text-align: right;
     color: #2c3e50;
 }
 
-/* כפתור סגירה */
-.close {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    font-size: 28px;
-    cursor: pointer;
-    color: #fff;
-    transition: color 0.3s;
-}
-.close:hover {
-    color: #e74c3c;
+.passport th {
+    background: rgba(212, 175, 55, 0.2);
+    font-weight: bold;
 }
 
-/* ============================ */
-/* 9️⃣ EVENT IMAGES & INFO */
-/* ============================ */
-.event-image {
-    width: 100%;
-    max-height: 300px;
-    object-fit: cover;
-    margin: 15px 0;
-    border-radius: 4px;
-    border: 2px solid rgba(0, 0, 0, 0.1);
+.passport .duration p {
+    margin: 0;
 }
 
-/* סגנון לתיבות מידע על אירועים */
+.passport .duration small {
+    font-size: 0.8em;
+    color: #666;
+}
+
+.passport .signatures {
+    text-align: center;
+}
+
+.passport .signatures .signature-placeholder {
+    width: 150px;
+    height: 50px;
+    background: #ccc;
+    margin: 10px auto;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-style: italic;
+    color: #666;
+}
+
+.passport .signatures small {
+    font-size: 0.8em;
+    color: #666;
+    text-align: center;
+    display: block;
+}
+
+.passport .approved {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.passport .approved span {
+    color: #d4af37;
+}
+
 .country-event {
-    padding: 15px;
-    margin: 10px 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s;
-    color: #fff;
-}
-.country-event:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateX(5px);
+    transition: background 0.3s;
 }
 
-/* ============================ */
-/* 🔟 ANIMATIONS */
-/* ============================ */
+.country-event:hover {
+    background: rgba(212, 175, 55, 0.3);
+}
+
+.scrollable {
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 #f5e8c7;
+    flex: 1;
+}
+
+.scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+    background: #f5e8c7;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+    background-color: #d4af37;
+    border-radius: 4px;
+}
+
+/* גלריית לוחמים (שמאל למעלה, ליד ה-passport) */
+.soldiers-section {
+    position: absolute;
+    top: 50px; /* מתחיל בגובה של ה-passport */
+    bottom: 20px; /* יימתח עד סוף המסך */
+    left: calc(20px + 530px); /* ממוקם משמאל ל-passport */
+    width: 300px;
+    background: #f5e8c7;
+    padding: 15px;
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    animation: fadeInElement 0.5s ease-in-out forwards;
+    animation-delay: 0.1s;
+    z-index: 2100;
+    display: flex;
+    flex-direction: column;
+}
+
+.soldiers-list {
+    display: flex;
+    flex-direction: column; /* כדי שהלוחמים יסתדרו אחד מתחת לשני */
+    gap: 10px;
+    overflow-y: auto; /* גלילה במקרה של הרבה לוחמים */
+    flex: 1; /* ממלא את כל השטח */
+    padding-right: 5px;
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 #f5e8c7;
+}
+
+.soldiers-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.soldiers-list::-webkit-scrollbar-track {
+    background: #f5e8c7;
+}
+
+.soldiers-list::-webkit-scrollbar-thumb {
+    background-color: #d4af37;
+    border-radius: 4px;
+}
+
+.soldier {
+    text-align: center;
+    width: 100%;
+}
+
+.soldier img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #d4af37;
+    transition: transform 0.3s;
+}
+
+.soldier:hover img {
+    transform: scale(1.1);
+}
+
+.soldier-name {
+    font-size: 14px;
+    color: #2c3e50;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+/* מפה קטנה (שמאל באמצע, מתחת לגלריית הלוחמים) */
+.insetMap {
+    position: absolute;
+    top: 350px; /* 20px + 300px (גובה ה-multimedia) + 10px (padding עליון) + 10px (padding תחתון) + 10px (מרווח) */
+    left: 110px; /* מיושר עם ה-multimedia */
+    width: 400px; /* רוחב זהה ל-multimedia */
+    background: #f5e8c7;
+    padding: 10px;
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    transform: rotate(-0.89deg);
+    opacity: 0;
+    animation: fadeInElement 0.5s ease-in-out forwards;
+    animation-delay: 0.5s;
+    z-index: 2000;
+}
+
+.map-placeholder {
+    width: 100%;
+    height: 200px;
+    background: #ddd;
+    border: 2px solid #d4af37;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    color: #666;
+}
+
+
+/* תמונה או וידאו (שמאל למטה, מתחת למפה הקטנה) */
+/* תמונה או וידאו (שמאל למעלה) */
+.multimedia {
+    position: absolute;
+    top: 20px; /* שמאל למעלה */
+    left: 110px; /* שמאל */
+    width: 400px;
+    background: #f5e8c7;
+    padding: 10px;
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    transform: rotate(0.63deg);
+    opacity: 0;
+    animation: fadeInElement 0.5s ease-in-out forwards;
+    animation-delay: 0.4s;
+    z-index: 2000;
+}
+
+.event-image, .event-media {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border: 2px solid #d4af37;
+}
+
+/* אייקונים וינטג' */
+.vintage-stamp {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: #d4af37;
+    border-radius: 50%;
+    opacity: 0.7;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.stamp-multimedia {
+    top: -10px;
+    right: -10px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V7z"/></svg>');
+    background-size: 60%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.stamp-soldiers {
+    top: -10px;
+    right: -10px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M12 2a5 5 0 00-5 5v2h10V7a5 5 0 00-5-5zm0 8H7v12h10V10h-5zm-2 4h4v2h-4v-2z"/></svg>');
+    background-size: 60%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.stamp-map {
+    bottom: -10px;
+    right: -10px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2V7zm0 8h2v2h-2v-2z"/></svg>');
+    background-size: 60%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* אנימציות */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
-/* ✅ סגנון כללי ללוחמים */
-.soldiers-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-/* ✅ עיצוב עיגול לכל לוחם */
-.soldier {
-    display: flex;
-    flex-direction: column; /* מיישר את שם הלוחם מתחת לתמונה */
-    align-items: center; /* מרכז את התוכן */
-    text-align: center;
-    width: 100px; /* גודל קבוע */
-    margin: 10px;
-}
-
-/* ✅ תמונת לוחם */
-.soldier img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%; /* צורת עיגול */
-    object-fit: cover;
-    display: block;
-    margin: 0 auto;
-    border: 2px solid white; /* מסגרת קטנה */
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s;
-}
-
-/* ✅ שם הלוחם */
-.soldier-name {
-    font-size: 14px;
-    font-weight: bold;
-    color: white;
-    margin-top: 5px; /* ריווח בין התמונה לשם */
-    white-space: normal; /* ✅ מאפשר שם מלא בשורות נוספות */
-    overflow: visible;
-    text-align: center;
-    max-width: 100px; /* ✅ מתאים לגודל של התמונה */
-    word-wrap: break-word; /* ✅ שובר שורה במקרה של שם ארוך */
-}
-
-/* ✅ אנימציה במעבר עכבר */
-.soldier:hover img {
-    transform: scale(1.1);
-    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5);
+@keyframes fadeInElement {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }

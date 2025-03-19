@@ -1,22 +1,15 @@
-// מאזין לאירוע טעינת הדף - הקוד ירוץ רק לאחר שה-DOM נטען במלואו
 document.addEventListener("DOMContentLoaded", () => {
-
-    // הגדרת מפתח API לשירות MapTiler כדי לגשת לשכבות מפה (כמו רחובות)
     const MAPTILER_KEY = "a1se7rp3zc7WUUPq5C1F";
-
-    // הגדרת גבולות גיאוגרפיים למפה כדי למנוע גלילה לאזורים לא רלוונטיים
-    const southWest = L.latLng(-89.981557, -180); 
+    const southWest = L.latLng(-89.981557, -180);
     const northEast = L.latLng(89.993461, 180);
-    const maxBounds = L.latLngBounds(southWest, northEast); 
+    const maxBounds = L.latLngBounds(southWest, northEast);
 
-    // בדיקה אם אלמנט המפה קיים לפני יצירת המפה
     const mapElement = document.getElementById("map");
     if (!mapElement) {
         console.error("❌ שגיאה: אלמנט המפה לא נמצא!");
         return;
     }
 
-    // יצירת המפה עם הגדרות בסיסיות
     const map = L.map("map", {
         center: [52.2298, 21.0122], // ורשה, פולין
         zoom: 3,
@@ -26,20 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
         maxBoundsViscosity: 1.0
     });
 
-    // הוספת שכבת מפת רקע של MapTiler
     L.tileLayer(`https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`, {
         attribution: '© MapTiler'
     }).addTo(map);
 
-    // משתני מצב
-    let historicalEvents = []; 
-    let countriesGeoJSON; 
-    let geojsonLayer; 
-    let currentMapView = null; 
+    let historicalEvents = [];
+    let countriesGeoJSON;
+    let geojsonLayer;
+    let currentMapView = null;
+    let currentEvents = [];
+    let currentSoldiers = [];
+    let currentIndex = 0;
 
-    // טעינת אירועים היסטוריים מהשרת
     function loadEvents() {
-        fetch("/events/") 
+        fetch("/events/")
             .then(response => response.json())
             .then(events => {
                 historicalEvents = events;
@@ -47,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(error => console.error("Error loading events:", error));
     }
 
-    // טעינת נתוני GeoJSON של גבולות מדינות
     fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
         .then(response => response.json())
         .then(countries => {
@@ -56,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch(error => console.error("Error loading countries:", error));
 
-    // הוספת שכבת GeoJSON של גבולות מדינות למפה
     function addCountriesLayer() {
         geojsonLayer = L.geoJSON(countriesGeoJSON, {
             style: countryStyle,
@@ -64,7 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }).addTo(map);
     }
 
-    // סגנון ברירת מחדל לגבולות מדינות
     function countryStyle() {
         return {
             fillColor: "transparent",
@@ -74,7 +64,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // הוספת אירועים לכל מדינה
     function onEachCountryFeature(feature, layer) {
         layer.on({
             mouseover: (e) => highlightCountry(e.target),
@@ -83,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // הדגשת מדינה במעבר עכבר
     function highlightCountry(layer) {
         layer.setStyle({
             fillColor: "transparent",
@@ -93,16 +81,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // איפוס הסגנון של מדינה
     function resetCountryStyle(layer) {
         geojsonLayer.resetStyle(layer);
     }
 
-    // טיפול בקליק על מדינה - הצגת אירועים ולוחמים
     function handleCountryClick(country) {
         const countryName = country.properties.name.trim().toLowerCase();
         console.log("🔍 מדינה שנבחרה מהמפה:", countryName);
-    
+
         const countryTranslations = {
             "פולין": "poland",
             "צרפת": "france",
@@ -113,149 +99,176 @@ document.addEventListener("DOMContentLoaded", () => {
             "יקטרינוסלב": "russia",
             "ליבק": "germany"
         };
-    
+
         const translatedCountry = Object.keys(countryTranslations).find(
             key => countryTranslations[key] === countryName
         ) || countryName;
-    
-        // ✅ טעינת האירועים + הלוחמים במקביל
+
         Promise.all([
             fetch("/events/").then(response => response.json()),
             fetch("/soldiers/").then(response => response.json())
         ])
         .then(([events, soldiers]) => {
-            console.log("🔵 כל האירועים מהשרת:", events);
-            console.log("🔵 כל הלוחמים מהשרת:", soldiers);
-    
             const countryEvents = events.filter(ev =>
                 ev.country__name.trim().toLowerCase() === countryName
             );
-    
             const countrySoldiers = soldiers.filter(soldier => {
                 let soldierCountry = soldier.country ? soldier.country.trim().toLowerCase() : "";
                 return soldierCountry === translatedCountry || soldierCountry.includes(translatedCountry);
             });
-    
+
             console.log("🟢 אירועים במדינה שנבחרה:", countryEvents);
             console.log("🟢 לוחמים במדינה שנבחרה:", countrySoldiers);
-    
+
+            currentEvents = countryEvents;
+            currentSoldiers = countrySoldiers;
+            currentIndex = 0;
             showCountryEventsModal(country.properties.name, countryEvents, countrySoldiers);
         })
         .catch(error => console.error("❌ Error loading data:", error));
     }
 
-    // הצגת מודל עם אירועים במדינה שנבחרה
     function showCountryEventsModal(countryName, events, soldiers) {
         const modal = document.getElementById("eventModal");
         document.getElementById("eventTitle").textContent = `אירועים ולוחמים ב-${countryName}`;
-        document.getElementById("eventDate").textContent = "";
-
-        // ✅ הצגת האירועים
-        const eventsContent = events.length === 0
-            ? "<p>אין אירועים במדינה זו</p>"
-            : events.map(ev => 
-                `<div class="country-event" onclick="showSingleEvent(this)" 
-                    data-event="${encodeURIComponent(JSON.stringify(ev))}">
-                    <h3>${ev.title}</h3>
-                    <p>${ev.date}</p>
-                </div>`).join("");
-
-        document.getElementById("eventDescription").innerHTML = eventsContent;
-        document.getElementById("eventImage").style.display = "none";
-        document.getElementById("eventVideo").style.display = "none";
-
-        // ✅ הצגת הלוחמים
+        
+        const imageElement = document.getElementById("eventImage");
+        const videoElement = document.getElementById("eventVideo");
+        const eventsTableBody = document.getElementById("eventsTableBody");
         const soldiersContainer = document.getElementById("soldiersContainer");
-        const soldiersTitle = document.getElementById("soldiersTitle"); // הכותרת
+        const soldiersTitle = document.getElementById("soldiersTitle");
 
-        soldiersContainer.innerHTML = ""; // מנקים כדי שלא תהיה כפילות
-        soldiersContainer.style.display = soldiers.length > 0 ? "block" : "none"; // ✅ אם אין לוחמים - מסתירים
+        // ניקוי תוכן קודם
+        eventsTableBody.innerHTML = "";
+        imageElement.style.display = "none";
+        videoElement.style.display = "none";
+        soldiersContainer.innerHTML = "";
 
-        if (soldiersTitle) {
-            soldiersTitle.style.display = soldiers.length > 0 ? "block" : "none"; // ✅ הסתרת הכותרת אם אין לוחמים
+        // מילוי טבלת אירועים
+        if (events.length === 0) {
+            eventsTableBody.innerHTML = `
+                <tr><td colspan="2">אין אירועים במדינה זו</td></tr>
+            `;
+        } else {
+            displayEvent(currentIndex);
         }
 
-        // ✅ קריאה לפונקציה שמציגה את הלוחמים, כולל השמות
-        displaySoldiersForCountry(soldiers);
+        // הצגת לוחמים
+        soldiersTitle.style.display = soldiers.length > 0 ? "block" : "none";
+        soldiersContainer.style.display = soldiers.length > 0 ? "block" : "none";
+
+        if (soldiers.length === 0) {
+            soldiersContainer.innerHTML = "<p>לא נמצאו לוחמים למדינה זו</p>";
+        } else {
+            soldiers.forEach(soldier => {
+                const soldierDiv = document.createElement("div");
+                soldierDiv.classList.add("soldier");
+                soldierDiv.innerHTML = soldier.image
+                    ? `<img src="${soldier.image}" alt="${soldier.name || 'שם לא ידוע'}">`
+                    : `<div class="soldier-placeholder">לוחם</div>`;
+                soldierDiv.innerHTML += `<p class="soldier-name">${soldier.name || 'שם לא ידוע'}</p>`;
+                soldierDiv.onclick = () => showSoldierDetails(soldier);
+                soldiersContainer.appendChild(soldierDiv);
+            });
+        }
 
         modal.style.display = "block";
     }
 
-    // הצגת הלוחמים עם שמות מתחת לתמונות
-    function displaySoldiersForCountry(soldiers) {
-        const container = document.getElementById("soldiersContainer");
-        container.innerHTML = "";
+    function displayEvent(index) {
+        const eventsTableBody = document.getElementById("eventsTableBody");
+        const imageElement = document.getElementById("eventImage");
+        const videoElement = document.getElementById("eventVideo");
+        const event = currentEvents[index];
+        const converter = new showdown.Converter();
 
-        if (soldiers.length === 0) {
-            container.innerHTML = "<p>לא נמצאו לוחמים למדינה זו</p>";
-            return;
-        }
+        eventsTableBody.innerHTML = `
+            <tr class="country-event" data-event="${encodeURIComponent(JSON.stringify(event))}">
+                <td class="duration">
+                    <p class="join">
+                        <span class="startDate">${event.date}</span><br>
+                        <small>···· עד ····</small><br>
+                        <span class="endDate">${event.endDate || event.date}</span>
+                    </p>
+                </td>
+                <td class="summary">${converter.makeHtml(event.description)}</td>
+            </tr>
+            <tr>
+                <td class="signatures">
+                    <p class="loggedBy join">
+                        <div class="signature-placeholder">חתימה</div>
+                        <small class="loggedByLabel">מתועד ע"י</small>
+                    </p>
+                    <p class="approvedBy">
+                        <div class="signature-placeholder">חתימה</div>
+                        <small class="approvedByLabel">מאושר ע"י</small>
+                    </p>
+                    <div class="approved">
+                        <span>★ ★ ★</span>
+                        <p>מאושר</p>
+                        <span>★ ★ ★</span>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+        `;
 
-        soldiers.forEach(soldier => {
-            console.log("🟢 לוחם שנוסף:", soldier.name, "| מדינה:", soldier.country); // ✅ בדיקה בקונסול
-
-            const soldierDiv = document.createElement("div");
-            soldierDiv.classList.add("soldier");
-
-            // יצירת תמונה
-            const img = document.createElement("img");
-            img.src = soldier.image;
-            img.alt = soldier.name;
-
-            // יצירת שם הלוחם
-            const nameParagraph = document.createElement("p");
-            nameParagraph.classList.add("soldier-name");
-            nameParagraph.textContent = soldier.name ? soldier.name : "שם לא ידוע"; // ✅ הצגת שם
-
-            console.log("📌 שם הלוחם שנוסף:", nameParagraph.textContent); // ✅ בדיקה בקונסול
-
-            // הוספת האלמנטים ללוחם
-            soldierDiv.appendChild(img);
-            soldierDiv.appendChild(nameParagraph); // ✅ הוספת שם מתחת לתמונה
-
-            soldierDiv.onclick = () => showSoldierDetails(soldier);
-            container.appendChild(soldierDiv);
-        });
+        imageElement.src = event.image || "";
+        imageElement.style.display = event.image ? "block" : "none";
+        videoElement.src = event.video || "";
+        videoElement.style.display = event.video ? "block" : "none";
     }
 
-    // הצגת פרטי לוחם (פונקציה ריקה כרגע - תצטרך למלא אותה לפי הצורך)
-    function showSoldierDetails(soldier) {
-        console.log("🔵 לוחם שנבחר:", soldier);
-        // כאן תוכל להוסיף קוד להצגת פרטי הלוחם, למשל במודאל נפרד
-    }
-
-    // הצגת אירוע בודד
     window.showSingleEvent = function (element) {
         try {
             const event = JSON.parse(decodeURIComponent(element.getAttribute("data-event")));
-            console.log("🔵 אירוע שנבחר:", event); // 🔥 בדיקה בקונסול
-
             const modal = document.getElementById("eventModal");
-
-            document.getElementById("eventTitle").textContent = event.title;
-            document.getElementById("eventDate").textContent = event.date;
-
-            const converter = new showdown.Converter();
-            document.getElementById("eventDescription").innerHTML = converter.makeHtml(event.description);
-
-            const imgEl = document.getElementById("eventImage");
-            imgEl.src = event.image ? event.image : "";
-            imgEl.style.display = event.image ? "block" : "none";
-
-            const videoEl = document.getElementById("eventVideo");
-            videoEl.src = event.video || "";
-            videoEl.style.display = event.video ? "block" : "none";
-
-            // ❌ הסתרת הכותרת של הלוחמים במודאל של האירוע
+            const eventsTableBody = document.getElementById("eventsTableBody");
+            const imageElement = document.getElementById("eventImage");
+            const videoElement = document.getElementById("eventVideo");
             const soldiersTitle = document.getElementById("soldiersTitle");
             const soldiersContainer = document.getElementById("soldiersContainer");
 
-            if (soldiersTitle) {
-                soldiersTitle.style.display = "none"; // ✅ מחביאים את הכותרת
-            }
-            if (soldiersContainer) {
-                soldiersContainer.style.display = "none"; // ✅ מחביאים גם את הרשימה
-            }
+            document.getElementById("eventTitle").textContent = event.title;
+            const converter = new showdown.Converter();
+            eventsTableBody.innerHTML = `
+                <tr>
+                    <td class="duration">
+                        <p class="join">
+                            <span class="startDate">${event.date}</span><br>
+                            <small>···· עד ····</small><br>
+                            <span class="endDate">${event.endDate || event.date}</span>
+                        </p>
+                    </td>
+                    <td class="summary">${converter.makeHtml(event.description)}</td>
+                </tr>
+                <tr>
+                    <td class="signatures">
+                        <p class="loggedBy join">
+                            <div class="signature-placeholder">חתימה</div>
+                            <small class="loggedByLabel">מתועד ע"י</small>
+                        </p>
+                        <p class="approvedBy">
+                            <div class="signature-placeholder">חתימה</div>
+                            <small class="approvedByLabel">מאושר ע"י</small>
+                        </p>
+                        <div class="approved">
+                            <span>★ ★ ★</span>
+                            <p>מאושר</p>
+                            <span>★ ★ ★</span>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+            `;
+
+            imageElement.src = event.image || "";
+            imageElement.style.display = event.image ? "block" : "none";
+            videoElement.src = event.video || "";
+            videoElement.style.display = event.video ? "block" : "none";
+
+            soldiersTitle.style.display = "none";
+            soldiersContainer.style.display = "none";
 
             modal.style.display = "block";
         } catch (error) {
@@ -263,23 +276,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // סגירת המודל
+    function showSoldierDetails(soldier) {
+        console.log("🔵 לוחם שנבחר:", soldier);
+        // כאן תוכל להוסיף מודאל נפרד או להציג פרטים נוספים
+    }
+
     window.closeModal = function () {
         const modal = document.getElementById("eventModal");
-        const modalContent = document.querySelector(".modal-content");
-
-        if (!modalContent) return;
+        if (!modal) return;
 
         if (currentMapView) {
             map.setView(currentMapView, map.getZoom(), { animate: true, duration: 0.3 });
         }
 
-        modalContent.classList.remove("event-active");
         modal.style.display = "none";
         document.getElementById("eventImage").src = "";
         document.getElementById("eventVideo").src = "";
     };
 
-    // קריאה לטעינת האירועים בעת טעינת הדף
     loadEvents();
 });
