@@ -24,20 +24,67 @@ html, body {
 /* 2️⃣ HEADER */
 /* ============================ */
 .map-header {
-    background-color: rgba(255, 255, 255, 0.8);
-    color: #333;
+    background-color: transparent; /* בלי רקע כשהוא מוסתר */
     padding: 5px 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, background-color 0.3s ease; /* מעבר חלק גם לרקע */
 }
 
+.map-header.visible {
+    opacity: 1;
+    pointer-events: auto;
+    background-color: rgba(255, 255, 255, 0.8); /* רקע לבן עם שקיפות כשהוא גלוי */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* נחזיר את הצל למראה מקורי */
+}
+
+.header-hover-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 999;
+}
+
+/* עיצוב ויזואלי קליל לרמז */
+.header-hint {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 998;
+    opacity: 0.8;
+    transition: opacity 0.1s ease; /* קיצרנו ל-0.1 שניות */
+}
+
+.header-hint.hidden {
+    opacity: 0;
+}
+
+.header-hint img {
+    width: 32px;
+    height: 32px;
+    filter: hue-rotate(20deg) brightness(1.2);
+    animation: bounce 1.5s infinite ease-in-out;
+}
+
+
+
+/* אנימציה של קפיצה */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
 .logo-container {
     display: flex;
     align-items: center;

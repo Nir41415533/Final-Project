@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
 from django.views import View
+from .models import Soldier
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from .models import Event
-from .forms import DateRangeForm  # ✅ זה מה שהיה חסר!
+from .forms import DateRangeForm
 import csv
-import os  # 🔥 הוסף את זה
+import os 
 from django.http import JsonResponse
 from django.conf import settings
 
@@ -70,37 +71,30 @@ def ww2map_view(request):
 
 @api_view(['GET'])
 def event_list(request):
-    year = request.GET.get('year')
-    if year:
-        events = Event.objects.filter(date__year=year).values(
-            "title", "date", "description", "country__name", "image", "video"
-        )
-    else:
-        events = Event.objects.all().values(
-            "title", "date", "description", "country__name", "image", "video"
-        )
-
-    return JsonResponse(list(events), safe=False)
-
-#בדיקת לוחמים
-def load_soldiers_data(request):
-    # נתיב לקובץ ה-CSV שנמצא באותה תיקייה כמו manage.py
-    csv_path = os.path.join(settings.BASE_DIR, "soldiers_data.csv")
-
-    soldiers = []
     try:
-        with open(csv_path, encoding="UTF-8") as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                soldiers.append({
-                    "id": row.get("ID"),
-                    "name": row.get("שם"),
-                    "country": row.get("מדינה"),
-                    "years": row.get("שנות פעילות"),
-                    "bio": row.get("קורות חיים"),
-                    "image": row.get("קישור לתמונה")
-                })
-    except Exception as e:
-        return JsonResponse({"error": f"Failed to load CSV: {str(e)}"}, status=500)
+        events = Event.objects.all().values(
+            "title", "date", "description", "country__name_en", "image", "video"
+        )
 
-    return JsonResponse(soldiers, safe=False)
+        results = []
+        for event in events:
+            event["country__name"] = event.pop("country__name_en")
+        return JsonResponse(list(events), safe=False)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['GET'])
+def soldiers_list(request):
+    soldiers = Soldier.objects.select_related('birth_country')[:1000]
+
+    data = []
+    for soldier in soldiers:
+        data.append({
+            "id": soldier.customer_id,
+            "name": f"{soldier.first_name_he} {soldier.last_name_he}",
+            "image": soldier.image_url,
+            "gender":soldier.gender,
+            "country": soldier.birth_country.name_en if soldier.birth_country else "",
+        })
+
+    return JsonResponse(data, safe=False)

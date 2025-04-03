@@ -151,7 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("📋 כל החיילים מהשרת:", soldiers);
             const countrySoldiers = soldiers.filter(soldier => {
                 const soldierCountry = soldier.country ? soldier.country.trim().toLowerCase() : "";
-                console.log(`🔎 בודק חייל: ${soldier.name || 'אלמוני'}, מדינה: ${soldierCountry}`);
                 return soldierCountry === translatedCountry || 
                        soldierCountry.includes(translatedCountry) || 
                        soldierCountry === countryName || 
@@ -163,6 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
     
             currentEvents = countryEvents;
             currentSoldiers = countrySoldiers;
+            window.currentSoldiers = currentSoldiers; //ADDED
+
             currentIndex = 0;
             showCountryEventsModal(country.properties.name, countryEvents, countrySoldiers);
         })
@@ -183,23 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const soldiersContainer = document.getElementById("soldiersContainer");
         const soldiersTitle = document.getElementById("soldiersTitle");
     
-        // בדיקת קיום האלמנטים
-        console.log("🔍 בודק אלמנטים ב-DOM:");
-        console.log("modal:", modal);
-        console.log("eventTitle:", eventTitle);
-        console.log("imageElement:", imageElement);
-        console.log("videoElement:", videoElement);
-        console.log("eventsTableBody:", eventsTableBody);
-        console.log("soldiersContainer:", soldiersContainer);
-        console.log("soldiersTitle:", soldiersTitle);
-    
-        if (!eventTitle || !imageElement || !videoElement || !eventsTableBody || !soldiersContainer || !soldiersTitle) {
-            console.error("❌ שגיאה: אחד או יותר מהאלמנטים ב-DOM חסרים!");
-            return;
-        }
-    
-        eventTitle.textContent = `אירועים ולוחמים ב-${countryName}`;
-        
         // ניקוי תוכן קודם
         eventsTableBody.innerHTML = "";
         imageElement.style.display = "none";
@@ -225,23 +209,52 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             console.log("🔍 מוסיף לוחמים ל-DOM:", soldiers);
             soldiers.forEach(soldier => {
+                if (soldier.gender === undefined || soldier.gender === null) {
+                    console.log("Gender is missing or undefined for soldier:", soldier);
+                } else {
+                    console.log("Gender value for soldier:", soldier.gender);  // מדפיס את הערך
+                }
                 const soldierDiv = document.createElement("div");
                 soldierDiv.classList.add("soldier");
-                soldierDiv.innerHTML = soldier.image
-                    ? `<img src="${soldier.image}" alt="${soldier.name || 'שם לא ידוע'}">`
-                    : `<div class="soldier-placeholder">לוחם</div>`;
-                soldierDiv.innerHTML += `<p class="soldier-name">${soldier.name || 'שם לא ידוע'}</p>`;
+            
+                // אם יש תמונה, השתמש בה, אחרת השתמש בתמונה אנונימית
+                const imageUrl = soldier.image && soldier.image.trim() !== ""
+                ? soldier.image
+                : (soldier.gender === "1.0" || soldier.gender === "1" || soldier.gender === 1
+                    ? "https://media.istockphoto.com/id/666545204/vector/default-placeholder-profile-icon.jpg?s=612x612&w=0&k=20&c=UGYk-MX0pFWUZOr5hloXDREB6vfCqsyS7SgbQ1-heY8="
+                    : "https://media.istockphoto.com/id/666545148/vector/default-placeholder-profile-icon.jpg?s=612x612&w=0&k=20&c=swBnLcHy6L9v5eaiRkDwfGLr5cfLkH9hKW-sZfH-m90=");
+            
+                const femaleSoldiers = currentSoldiers.filter(s => s.gender === "0" || s.gender?.toLowerCase() === "female");
+                    console.log("🔍 מספר לוחמות:", femaleSoldiers.length);
+                    console.table(femaleSoldiers);
+
+                soldierDiv.innerHTML = `
+                    <div class="soldier-image" style="
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 50%;
+                        overflow: hidden;
+                        margin: auto;
+                        border: 2px solid #ccc;
+                    ">
+                        <img src="${imageUrl}" alt="${soldier.name || 'לוחם'}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <p class="soldier-name">${soldier.name || 'לוחם'}</p>
+                `;
+            
                 soldierDiv.onclick = () => showSoldierDetails(soldier);
                 soldiersContainer.appendChild(soldierDiv);
             });
+            
+            
             // Force a reflow to ensure the DOM updates
             soldiersContainer.offsetHeight; // Trigger reflow
-            console.log("🔍 תוכן ה-soldiersContainer לאחר הוספה:", soldiersContainer.innerHTML);
         }
     
         modal.style.display = "block";
         console.log("🔍 המודאל אמור להיות גלוי כעת");
     }
+    
     function displayEvent(index) {
         const eventsTableBody = document.getElementById("eventsTableBody");
         const imageElement = document.getElementById("eventImage");
@@ -360,6 +373,38 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("eventImage").src = "";
         document.getElementById("eventVideo").src = "";
     };
-
+    const header = document.querySelector('.map-header');
+    const hoverArea = document.querySelector('.header-hover-area');
+    const headerHint = document.querySelector('.header-hint');
+    const modal = document.getElementById('eventModal');
+    
+    // פונקציה לעדכון מצב ה-header-hint
+    function updateHeaderHintVisibility() {
+        const isModalVisible = modal.style.display === 'block';
+        if (isModalVisible) {
+            headerHint.classList.add('hidden');
+        } else if (!header.classList.contains('visible')) {
+            headerHint.classList.remove('hidden');
+        }
+    }
+    
+    hoverArea.addEventListener('mouseenter', () => {
+        header.classList.add('visible');
+        headerHint.classList.add('hidden');
+    });
+    
+    header.addEventListener('mouseleave', () => {
+        header.classList.remove('visible');
+        updateHeaderHintVisibility(); // בדיקה אם המודאל פתוח
+    });
+    
+    // עדכון כשהמודאל נפתח או נסגר
+    modal.addEventListener('transitionend', updateHeaderHintVisibility); // לוכד שינויים במצב המודאל
+    window.closeModal = function () {
+        modal.style.display = 'none';
+        document.getElementById('eventImage').src = '';
+        document.getElementById('eventVideo').src = '';
+        updateHeaderHintVisibility(); // בדיקה מחדש כשהמודאל נסגר
+    };
     loadEvents();
 });
