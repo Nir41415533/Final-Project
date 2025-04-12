@@ -1,24 +1,24 @@
-// js/countryClickHandler.js
-import { countryCodeMapping } from "./countryCodeMapping.js";
 import { showCountryEventsModal } from "./modalHandler.js";
+import { countryCodeMapping } from "./countryCodeMapping.js"; // אם אתה עדיין משתמש בזה
 
 export function handleCountryClick(country) {
-    const countryName = country.properties.name.trim().toLowerCase();
+    const name = country.properties?.name;
 
-    // אם יש תיקון לשם – השתמש בו
-    const nameFixes = {
-        "united states of america": "usa"
-    };
-    const fixedCountryName = nameFixes[countryName] || countryName;
+    if (!name || typeof name !== "string") {
+        console.warn("⚠️ לא נמצא שם מדינה תקף בפיצ'ר:", country.properties);
+        return;
+    }
+
+    const countryName = name.trim().toLowerCase();
 
     console.log("🔍 מדינה שנבחרה מהמפה:", countryName);
 
-    // דגל
+    // דגל לפי השם באנגלית
     const countryCode = countryCodeMapping[countryName] || "";
     const mapPlaceholder = document.getElementById("insetMapPlaceholder");
     if (mapPlaceholder) {
         mapPlaceholder.innerHTML = countryCode
-            ? `<img src="https://flagcdn.com/w320/${countryCode}.png" alt="דגל ${countryName}">`
+            ? `<img src="https://flagcdn.com/w320/${countryCode}.png" alt="דגל ${name}">`
             : "מפת הקרב";
     }
 
@@ -28,23 +28,26 @@ export function handleCountryClick(country) {
     ])
     .then(([events, soldiers]) => {
         const countryEvents = events.filter(ev => {
-            const eventCountry = ev.country__name?.trim().toLowerCase() || "";
-            return eventCountry === fixedCountryName;
+            const eventCountry = ev.country__name_en?.trim().toLowerCase() || "";
+            return eventCountry === countryName;
         });
 
         const countrySoldiers = soldiers.filter(soldier => {
-            const soldierCountry = soldier.country?.trim().toLowerCase() || "";
-            return soldierCountry === fixedCountryName || soldierCountry.includes(fixedCountryName);
+            const soldierCountry = soldier.country?.toLowerCase().trim() || "";
+            return soldierCountry === countryName;
         });
 
-        console.log("🟢 אירועים במדינה שנבחרה:", countryEvents);
-        console.log("🟢 לוחמים במדינה שנבחרה:", countrySoldiers);
+        console.log("🟢 חיילים שנמצאו:", countrySoldiers);
+        console.log("🟢 אירועים במדינה:", countryEvents);
+        console.log("🟢 לוחמים במדינה:", countrySoldiers);
 
         window.currentEvents = countryEvents;
         window.currentSoldiers = countrySoldiers;
         window.currentIndex = 0;
 
-        showCountryEventsModal(country.properties.name, countryEvents, countrySoldiers);
+        showCountryEventsModal(name, countryEvents, countrySoldiers);
     })
-    .catch(error => console.error("❌ שגיאה בטעינת נתונים:", error));
+    .catch(error => {
+        console.error("❌ שגיאה בטעינת נתונים:", error);
+    });
 }

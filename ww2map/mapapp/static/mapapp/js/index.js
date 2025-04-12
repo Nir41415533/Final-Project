@@ -1,14 +1,11 @@
-// static/js/index.js
-
 import { createMap } from "./mapSetup.js";
 import { addCountriesLayer } from "./countryLayer.js";
 import { setupModalClose } from "./modalHandler.js";
 
-
 // מפתח MapTiler שלך
-const MAPTILER_KEY = "a1se7rp3zc7WUUPq5C1F";
+const MAPTILER_KEY = "id6E01naKP3UCWgW7hY1";
 
-// טעינת אירועים כלליים (נשמרים ב־window לצורך שימוש עתידי)
+// טוען אירועים
 function loadEvents() {
     fetch("/events/")
         .then(response => response.json())
@@ -18,9 +15,9 @@ function loadEvents() {
         .catch(error => console.error("❌ שגיאה בטעינת אירועים:", error));
 }
 
-// קריאה לקובץ GeoJSON עם גבולות המדינות
+// טוען מדינות
 function loadCountries(map) {
-    fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
+    fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson")
         .then(response => response.json())
         .then(countries => {
             window.geojsonLayer = addCountriesLayer(map, countries);
@@ -28,13 +25,16 @@ function loadCountries(map) {
         .catch(error => console.error("❌ שגיאה בטעינת מדינות:", error));
 }
 
-// הטענת המפה כשהמסמך מוכן
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("load", () => {
     const map = createMap(MAPTILER_KEY);
     if (!map) return;
 
-    window.map = map; // נשמר למקרה שצריך בעתיד
-    loadEvents();
-    loadCountries(map);
-    setupModalClose(map);
+    window.map = map;
+
+    map.on("load", () => {
+        console.log("✅ המפה מוכנה, טוען שכבות...");
+        loadEvents();
+        loadCountries(map);  // ✅ תמתין עד שהמפה מוכנה לפני שאתה מוסיף שכבת מדינות
+        setupModalClose(map);
+    });
 });

@@ -143,7 +143,6 @@ html, body {
     animation: fadeIn 0.5s ease-in-out;
 }
 
-/* כפתור סגירה (ימין למעלה) */
 .modal-controls {
     position: absolute;
     top: 20px;
@@ -182,14 +181,18 @@ html, body {
     box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
 }
 
-/* טבלת אירועים (ימין למעלה, מתחת לכפתור הסגירה) */
 .passport {
+    background-color: #f5e8c7;
+    background-image: url("/static/mapapp/images/paper-bg.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+
     position: absolute;
     top: 100px;
     right: 20px;
     width: 450px;
     height: 400px;
-    background: #f5e8c7;
     padding: 15px;
     border: 2px solid #d4af37;
     border-radius: 8px;
@@ -202,26 +205,26 @@ html, body {
     z-index: 2000;
 }
 
-.passport table {
+/* .passport table {
     width: 100%;
     border-collapse: collapse;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.85); 
     border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     border: 1px solid #d4af37;
     flex: 1;
     display: flex;
     flex-direction: column;
-}
+} */
 
-.passport caption {
+ .passport caption {
     font-family: 'Special Elite', cursive;
     font-size: 1.5rem;
     font-weight: bold;
     text-transform: uppercase;
     color: #4a2c2a;
     margin-bottom: 10px;
-}
+} 
 
 .passport th, .passport td {
     padding: 10px;
@@ -277,6 +280,8 @@ html, body {
     color: #d4af37;
 }
 
+
+
 .country-event {
     cursor: pointer;
     transition: background 0.3s;
@@ -307,35 +312,30 @@ html, body {
     border-radius: 4px;
 }
 
-/* גלריית לוחמים (שמאל למעלה, ליד ה-passport) */
 .soldiers-section {
     position: absolute;
     top: 50px;
-    bottom: 20px;
     left: calc(20px + 530px);
-    width: 300px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
     background: #f5e8c7;
     padding: 15px;
     border: 2px solid #d4af37;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    opacity: 0; /* Initial state */
-    animation: fadeInElement 0.5s ease-in-out forwards;
-    animation-delay: 0.1s;
     z-index: 2100;
-    display: flex;
-    flex-direction: column;
 }
 
 .soldiers-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    overflow-y: auto;
     flex: 1;
-    padding-right: 5px;
-    scrollbar-width: thin;
-    scrollbar-color: #d4af37 #f5e8c7;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-auto-rows: minmax(120px, auto);
+    gap: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
 }
 
 .soldiers-list::-webkit-scrollbar {
@@ -414,15 +414,12 @@ html, body {
     transition: transform 0.2s ease;
 }
 
-
-/* תמונה או וידאו (שמאל למעלה) */
 .multimedia {
     position: absolute;
     top: 100px;
     left: 110px;
     width: 400px;
-    height:200px;
-
+    height: 200px;
     background: #f5e8c7;
     padding: 10px;
     border: 2px solid #d4af37;
@@ -442,7 +439,6 @@ html, body {
     border: 2px solid #d4af37;
 }
 
-/* אנימציות */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -451,4 +447,115 @@ html, body {
 @keyframes fadeInElement {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 1495px) and (min-width: 901px) {
+    .soldiers-section {
+        left: calc(10px + 400px); /* Reduced to fit better */
+        width: 300px; /* Reduced width */
+        top: 50px;
+    }
+    
+    .passport {
+        width: 350px; /* Reduced width */
+        right: 10px;
+        top: 80px;
+    }
+    
+    .multimedia {
+        width: 300px; /* Reduced width */
+        left: 80px;
+        top: 80px;
+    }
+    
+    .insetMap {
+        width: 250px; /* Reduced width */
+        left: 150px;
+        top: 300px; /* Adjusted to fit below multimedia */
+    }
+
+    .soldiers-list {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Smaller grid items */
+    }
+
+    .soldier img {
+        width: 60px; /* Smaller images */
+        height: 60px;
+    }
+
+    .soldier-name {
+        font-size: 12px; /* Smaller text */
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .passport, .soldiers-section, .multimedia, .insetMap {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        margin: 1rem auto;
+        width: min(90vw, 450px);
+    }
+    
+    .soldiers-section {
+        max-height: 50vh;
+    }
+    
+    .multimedia {
+        height: auto;
+        min-height: 150px;
+    }
+    
+    .insetMap {
+        width: min(90vw, 320px);
+    }
+    
+    .modal-controls {
+        top: 10px;
+        right: 10px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .modal {
+        padding: 10px;
+    }
+    
+    .passport {
+        width: 95vw;
+        height: auto;
+        min-height: 300px;
+    }
+    
+    .soldiers-section {
+        width: 95vw;
+    }
+    
+    .soldiers-list {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+    
+    .soldier img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .soldier-name {
+        font-size: 12px;
+    }
+    
+    .multimedia {
+        width: 95vw;
+    }
+    
+    .insetMap {
+        width: 95vw;
+    }
+    
+    .eventClose {
+        padding: 8px 16px;
+        font-size: 1rem;
+    }
 }

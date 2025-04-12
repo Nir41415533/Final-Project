@@ -6,20 +6,23 @@
     <title>מפה אינטראקטיבית של מלחמת העולם השנייה</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <!-- Showdown for Markdown conversion -->
+    <!-- ספריות צד שלישי -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js" defer></script>
-
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
-
-    <!-- Google Fonts for historical font -->
     <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'mapapp/css/styles.css' %}">
+    <!-- MapLibre CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@3.3.1/dist/maplibre-gl.min.css" rel="stylesheet" />
 
-    <!-- Favicon (optional, to silence 404) -->
+    <!-- CSS פרטי -->
+    <link rel="stylesheet" href="{% static 'mapapp/css/styles.css' %}">
     <link rel="icon" href="{% static 'mapapp/favicon.ico' %}" type="image/x-icon">
+
+    <style>
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
 </head>
 <body>
     <div class="main-container">
@@ -40,13 +43,13 @@
 
     <!-- מודאל משודרג -->
     <div id="eventModal" class="modal">
-        <!-- גלריית לוחמים (בצד שמאל) -->
+        <!-- גלריית לוחמים -->
         <div class="soldiers-section">
             <h3 id="soldiersTitle" style="display: none;">לוחמים ממדינה זו:</h3>
-            <div id="soldiersContainer" class="soldiers-list scrollable" style="display: none;"></div>
+            <div id="soldiersContainer" class="soldiers-list scrollable"></div>
         </div>
 
-        <!-- טבלת אירועים (בצד ימין) -->
+        <!-- טבלת אירועים -->
         <div class="passport">
             <table>
                 <caption id="eventTitle" class="uppercase"></caption>
@@ -56,37 +59,34 @@
                         <th class="summaryHeading">תיאור</th>
                     </tr>
                 </thead>
-                <tbody id="eventsTableBody" class="scrollable">
-                    <!-- נתונים יתווספו דינמית -->
-                </tbody>
+                <tbody id="eventsTableBody" class="scrollable"></tbody>
             </table>
         </div>
 
         <!-- תמונה או וידאו -->
         <div class="multimedia">
-            <img id="eventImage" class="event-image" src="" alt="תמונה מהאירוע" style="display: none;"/>
+            <img id="eventImage" class="event-image" src="" alt="תמונה מהאירוע" style="display: none;" />
             <video id="eventVideo" class="event-media" controls preload="metadata" style="display: none;"></video>
         </div>
-        
+
         <!-- מפה קטנה -->
         <div class="insetMap">
             <div id="insetMapPlaceholder" class="map-placeholder">מפת הקרב</div>
         </div>
-        
-        <!-- כפתור סגירה בלבד -->
+
+        <!-- כפתור סגירה -->
         <div class="modal-controls">
-            <button id="eventClose" class="eventClose" onclick="closeModal()"><span class="closeText">סגור</span> <span class="closeX">×</span></button>
+            <button id="eventClose" class="eventClose" onclick="closeModal()">
+                <span class="closeText">סגור</span>
+                <span class="closeX">×</span>
+            </button>
         </div>
     </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
+    <!-- MapLibre JS -->
+    <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@3.3.1/dist/maplibre-gl.min.js"></script>
 
-    <!-- MapTiler SDK -->
-    <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.umd.min.js" defer></script>
-
-    <!-- Custom JS -->
-    <script type="module" src="{% static 'mapapp/js/index.js' %}"></script>     <!-- type module has been added for import/export in the fututre->
-
+    <!-- קובץ JS ראשי -->
+    <script type="module" src="{% static 'mapapp/js/index.js' %}"></script>
 </body>
 </html>
