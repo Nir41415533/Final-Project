@@ -17,9 +17,8 @@ class Event(models.Model):
     image = models.CharField(max_length=255, blank=True, null=True)  # תמונה (לא חובה)
     video = models.CharField(max_length=255, blank=True, null=True)  # וידאו (לא חובה)
 
-    
     def __str__(self):
-        return f"{self.title} - {self.date} ({self.country.name})"
+        return f"{self.title} - {self.date} ({self.country.name_he})"
     
 class Soldier(models.Model):
     customer_id = models.IntegerField(unique=True)

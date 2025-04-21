@@ -15,7 +15,9 @@
 
     <!-- CSS פרטי -->
     <link rel="stylesheet" href="{% static 'mapapp/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'mapapp/css/modal.css' %}">
     <link rel="icon" href="{% static 'mapapp/favicon.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
     <style>
         #map {
@@ -25,8 +27,19 @@
     </style>
 </head>
 <body>
+    <!-- מסך טעינה -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <h1 class="loading-title">מוזיאון הלוחם היהודי</h1>
+            <div class="loading-spinner"></div>
+            <div class="loading-progress">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <div id="loadingText" class="loading-text">טוען את המפה...</div>
+        </div>
+    </div>
+
     <div class="main-container">
-        <div class="header-hover-area"></div>
         <div class="header-hint">
             <img src="{% static 'mapapp/images/down-arrow.svg' %}" alt="רמז לפתיחת תפריט">
         </div>
@@ -37,49 +50,107 @@
                 </a>
                 <span class="logo-text">מוזיאון הלוחם היהודי</span>
             </div>
+            <div class="nav-buttons">
+                <form method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="website">
+                    <button type="submit">אתר ראשי</button>
+                </form>
+                <form method="POST" action="/i18n/setlang/" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="language" value="he">
+                    <button type="submit">עברית</button>
+                </form>
+                <form method="POST" action="/i18n/setlang/" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="language" value="en">
+                    <button type="submit">English</button>
+                </form>
+            </div>
         </header>
         <div id="map"></div>
     </div>
 
     <!-- מודאל משודרג -->
     <div id="eventModal" class="modal">
-        <!-- גלריית לוחמים -->
-        <div class="soldiers-section">
-            <h3 id="soldiersTitle" style="display: none;">לוחמים ממדינה זו:</h3>
-            <div id="soldiersContainer" class="soldiers-list scrollable"></div>
-        </div>
+        <div id="eventContent" class="content">
+            <!-- כפתור סגירה -->
+            <div class="modal-controls">
+                <button id="eventClose" class="eventClose" onclick="closeModal()">
+                    <span class="closeText">סגור</span>
+                    <span class="closeX">×</span>
+                </button>
+            </div>
 
-        <!-- טבלת אירועים -->
-        <div class="passport">
-            <table>
-                <caption id="eventTitle" class="uppercase"></caption>
-                <thead>
-                    <tr>
-                        <th class="notesHeading">תאריכים</th>
-                        <th class="summaryHeading">תיאור</th>
-                    </tr>
-                </thead>
-                <tbody id="eventsTableBody" class="scrollable"></tbody>
-            </table>
-        </div>
+            <div class="modal-layout-grid">
+                <!-- Left Column -->
+                <div class="soldiers-section">
+                    <h3 id="soldiersTitle">לוחמים ממדינה זו:</h3>
+                    <div id="soldiersContainer" class="soldiers-list scrollable"></div>
+                </div>
 
-        <!-- תמונה או וידאו -->
-        <div class="multimedia">
-            <img id="eventImage" class="event-image" src="" alt="תמונה מהאירוע" style="display: none;" />
-            <video id="eventVideo" class="event-media" controls preload="metadata" style="display: none;"></video>
-        </div>
+                <!-- Middle Column -->
+                <div class="passport">
+                    <caption class="event-caption">
+                        <div class="caption-wrapper">
+                            <span id="eventTitle" class="uppercase">שם האירוע</span>
+                            <div id="insetMapPlaceholder" class="map-placeholder">
+                                <img id="countryFlag" src="" alt="דגל המדינה">
+                            </div>
+                        </div>
+                    </caption>
+                    
+                    <!-- Event Cards Container -->
+                    <div id="eventsContainer" class="events-cards-container">
+                        <!-- Events will be dynamically added here as cards -->
+                    </div>
 
-        <!-- מפה קטנה -->
-        <div class="insetMap">
-            <div id="insetMapPlaceholder" class="map-placeholder">מפת הקרב</div>
-        </div>
+                    <!-- Event Details Section -->
+                    <div id="eventDetails" class="event-details" style="display: none;">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <strong>תאריך התחלה:</strong>
+                                <span id="startDate">25/08/1941</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>תאריך סיום:</strong>
+                                <span id="endDate">30/08/1941</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>מיקום:</strong>
+                                <span id="location">איראן</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>סוג:</strong>
+                                <span id="eventType">פלישה</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>סטטוס:</strong>
+                                <span id="eventStatus">מאושר ★</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>מזהה אירוע:</strong>
+                                <span id="eventId">EVT-1941</span>
+                            </div>
+                        </div>
+                        
+                        <div class="event-description">
+                            <h3>תיאור האירוע</h3>
+                            <div id="eventSummary" class="scrollable">
+                                <!-- Event description will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- כפתור סגירה -->
-        <div class="modal-controls">
-            <button id="eventClose" class="eventClose" onclick="closeModal()">
-                <span class="closeText">סגור</span>
-                <span class="closeX">×</span>
-            </button>
+                <!-- Right Column -->
+                <div class="right-column">
+                    <div class="multimedia">
+                        <img id="eventImage" class="event-image" src="" alt="תמונה מהאירוע" style="display: none;" />
+                        <video id="eventVideo" class="event-media" controls preload="metadata" style="display: none;"></video>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

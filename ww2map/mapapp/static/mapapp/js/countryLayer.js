@@ -1,11 +1,13 @@
 import { handleCountryClick } from "./countryClickHandler.js";
 
+// הוספת שכבת מדינות
 export function addCountriesLayer(map, countriesGeoJSON) {
     map.addSource("countries", {
         type: "geojson",
         data: countriesGeoJSON
     });
 
+    // הוספת שכבת מילוי מדינות
     map.addLayer({
         id: "countries-fill",
         type: "fill",
@@ -16,6 +18,7 @@ export function addCountriesLayer(map, countriesGeoJSON) {
         }
     });
 
+    //adds the countries outline layer to the map
     map.addLayer({
         id: "countries-outline",
         type: "line",
@@ -26,6 +29,7 @@ export function addCountriesLayer(map, countriesGeoJSON) {
         }
     });
 
+    //adds the highlighted country source to the map
     map.addSource("highlighted-country", {
         type: "geojson",
         data: {
@@ -34,16 +38,18 @@ export function addCountriesLayer(map, countriesGeoJSON) {
         }
     });
 
+    //adds the highlighted country fill layer to the map
     map.addLayer({
         id: "highlight-fill",
         type: "fill",
         source: "highlighted-country",
         paint: {
-            "fill-color": "#e53e3e",
+            "fill-color": "#e53e3e", // אדום כהה
             "fill-opacity": 0.2
         }
     });
 
+    //adds the highlighted country outline layer to the map
     map.addLayer({
         id: "highlight-outline",
         type: "line",

@@ -73,12 +73,17 @@ def ww2map_view(request):
 def event_list(request):
     try:
         events = Event.objects.all().values(
-            "title", "date", "description", "country__name_en", "image", "video"
+            "title", "date", "description", "country__name_en", "country__name_he", "image", "video"
         )
-
+        
+        # Debug information
+        print("🔍 כל האירועים:", list(events))
+        print("🔍 מדינות ייחודיות:", set(ev["country__name_en"] for ev in events if ev["country__name_en"]))
+        
         results = []
         for event in events:
             event["country__name"] = event.pop("country__name_en")
+            event["country__name_he"] = event.pop("country__name_he")
         return JsonResponse(list(events), safe=False)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
