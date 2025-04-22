@@ -17,16 +17,18 @@ export function handleCountryClick(country) {
     const countryName = name.trim().toLowerCase();
     console.log("🔍 מדינה שנבחרה מהמפה:", countryName);
 
- 
+    // Get the proper flag code
     const countryCode = countryCodeMapping[countryName] || "";
+    console.log("🚩 קוד דגל המדינה:", countryCode);
   
+    // Manually set the flag in the modal
     const mapPlaceholder = document.getElementById("insetMapPlaceholder");
-    //אם יש דגל, מציג את הדגל
     if (mapPlaceholder) {
         mapPlaceholder.innerHTML = countryCode
-            ? `<img src="https://flagcdn.com/w320/${countryCode}.png" alt="flag of ${name}">`
+            ? `<img id="countryFlag" src="https://flagcdn.com/w320/${countryCode}.png" alt="flag of ${name}">`
             : "מפת הקרב";
     }
+    
     //send request to get events and soldiers from the server 
     Promise.all([
         fetch("/events/").then(res => res.json()),

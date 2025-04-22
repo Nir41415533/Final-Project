@@ -253,68 +253,121 @@ html, body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: #2c3e50;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    background-image: url("/static/mapapp/images/loadingScreen.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     z-index: 9999;
     transition: opacity 0.5s ease-out;
+    overflow: hidden;
 }
 
-.loading-screen.fade-out {
-    opacity: 0;
-    pointer-events: none;
+.loading-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.4), transparent);
 }
 
 .loading-content {
-    text-align: center;
-    color: #f5e6d3;
+    position: absolute;
+    z-index: 1;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    height: 100%;
+    width: 35%;
+    right: 10%;
+    top: 0;
 }
 
 .loading-title {
     font-family: 'Special Elite', cursive;
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: #d4af37;
+    font-size: 3rem;
+    margin-bottom: 40px;
+    color: #f5e6d3;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    letter-spacing: 2px;
+    text-align: right;
 }
 
 .loading-spinner {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 20px;
-    border: 6px solid #f5e6d3;
-    border-top: 6px solid #d4af37;
+    width: 90px;
+    height: 90px;
+    margin-bottom: 40px;
+    border: 4px solid rgba(245, 230, 211, 0.2);
+    border-top: 4px solid #f5e6d3;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    align-self: flex-end;
 }
 
 .loading-progress {
-    width: 200px;
+    width: 300px;
     height: 4px;
-    background: rgba(245, 230, 211, 0.2);
-    border-radius: 2px;
-    margin: 20px 0;
+    background: rgba(245, 230, 211, 0.1);
+    border-radius: 4px;
+    margin: 30px 0;
     overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    align-self: flex-end;
 }
 
 .progress-bar {
     width: 0%;
     height: 100%;
-    background: #d4af37;
+    background: #f5e6d3;
     transition: width 0.3s ease;
+    position: relative;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent
+    );
+    animation: shimmer 1.5s infinite;
 }
 
 .loading-text {
-    font-size: 1.2rem;
-    margin-top: 10px;
+    font-size: 1.3rem;
+    margin-top: 20px;
+    color: #f5e6d3;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+    font-family: 'Special Elite', cursive;
+    text-align: right;
+    align-self: flex-end;
 }
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.loading-screen.fade-out {
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Fix for extra closing bracket */
@@ -335,6 +388,157 @@ html, body {
     .eventClose {
         padding: 8px 16px;
         font-size: 1rem;
+    }
+}
+
+/* Search functionality in the map - Google Maps style */
+.search-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1500;
+    width: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.search-input-container {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border-radius: 8px;
+    padding: 10px 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-icon {
+    width: 18px;
+    height: 18px;
+    margin-left: 10px;
+    opacity: 0.7;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 6px 0;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    direction: rtl;
+    background: transparent;
+}
+
+.search-container button {
+    display: none; /* Hide the button, we'll make the search automatic */
+}
+
+.search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-results div {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f1f1;
+    direction: rtl;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.search-results div:before {
+    content: "●";
+    margin-left: 10px;
+    font-size: 10px;
+    color: #4285F4;
+}
+
+.search-results div:hover {
+    background-color: #f7f7f7;
+}
+
+.search-results div:last-child {
+    border-bottom: none;
+}
+
+.search-results div.active {
+    background-color: #f0f7ff;
+}
+
+/* Dark mode support for search */
+body.dark-mode .search-input-container {
+    background-color: #333;
+}
+
+body.dark-mode .search-container input {
+    color: #fff;
+    background: transparent;
+}
+
+body.dark-mode .search-icon {
+    filter: invert(1);
+    opacity: 0.8;
+}
+
+body.dark-mode .search-results {
+    background-color: #333;
+}
+
+body.dark-mode .search-results div {
+    border-bottom-color: #444;
+    color: #fff;
+}
+
+body.dark-mode .search-results div:hover {
+    background-color: #444;
+}
+
+body.dark-mode .search-results div.active {
+    background-color: #2d3740;
+}
+
+/* Responsive design for search */
+@media screen and (max-width: 768px) {
+    .search-container {
+        width: 300px;
+        top: 15px;
+        right: 15px;
+    }
+
+    .search-input-container {
+        padding: 8px 14px;
+    }
+
+    .search-container input {
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .search-container {
+        width: calc(100% - 30px);
+        top: 10px;
+        right: 15px;
+    }
+    
+    .search-input-container {
+        padding: 7px 12px;
+    }
+    
+    .search-container input {
+        font-size: 13px;
     }
 }
 

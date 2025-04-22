@@ -30,7 +30,7 @@
     <!-- מסך טעינה -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loading-content">
-            <h1 class="loading-title">מוזיאון הלוחם היהודי</h1>
+            <h1 class="loading-title">טוען מפה אינטראקטיבית</h1>
             <div class="loading-spinner"></div>
             <div class="loading-progress">
                 <div id="progressBar" class="progress-bar"></div>
@@ -68,7 +68,19 @@
                 </form>
             </div>
         </header>
-        <div id="map"></div>
+        <div id="map">
+            <div class="search-container">
+                <div class="search-input-container">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="countrySearch" placeholder="חפש מדינה..." aria-label="חיפוש מדינה">
+                    <button id="searchButton" aria-label="חפש מדינה" style="display:none;">חיפוש</button>
+                </div>
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
     </div>
 
     <!-- מודאל משודרג -->
@@ -83,9 +95,13 @@
             </div>
 
             <div class="modal-layout-grid">
-                <!-- Left Column -->
+                <!-- Rifht Column -->
                 <div class="soldiers-section">
                     <h3 id="soldiersTitle">לוחמים ממדינה זו:</h3>
+                    <div class="soldiers-search-container">
+                        <input type="text" id="soldiersSearch" class="soldiers-search" placeholder="חפש לוחמים..." aria-label="חפש לוחמים">
+                        <button id="clearSearch" class="clear-search" aria-label="נקה חיפוש">×</button>
+                    </div>
                     <div id="soldiersContainer" class="soldiers-list scrollable"></div>
                 </div>
 
@@ -106,38 +122,25 @@
                     </div>
 
                     <!-- Event Details Section -->
-                    <div id="eventDetails" class="event-details" style="display: none;">
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <strong>תאריך התחלה:</strong>
-                                <span id="startDate">25/08/1941</span>
-                            </div>
-                            <div class="info-item">
-                                <strong>תאריך סיום:</strong>
-                                <span id="endDate">30/08/1941</span>
-                            </div>
-                            <div class="info-item">
-                                <strong>מיקום:</strong>
-                                <span id="location">איראן</span>
-                            </div>
-                            <div class="info-item">
-                                <strong>סוג:</strong>
-                                <span id="eventType">פלישה</span>
-                            </div>
-                            <div class="info-item">
-                                <strong>סטטוס:</strong>
-                                <span id="eventStatus">מאושר ★</span>
-                            </div>
-                            <div class="info-item">
-                                <strong>מזהה אירוע:</strong>
-                                <span id="eventId">EVT-1941</span>
-                            </div>
-                        </div>
-                        
+                    <div id="eventDetails" class="event-details">
                         <div class="event-description">
                             <h3>תיאור האירוע</h3>
                             <div id="eventSummary" class="scrollable">
                                 <!-- Event description will be added here -->
+                                <div class="event-info">
+                                    <div class="info-row">
+                                        <strong>תאריך התחלה:</strong>
+                                        <span id="startDate">25/08/1941</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <strong>תאריך סיום:</strong>
+                                        <span id="endDate">30/08/1941</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <strong>מיקום:</strong>
+                                        <span id="location">איראן</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

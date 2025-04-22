@@ -13,13 +13,9 @@ export function displayEvent(event) {
     const startDate = document.getElementById("startDate");
     const endDate = document.getElementById("endDate");
     const location = document.getElementById("location");
-    const eventType = document.getElementById("eventType");
-    const eventStatus = document.getElementById("eventStatus");
-    const eventId = document.getElementById("eventId");
     const eventSummary = document.getElementById("eventSummary");
     const imageElement = document.getElementById("eventImage");
     const videoElement = document.getElementById("eventVideo");
-    const countryFlag = document.getElementById("countryFlag");
     const eventDetails = document.getElementById("eventDetails");
 
     // Make sure event details section is visible
@@ -32,9 +28,6 @@ export function displayEvent(event) {
     const start = event.date || event.start_date || "לא ידוע";
     const end = event.endDate || event.end_date || event.date || "לא ידוע";
     const locationText = event.location || event.country__name_he || event.country__name || "לא ידוע";
-    const type = event.event_type || event.type || "לא ידוע";
-    const status = event.status || "מאושר ★";
-    const id = event.event_id || event.id || "לא ידוע";
     
     // Convert the event description to html if showdown is available
     let description = event.description || event.summary || "אין תיאור זמין";
@@ -55,21 +48,7 @@ export function displayEvent(event) {
     if (startDate) startDate.textContent = start;
     if (endDate) endDate.textContent = end;
     if (location) location.textContent = locationText;
-    if (eventType) eventType.textContent = type;
-    if (eventStatus) eventStatus.textContent = status;
-    if (eventId) eventId.textContent = id;
     if (eventSummary) eventSummary.innerHTML = description;
-
-    // Handle flag display
-    if (countryFlag && event.country_code) {
-        const flagUrl = `https://flagcdn.com/w320/${event.country_code.toLowerCase()}.png`;
-        countryFlag.src = flagUrl;
-        countryFlag.style.display = 'block';
-        countryFlag.alt = `דגל של ${event.country__name_he || event.country__name || ""}`;
-    } else if (countryFlag) {
-        // If the flag is not available, hide it
-        countryFlag.style.display = 'none';
-    }
 
     // Handle media
     if (imageElement) {
@@ -89,6 +68,15 @@ export function displayEvent(event) {
             videoElement.style.display = "none";
         }
     }
+
+    // Save the current event ID for reference
+    currentEventId = event.id;
+    
+    // Highlight the active event card
+    highlightActiveEvent(event.id);
+    
+    // Update the multimedia section
+    updateMultimedia(event);
 }
 
 export function showCountryEvents(countryName, events) {
@@ -129,14 +117,12 @@ export function showCountryEvents(countryName, events) {
                     // Get event data with fallbacks for different field names
                     const eventTitle = event.name || event.title || 'אירוע ללא שם';
                     const eventDate = event.date || formatDate(event.start_date) || 'לא ידוע';
-                    const eventType = event.event_type || event.type || 'לא ידוע';
                     
                     // Create card content with clear structure
                     eventCard.innerHTML = `
                         <div class="card-content">
                             <div class="event-card-title">${eventTitle}</div>
                             <div class="event-card-date">${eventDate}</div>
-                            <div class="event-card-type">${eventType}</div>
                         </div>
                     `;
                     
@@ -179,7 +165,6 @@ export function showCountryEvents(countryName, events) {
                 // Add a clear message prompting user to select an event
                 const promptDiv = document.createElement('div');
                 promptDiv.className = 'select-event-prompt';
-                promptDiv.textContent = 'בחר אירוע כדי לראות את הפרטים המלאים';
                 eventsContainer.appendChild(promptDiv);
                 
                 // Don't show first event by default - wait for user to click

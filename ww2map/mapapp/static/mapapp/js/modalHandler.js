@@ -3,12 +3,17 @@
     import { displayEvent, showCountryEvents } from "./eventDisplay.js";
     import { showSoldierDetails } from "./soldierHandler.js";
 
+    // Keep a reference to all soldiers for search functionality
+    let allSoldiers = [];
+
     export function showCountryEventsModal(countryName, events, soldiers) {
         const modal = document.getElementById("eventModal");
         if (!modal) {
             console.error("❌ שגיאה: המודאל לא נמצא!");
             return;
         }
+
+        console.log("Opening modal for country:", countryName);
 
         // Initialize modal elements
         const eventTitle = document.getElementById("eventTitle");
@@ -18,6 +23,8 @@
         const soldiersContainer = document.getElementById("soldiersContainer");
         const soldiersTitle = document.getElementById("soldiersTitle");
         const eventDetails = document.getElementById("eventDetails");
+        const soldiersSearch = document.getElementById("soldiersSearch");
+        const clearSearch = document.getElementById("clearSearch");
 
         // Reset modal content
         if (eventTitle) eventTitle.textContent = countryName;
@@ -30,38 +37,41 @@
             videoElement.src = "";
             videoElement.style.display = "none";
         }
+        
+        // Note: We don't change the flag here because it is set by the caller
+        // This ensures the flag stays visible when viewing different events
+        
+        // Store reference to all soldiers
+        allSoldiers = [...soldiers];
 
         // Handle soldiers section
         if (soldiersContainer) {
-            soldiersContainer.innerHTML = "";
-            if (soldiers.length === 0) {
-                soldiersContainer.innerHTML = "<p>לא נמצאו לוחמים למדינה זו</p>";
-            } else {
-                soldiers.forEach(soldier => {
-                    const soldierDiv = document.createElement("div");
-                    soldierDiv.classList.add("soldier");
-
-                    const imageUrl = soldier.image && soldier.image.trim() !== ""
-                        ? soldier.image
-                        : (soldier.gender === "1.0" || soldier.gender === "1" || soldier.gender === 1
-                            ? "https://media.istockphoto.com/id/666545204/vector/default-placeholder-profile-icon.jpg?s=612x612&w=0&k=20&c=UGYk-MX0pFWUZOr5hloXDREB6vfCqsyS7SgbQ1-heY8="
-                            : "https://media.istockphoto.com/id/666545148/vector/default-placeholder-profile-icon.jpg?s=612x612&w=0&k=20&c=swBnLcHy6L9v5eaiRkDwfGLr5cfLkH9hKW-sZfH-m90=");
-
-                    soldierDiv.innerHTML = `
-                        <div class="soldier-image">
-                            <img src="${imageUrl}" alt="${soldier.name || 'לוחם'}">
-                        </div>
-                        <p class="soldier-name">${soldier.name || 'לוחם'}</p>
-                    `;
-
-                    soldierDiv.onclick = () => showSoldierDetails(soldier);
-                    soldiersContainer.appendChild(soldierDiv);
-                });
-            }
+            renderSoldiers(soldiers, soldiersContainer);
         }
 
         if (soldiersTitle) {
             soldiersTitle.style.display = soldiers.length > 0 ? "block" : "none";
+        }
+
+        // Setup search functionality
+        if (soldiersSearch) {
+            soldiersSearch.value = ""; // Clear any previous search
+            soldiersSearch.addEventListener("input", handleSearch);
+            
+            // Show clear button when there's text
+            soldiersSearch.addEventListener("input", function() {
+                clearSearch.style.display = this.value ? "block" : "none";
+            });
+        }
+
+        if (clearSearch) {
+            clearSearch.style.display = "none"; // Initially hidden
+            clearSearch.addEventListener("click", function() {
+                soldiersSearch.value = "";
+                renderSoldiers(allSoldiers, soldiersContainer);
+                this.style.display = "none";
+                soldiersSearch.focus();
+            });
         }
 
         // Show modal
@@ -91,6 +101,55 @@
         }
 
         console.log("🔍 המודאל נפתח בהצלחה");
+    }
+
+    // Function to render soldiers list
+    function renderSoldiers(soldiers, container) {
+        if (!container) return;
+        
+        container.innerHTML = "";
+        if (soldiers.length === 0) {
+            container.innerHTML = "<p>לא נמצאו לוחמים למדינה זו</p>";
+            return;
+        }
+        
+        soldiers.forEach(soldier => {
+            const soldierDiv = document.createElement("div");
+            soldierDiv.classList.add("soldier");
+
+            const imageUrl = soldier.image && soldier.image.trim() !== ""
+                ? soldier.image
+                : (soldier.gender === "1.0" || soldier.gender === "1" || soldier.gender === 1
+                    ? "https://media.istockphoto.com/id/666545204/vector/default-placeholder-profile-icon.jpg?s=612x612&w=0&k=20&c=UGYk-MX0pFWUZOr5hloXDREB6vfCqsyS7SgbQ1-heY8="
+                    : "https://media.istockphoto.com/id/666545148/vector/default-placeholder-profile-icon.jpg?s=612x612&w=0&k=20&c=swBnLcHy6L9v5eaiRkDwfGLr5cfLkH9hKW-sZfH-m90=");
+
+            soldierDiv.innerHTML = `
+                <div class="soldier-image">
+                    <img src="${imageUrl}" alt="${soldier.name || 'לוחם'}">
+                </div>
+                <p class="soldier-name">${soldier.name || 'לוחם'}</p>
+            `;
+
+            soldierDiv.onclick = () => showSoldierDetails(soldier);
+            container.appendChild(soldierDiv);
+        });
+    }
+
+    // Search function
+    function handleSearch() {
+        const query = this.value.trim().toLowerCase();
+        const soldiersContainer = document.getElementById("soldiersContainer");
+        
+        if (!query) {
+            renderSoldiers(allSoldiers, soldiersContainer);
+            return;
+        }
+        
+        const filteredSoldiers = allSoldiers.filter(soldier => 
+            (soldier.name && soldier.name.toLowerCase().includes(query))
+        );
+        
+        renderSoldiers(filteredSoldiers, soldiersContainer);
     }
 
     export function setupModalClose(map) {

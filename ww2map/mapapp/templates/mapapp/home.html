@@ -23,24 +23,35 @@
         </div>
         
         <div class="nav-buttons">
-            <form method="POST" style="display: inline;">
+            <!-- כפתור אתר ראשי -->
+            <!-- כפתור אתר ראשי -->
+            <form method="POST" style="margin: 0;">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="website">
                 <button type="submit">{% trans "Main Website" %}</button>
             </form>
-    
-            <!-- כפתורי החלפת שפה -->
-            <form method="POST" action="/i18n/setlang/" style="display: inline;">
+            <button id="dark-mode-toggle" class="flag-button" title="Toggle Dark Mode">
+                🌙
+            </button>
+            <!-- כפתור החלפת שפה עם דגל -->
+            <form method="POST" action="{% url 'set_language' %}" style="margin: 0;">
                 {% csrf_token %}
-                <input type="hidden" name="language" value="he">
-                <button type="submit">עברית</button>
-            </form>
-            <form method="POST" action="/i18n/setlang/" style="display: inline;">
-                {% csrf_token %}
-                <input type="hidden" name="language" value="en">
-                <button type="submit">English</button>
+                {% if LANGUAGE_CODE == "he" %}
+                    <input type="hidden" name="language" value="en">
+                    <input type="hidden" name="next" value="/en/">
+                    <button type="submit" class="flag-button" title="Switch to English">
+                        <img src="{% static 'mapapp/images/flag_us.png' %}" alt="English">
+                    </button>
+                {% else %}
+                    <input type="hidden" name="language" value="he">
+                    <input type="hidden" name="next" value="/he/">
+                    <button type="submit" class="flag-button" title="Switch to Hebrew">
+                        <img src="{% static 'mapapp/images/flag_il.png' %}" alt="עברית">
+                    </button>
+                {% endif %}
             </form>
         </div>
+       
     </nav>
 
     <!-- Centered Title -->

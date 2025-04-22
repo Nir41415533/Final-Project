@@ -25,3 +25,9 @@ timeRangeButton.addEventListener("click", (e) => {
         timeRangeForm.style.display = "none"; // Hide the form if already visible
     }
 });
+document.addEventListener("DOMContentLoaded", function () {
+    const toggle = document.getElementById("dark-mode-toggle");
+    toggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+    });
+});
