@@ -17,50 +17,29 @@ export function handleCountryClick(country) {
     const countryName = name.trim().toLowerCase();
     console.log("🔍 מדינה שנבחרה מהמפה:", countryName);
 
-    // Get the proper flag code
-    const countryCode = countryCodeMapping[countryName] || "";
-    console.log("🚩 קוד דגל המדינה:", countryCode);
-  
-    // Manually set the flag in the modal
-    const mapPlaceholder = document.getElementById("insetMapPlaceholder");
-    if (mapPlaceholder) {
-        mapPlaceholder.innerHTML = countryCode
-            ? `<img id="countryFlag" src="https://flagcdn.com/w320/${countryCode}.png" alt="flag of ${name}">`
-            : "מפת הקרב";
+    // קורא לפונקציית openCountryModal מקובץ index.js
+    if (typeof window.openCountryModal === 'function') {
+        // המר את שם המדינה באנגלית לעברית אם קיים במיפוי
+        const hebrewName = findHebrewCountryName(countryName) || name;
+        window.openCountryModal(countryName, hebrewName);
+    } else {
+        console.error("❌ פונקציית openCountryModal אינה זמינה");
+    }
+}
+
+// פונקציה למציאת שם המדינה בעברית מתוך מיפוי countries באינדקס
+function findHebrewCountryName(englishName) {
+    // בדיקה שהמיפוי קיים
+    if (!window.countries) {
+        return null;
     }
     
-    //send request to get events and soldiers from the server 
-    Promise.all([
-        fetch("/events/").then(res => res.json()),
-        fetch("/soldiers/").then(res => res.json())
-    ])
-    .then(([events, soldiers]) => {
-        //filter events by country name
-        const countryEvents = events.filter(ev => {
-            const eventCountry = (ev.country__name || "").trim().toLowerCase();
-            const countryName = name.toLowerCase();
-            // בדיקה מדויקת של שם המדינה
-            return eventCountry === countryName;
-        });
-        //filter soldiers by country name
-        const countrySoldiers = soldiers.filter(soldier => {
-            const soldierCountry = (soldier.country || "").toLowerCase().trim();
-            return soldierCountry === countryName;
-        });
-
-        console.log("🟢 אירועים שנמצאו:", countryEvents);
-        console.log("🟢 חיילים שנמצאו:", countrySoldiers);
-
-        //set the events and soldiers to the modal
-        window.currentEvents = countryEvents;
-        window.currentSoldiers = countrySoldiers;
-        window.currentIndex = 0;
-
-        //show the modal
-        showCountryEventsModal(name, countryEvents, countrySoldiers);
-    })
-    .catch(error => {
-        //if there is an error, show the error
-        console.error("❌ שגיאה בטעינת נתונים:", error);
-    });
+    // חיפוש שם המדינה בעברית לפי שם באנגלית
+    for (const [hebrewName, englishValue] of Object.entries(window.countries)) {
+        if (englishValue.toLowerCase() === englishName.toLowerCase()) {
+            return hebrewName;
+        }
+    }
+    
+    return null;
 }

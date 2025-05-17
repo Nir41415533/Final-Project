@@ -1,0 +1,550 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>לוח בקרה - מוזיאון הלוחם היהודי</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    
+    <!-- גופנים -->
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
+    <!-- CSS פרטי -->
+    <link rel="stylesheet" href="{% static 'mapapp/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'mapapp/css/dashboard.css' %}">
+    <link rel="icon" href="{% static 'mapapp/favicon.ico' %}" type="image/x-icon">
+    
+    <style>
+        /* סגנונות למחוון טעינה */
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+            margin: auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container dashboard-container">
+        <header class="map-header visible">
+            <div class="logo-container">
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'mapapp/images/logo.svg' %}" alt="לוגו המוזיאון">
+                </a>
+                <span class="logo-text">מוזיאון הלוחם היהודי</span>
+            </div>
+            <div class="nav-buttons">
+                <a href="{% url 'home' %}" class="nav-button">דף הבית</a>
+                <a href="{% url 'ww2map' %}" class="nav-button">מפה אינטראקטיבית</a>
+                <a href="{% url 'dashboard' %}" class="nav-button active">נתונים וגרפים</a>
+            </div>
+        </header>
+        
+        <div class="dashboard-content">
+            <h1 class="dashboard-title">נתונים וסטטיסטיקות</h1>
+            
+            <div class="stats-boxes">
+                <div class="stat-box">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-number">{{ total_soldiers }}</div>
+                    <div class="stat-label">לוחמים</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-number">{{ total_events }}</div>
+                    <div class="stat-label">אירועים היסטוריים</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon">🌍</div>
+                    <div class="stat-number">{{ total_countries }}</div>
+                    <div class="stat-label">מדינות</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-controls">
+                <div class="view-options">
+                    <button class="view-option active" data-view="charts">תצוגת גרפים</button>
+                    <button class="view-option" data-view="tables">תצוגת טבלאות</button>
+                </div>
+            </div>
+            
+            <div class="charts-view">
+                <div class="charts-row">
+                    <div class="chart-container">
+                        <h2>לוחמים לפי מדינת לידה</h2>
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">טוען נתונים...</div>
+                        </div>
+                        <canvas id="soldiersByCountryChart" style="display: none;"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h2>לוחמים לפי מגדר</h2>
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">טוען נתונים...</div>
+                        </div>
+                        <canvas id="soldiersByGenderChart" style="display: none;"></canvas>
+                    </div>
+                </div>
+                
+                <div class="charts-row">
+                    <div class="chart-container">
+                        <h2>אירועים לפי מדינה</h2>
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">טוען נתונים...</div>
+                        </div>
+                        <canvas id="eventsByCountryChart" style="display: none;"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h2>לוחמים לפי צבא</h2>
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">טוען נתונים...</div>
+                        </div>
+                        <canvas id="soldiersByArmyChart" style="display: none;"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tables-view" style="display: none;">
+                <div class="table-container">
+                    <h2>לוחמים לפי מדינת לידה</h2>
+                    <div class="table-wrapper">
+                        <table id="soldiersByCountryTable">
+                            <thead>
+                                <tr>
+                                    <th>מדינה</th>
+                                    <th>מספר לוחמים</th>
+                                    <th>אחוז</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <h2>לוחמים לפי מגדר</h2>
+                    <div class="table-wrapper">
+                        <table id="soldiersByGenderTable">
+                            <thead>
+                                <tr>
+                                    <th>מגדר</th>
+                                    <th>מספר לוחמים</th>
+                                    <th>אחוז</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <h2>אירועים לפי מדינה</h2>
+                    <div class="table-wrapper">
+                        <table id="eventsByCountryTable">
+                            <thead>
+                                <tr>
+                                    <th>מדינה</th>
+                                    <th>מספר אירועים</th>
+                                    <th>אחוז</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <h2>לוחמים לפי צבא</h2>
+                    <div class="table-wrapper">
+                        <table id="soldiersByArmyTable">
+                            <thead>
+                                <tr>
+                                    <th>צבא</th>
+                                    <th>מספר לוחמים</th>
+                                    <th>אחוז</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // פונקציות עזר
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        function calculatePercentage(value, total) {
+            return ((value / total) * 100).toFixed(1);
+        }
+        
+        function updateTables(data) {
+            // עדכון טבלת לוחמים לפי מדינה
+            const soldiersCountryTable = document.getElementById('soldiersByCountryTable').getElementsByTagName('tbody')[0];
+            soldiersCountryTable.innerHTML = '';
+            data.soldiers_by_country.forEach(item => {
+                const row = soldiersCountryTable.insertRow();
+                row.insertCell(0).textContent = item.birth_country__name_he || 'לא ידוע';
+                row.insertCell(1).textContent = formatNumber(item.count);
+                row.insertCell(2).textContent = calculatePercentage(item.count, data.total_soldiers) + '%';
+            });
+            
+            // עדכון טבלת לוחמים לפי מגדר
+            const soldiersGenderTable = document.getElementById('soldiersByGenderTable').getElementsByTagName('tbody')[0];
+            soldiersGenderTable.innerHTML = '';
+            const genderMapping = { 1.0: 'גברים', 0.0: 'נשים' };
+            data.soldiers_by_gender.forEach(item => {
+                const row = soldiersGenderTable.insertRow();
+                row.insertCell(0).textContent = genderMapping[parseFloat(item.gender)] || 'לא ידוע';
+                row.insertCell(1).textContent = formatNumber(item.count);
+                row.insertCell(2).textContent = calculatePercentage(item.count, data.total_soldiers) + '%';
+            });
+            
+            // עדכון טבלת אירועים לפי מדינה
+            const eventsCountryTable = document.getElementById('eventsByCountryTable').getElementsByTagName('tbody')[0];
+            eventsCountryTable.innerHTML = '';
+            data.events_by_country.forEach(item => {
+                const row = eventsCountryTable.insertRow();
+                row.insertCell(0).textContent = item.country__name_he || 'לא ידוע';
+                row.insertCell(1).textContent = formatNumber(item.count);
+                row.insertCell(2).textContent = calculatePercentage(item.count, data.total_events) + '%';
+            });
+            
+            // עדכון טבלת לוחמים לפי צבא
+            const soldiersArmyTable = document.getElementById('soldiersByArmyTable').getElementsByTagName('tbody')[0];
+            soldiersArmyTable.innerHTML = '';
+            data.soldiers_by_army.forEach(item => {
+                const row = soldiersArmyTable.insertRow();
+                row.insertCell(0).textContent = item.army_he || 'לא ידוע';
+                row.insertCell(1).textContent = formatNumber(item.count);
+                row.insertCell(2).textContent = calculatePercentage(item.count, data.total_soldiers) + '%';
+            });
+        }
+        
+        // טעינת נתונים
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardData();
+            
+            // הוספת פונקציונליות לכפתורי תצוגה
+            document.querySelectorAll('.view-option').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.view-option').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    if (button.dataset.view === 'charts') {
+                        document.querySelector('.charts-view').style.display = 'block';
+                        document.querySelector('.tables-view').style.display = 'none';
+                    } else {
+                        document.querySelector('.charts-view').style.display = 'none';
+                        document.querySelector('.tables-view').style.display = 'block';
+                    }
+                });
+            });
+        });
+        
+        function loadDashboardData() {
+            // איפוס מצב UI
+            document.querySelectorAll('.chart-container canvas').forEach(canvas => {
+                canvas.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.loading-container').forEach(container => {
+                container.style.display = 'flex';
+            });
+            
+            // טעינת נתונים
+            fetch('/dashboard/data/')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // שמירת הנתונים באופן גלובלי
+                    window.dashboardData = data;
+                    
+                    // הסתרת מחווני טעינה
+                    document.querySelectorAll('.loading-container').forEach(container => {
+                        container.style.display = 'none';
+                    });
+                    
+                    // הצגת קנבסים
+                    document.querySelectorAll('.chart-container canvas').forEach(canvas => {
+                        canvas.style.display = 'block';
+                    });
+                    
+                    // יצירת כל הגרפים
+                    createSoldiersByCountryChart();
+                    createSoldiersByGenderChart();
+                    createEventsByCountryChart();
+                    createSoldiersByArmyChart();
+                    
+                    // עדכון הטבלאות
+                    updateTables(data);
+                })
+                .catch(error => {
+                    console.error('Error loading dashboard data:', error);
+                    
+                    // הסתרת מחווני טעינה
+                    document.querySelectorAll('.loading-container').forEach(container => {
+                        container.style.display = 'none';
+                    });
+                    
+                    // הצגת הודעות שגיאה
+                    document.querySelectorAll('.chart-container, .table-container').forEach(container => {
+                        const canvas = container.querySelector('canvas');
+                        if (canvas) {
+                            canvas.style.display = 'none';
+                        }
+                        
+                        if (!container.querySelector('.error-message')) {
+                            const errorMsg = document.createElement('p');
+                            errorMsg.className = 'error-message';
+                            errorMsg.textContent = 'שגיאה בטעינת הנתונים. אנא נסה שוב מאוחר יותר.';
+                            container.appendChild(errorMsg);
+                        }
+                    });
+                });
+        }
+        
+        // פונקציות ליצירת הגרפים
+        function createSoldiersByCountryChart() {
+            const ctx = document.getElementById('soldiersByCountryChart').getContext('2d');
+            
+            // עיבוד הנתונים
+            const labels = window.dashboardData.soldiers_by_country.map(item => item.birth_country__name_he || 'לא ידוע');
+            const data = window.dashboardData.soldiers_by_country.map(item => item.count);
+            const total = window.dashboardData.total_soldiers;
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'מספר לוחמים',
+                        data: data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        datalabels: {
+                            formatter: (value) => {
+                                return value + ' (' + calculatePercentage(value, total) + '%)';
+                            },
+                            color: '#000',
+                            anchor: 'end',
+                            align: 'end'
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+        
+        function createSoldiersByGenderChart() {
+            const ctx = document.getElementById('soldiersByGenderChart').getContext('2d');
+            
+            // עיבוד הנתונים
+            const genderMapping = {
+                1.0: 'גברים',
+                0.0: 'נשים'
+            };
+            
+            const labels = window.dashboardData.soldiers_by_gender.map(item => 
+                genderMapping[parseFloat(item.gender)] || 'לא ידוע'
+            );
+            const data = window.dashboardData.soldiers_by_gender.map(item => item.count);
+            const total = window.dashboardData.total_soldiers;
+            const backgroundColors = [
+                'rgba(54, 162, 235, 0.8)', // כחול לגברים
+                'rgba(255, 99, 132, 0.8)'  // ורוד לנשים
+            ];
+            
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: 'rgba(255, 255, 255, 0.8)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        datalabels: {
+                            formatter: (value) => {
+                                return value + ' (' + calculatePercentage(value, total) + '%)';
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+        
+        function createEventsByCountryChart() {
+            const ctx = document.getElementById('eventsByCountryChart').getContext('2d');
+            
+            // עיבוד הנתונים
+            const labels = window.dashboardData.events_by_country.map(item => item.country__name_he || 'לא ידוע');
+            const data = window.dashboardData.events_by_country.map(item => item.count);
+            const total = window.dashboardData.total_events;
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'מספר אירועים',
+                        data: data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        datalabels: {
+                            formatter: (value) => {
+                                return value + ' (' + calculatePercentage(value, total) + '%)';
+                            },
+                            color: '#000',
+                            anchor: 'end',
+                            align: 'end'
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+        
+        function createSoldiersByArmyChart() {
+            const ctx = document.getElementById('soldiersByArmyChart').getContext('2d');
+            
+            // עיבוד הנתונים
+            const labels = window.dashboardData.soldiers_by_army.map(item => item.army_he || 'לא ידוע');
+            const data = window.dashboardData.soldiers_by_army.map(item => item.count);
+            const total = window.dashboardData.total_soldiers;
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)',
+                            'rgba(255, 159, 64, 0.8)',
+                            'rgba(199, 199, 199, 0.8)',
+                            'rgba(83, 102, 255, 0.8)',
+                            'rgba(40, 159, 150, 0.8)',
+                            'rgba(210, 105, 30, 0.8)'
+                        ],
+                        borderColor: 'rgba(255, 255, 255, 0.8)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        datalabels: {
+                            formatter: (value) => {
+                                return value + ' (' + calculatePercentage(value, total) + '%)';
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+    </script>
+</body>
+</html> 

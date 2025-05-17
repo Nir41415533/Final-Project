@@ -86,7 +86,7 @@ function initializeMap() {
     map.on('sourcedata', () => updateLoadingProgress(1, 100));
     map.on('dataloading', () => updateLoadingProgress(2, 50));
     map.on('data', () => updateLoadingProgress(2, 100));
-    
+
     map.on('load', () => {
         updateLoadingProgress(3, 100);
         setTimeout(hideLoadingScreen, 500);
@@ -114,49 +114,258 @@ const searchButton = document.getElementById('searchButton');
 const searchResults = document.getElementById('searchResults');
 const searchContainer = document.querySelector('.search-container');
 
-// List of countries with their Hebrew names - using the most relevant countries from our countryCodeMapping
+// List of countries with their Hebrew names - using all countries from countryCodeMapping
 const countries = {
+    'אפגניסטן': 'afghanistan',
+    'אלבניה': 'albania',
+    'אלג\'יריה': 'algeria',
+    'סמואה האמריקנית': 'american samoa',
+    'אנדורה': 'andorra',
+    'אנגולה': 'angola',
+    'אנגווילה': 'anguilla',
+    'אנטארקטיקה': 'antarctica',
+    'אנטיגואה וברבודה': 'antigua and barbuda',
+    'ארגנטינה': 'argentina',
+    'ארמניה': 'armenia',
+    'ארובה': 'aruba',
+    'אוסטרליה': 'australia',
+    'אוסטריה': 'austria',
+    'אזרבייג\'אן': 'azerbaijan',
+    'בהאמה': 'bahamas',
+    'בחריין': 'bahrain',
+    'בנגלדש': 'bangladesh',
+    'ברבדוס': 'barbados',
+    'בלארוס': 'belarus',
+    'בלגיה': 'belgium',
+    'בליז': 'belize',
+    'בנין': 'benin',
+    'ברמודה': 'bermuda',
+    'בהוטן': 'bhutan',
+    'בוליביה': 'bolivia',
+    'בוסניה והרצגובינה': 'bosnia and herzegovina',
+    'בוטסואנה': 'botswana',
+    'אי בובה': 'bouvet island',
+    'ברזיל': 'brazil',
+    'טריטוריה בריטית באוקיינוס ההודי': 'british indian ocean territory',
+    'ברוניי': 'brunei darussalam',
+    'בולגריה': 'bulgaria',
+    'בורקינה פאסו': 'burkina faso',
+    'בורונדי': 'burundi',
+    'קמבודיה': 'cambodia',
+    'קמרון': 'cameroon',
+    'קנדה': 'canada',
+    'כף ורדה': 'cape verde',
+    'איי קיימן': 'cayman islands',
+    'הרפובליקה המרכז-אפריקאית': 'central african republic',
+    'צ\'אד': 'chad',
+    'צ\'ילה': 'chile',
+    'סין': 'china',
+    'אי חג המולד': 'christmas island',
+    'איי קוקוס (קילינג)': 'cocos (keeling) islands',
+    'קולומביה': 'colombia',
+    'קומורו': 'comoros',
+    'קונגו': 'democratic republic of the congo',
+    'הרפובליקה הדמוקרטית של קונגו': 'congo, the democratic republic of the',
+    'איי קוק': 'cook islands',
+    'קוסטה ריקה': 'costa rica',
+    'קרואטיה': 'croatia',
+    'קובה': 'cuba',
+    'קוראסאו': 'curaçao',
+    'קפריסין': 'cyprus',
+    'צ\'כיה': 'czech republic',
+    'חוף השנהב': 'côte d\'ivoire',
+    'דנמרק': 'denmark',
+    'ג\'יבוטי': 'djibouti',
+    'דומיניקה': 'dominica',
+    'הרפובליקה הדומיניקנית': 'dominican republic',
+    'אקוודור': 'ecuador',
+    'מצרים': 'egypt',
+    'אל סלבדור': 'el salvador',
+    'גינאה המשוונית': 'equatorial guinea',
+    'אריתריאה': 'eritrea',
+    'אסטוניה': 'estonia',
+    'אסוואטיני': 'eswatini',
+    'אתיופיה': 'ethiopia',
+    'איי פוקלנד': 'falkland islands',
+    'איי פארו': 'faroe islands',
+    'פיג\'י': 'fiji',
+    'פינלנד': 'finland',
+    'צרפת': 'france',
+    'גיאנה הצרפתית': 'french guiana',
+    'פולינזיה הצרפתית': 'french polynesia',
+    'הטריטוריות הדרומיות של צרפת': 'french southern territories',
+    'גבון': 'gabon',
+    'גמביה': 'gambia',
+    'גאורגיה': 'georgia',
+    'גרמניה': 'germany',
+    'גאנה': 'ghana',
+    'גיברלטר': 'gibraltar',
+    'יוון': 'greece',
+    'גרינלנד': 'greenland',
+    'גרנדה': 'grenada',
+    'גוואדלופ': 'guadeloupe',
+    'גואם': 'guam',
+    'גרנזי': 'guernsey',
+    'גואטמלה': 'guatemala',
+    'גינאה': 'guinea',
+    'גינאה-ביסאו': 'guinea-bissau',
+    'גיאנה': 'guyana',
+    'האיטי': 'haiti',
+    'אי הרד ואיי מקדונלד': 'heard island and mcdonald islands',
+    'הכס הקדוש': 'holy see',
+    'הונדורס': 'honduras',
+    'הונג קונג': 'hong kong',
+    'הונגריה': 'hungary',
+    'איסלנד': 'iceland',
+    'הודו': 'india',
+    'אינדונזיה': 'indonesia',
     'איראן': 'iran',
     'עיראק': 'iraq',
-    'סוריה': 'syria',
-    'לבנון': 'lebanon',
-    'ירדן': 'jordan',
-    'מצרים': 'egypt',
-    'לוב': 'libya',
-    'תוניסיה': 'tunisia',
-    'אלג\'יריה': 'algeria',
-    'מרוקו': 'morocco',
-    'גרמניה': 'germany',
-    'צרפת': 'france',
+    'אירלנד': 'ireland',
+    'אי מאן': 'isle of man',
+    'ישראל': 'israel',
     'איטליה': 'italy',
+    'ג\'מייקה': 'jamaica',
+    'יפן': 'japan',
+    'ג\'רזי': 'jersey',
+    'ירדן': 'jordan',
+    'קזחסטן': 'kazakhstan',
+    'קניה': 'kenya',
+    'קיריבטי': 'kiribati',
+    'קוריאה הצפונית': 'korea, democratic people\'s republic of',
+    'קוריאה הדרומית': 'south korea',
+    'כווית': 'kuwait',
+    'קירגיזסטן': 'kyrgyzstan',
+    'לאוס': 'lao people\'s democratic republic',
+    'לטביה': 'latvia',
+    'לבנון': 'lebanon',
+    'לסוטו': 'lesotho',
+    'ליבריה': 'liberia',
+    'לוב': 'libya',
+    'ליכטנשטיין': 'liechtenstein',
+    'ליטא': 'lithuania',
+    'לוקסמבורג': 'luxembourg',
+    'מקאו': 'macao',
+    'מדגסקר': 'madagascar',
+    'מלאווי': 'malawi',
+    'מלזיה': 'malaysia',
+    'מלדיביים': 'maldives',
+    'מאלי': 'mali',
+    'מלטה': 'malta',
+    'איי מרשל': 'marshall islands',
+    'מרטיניק': 'martinique',
+    'מאוריטניה': 'mauritania',
+    'מאוריציוס': 'mauritius',
+    'מאיוט': 'mayotte',
+    'מקסיקו': 'mexico',
+    'מיקרונזיה': 'micronesia, federated states of',
+    'מולדובה': 'moldova',
+    'מונקו': 'monaco',
+    'מונגוליה': 'mongolia',
+    'מונטנגרו': 'montenegro',
+    'מונטסראט': 'montserrat',
+    'מרוקו': 'morocco',
+    'מוזמביק': 'mozambique',
+    'מיאנמר': 'myanmar',
+    'נמיביה': 'namibia',
+    'נאורו': 'nauru',
+    'נפאל': 'nepal',
+    'הולנד': 'netherlands',
+    'קלדוניה החדשה': 'new caledonia',
+    'ניו זילנד': 'new zealand',
+    'ניקרגואה': 'nicaragua',
+    'ניז\'ר': 'niger',
+    'ניגריה': 'nigeria',
+    'ניואה': 'niue',
+    'אי נורפוק': 'norfolk island',
+    'מקדוניה הצפונית': 'north macedonia',
+    'איי מריאנה הצפוניים': 'northern mariana islands',
+    'נורבגיה': 'norway',
+    'עומאן': 'oman',
+    'פקיסטן': 'pakistan',
+    'פלאו': 'palau',
+    'פלסטין': 'palestine',
+    'פנמה': 'panama',
+    'פפואה גינאה החדשה': 'papua new guinea',
+    'פרגוואי': 'paraguay',
+    'פרו': 'peru',
+    'פיליפינים': 'philippines',
+    'פיטקרן': 'pitcairn',
+    'פולין': 'poland',
+    'פורטוגל': 'portugal',
+    'פוארטו ריקו': 'puerto rico',
+    'קטאר': 'qatar',
+    'ראוניון': 'reunion',
+    'רומניה': 'romania',
+    'רוסיה': 'russia',
+    'רואנדה': 'rwanda',
+    'סנט ברתלמי': 'saint barthelemy',
+    'סנט הלנה': 'saint helena, ascension and tristan da cunha',
+    'סנט קיטס ונוויס': 'saint kitts and nevis',
+    'סנט לוסיה': 'saint lucia',
+    'סנט מרטין': 'saint martin',
+    'סנט פייר ומיקלון': 'saint pierre and miquelon',
+    'סנט וינסנט והגרנדינים': 'saint vincent and the grenadines',
+    'סמואה': 'samoa',
+    'סן מרינו': 'san marino',
+    'סאו טומה ופרינסיפה': 'sao tome and principe',
+    'ערב הסעודית': 'saudi arabia',
+    'סנגל': 'senegal',
+    'סרביה': 'serbia',
+    'סיישל': 'seychelles',
+    'סיירה ליאונה': 'sierra leone',
+    'סינגפור': 'singapore',
+    'סינט מארטן': 'sint maarten',
+    'סלובקיה': 'slovakia',
+    'סלובניה': 'slovenia',
+    'איי שלמה': 'solomon islands',
+    'סומליה': 'somalia',
+    'דרום אפריקה': 'south africa',
+    'ג\'ורג\'יה הדרומית ואיי סנדוויץ\' הדרומיים': 'south georgia and the south sandwich islands',
+    'ספרד': 'spain',
+    'סרי לנקה': 'sri lanka',
+    'סודאן': 'sudan',
+    'סורינאם': 'suriname',
+    'סוואלברד ויאן מאיין': 'svalbard and jan mayen',
+    'שוודיה': 'sweden',
+    'שווייץ': 'switzerland',
+    'סוריה': 'syria',
+    'טאיוואן': 'taiwan',
+    'טג\'יקיסטן': 'tajikistan',
+    'טנזניה': 'tanzania',
+    'הרפובליקה המאוחדת של טנזניה': 'united republic of tanzania',
+    'תאילנד': 'thailand',
+    'טימור-לסטה': 'timor-leste',
+    'טוגו': 'togo',
+    'טוקלאו': 'tokelau',
+    'טונגה': 'tonga',
+    'טרינידד וטובגו': 'trinidad and tobago',
+    'תוניסיה': 'tunisia',
+    'טורקיה': 'turkey',
+    'טורקמניסטן': 'turkmenistan',
+    'איי טורקס וקאיקוס': 'turks and caicos islands',
+    'טובאלו': 'tuvalu',
+    'אוגנדה': 'uganda',
+    'אוקראינה': 'ukraine',
+    'איחוד האמירויות': 'united arab emirates',
     'בריטניה': 'united kingdom',
     'ארצות הברית': 'united states of america',
-    'פולין': 'poland',
-    'רוסיה': 'russia',
-    'אוקראינה': 'ukraine',
-    'רומניה': 'romania',
-    'הונגריה': 'hungary',
-    'יוון': 'greece',
-    'צ\'כיה': 'czech republic',
-    'סלובקיה': 'slovakia',
-    'אוסטריה': 'austria',
-    'בלגיה': 'belgium',
-    'הולנד': 'netherlands',
-    'נורבגיה': 'norway',
-    'דנמרק': 'denmark',
-    'שוודיה': 'sweden',
-    'פינלנד': 'finland',
-    'ספרד': 'spain',
-    'פורטוגל': 'portugal',
-    'שווייץ': 'switzerland',
-    'יפן': 'japan',
-    'סין': 'china',
-    'אוסטרליה': 'australia',
-    'קנדה': 'canada',
-    'דרום אפריקה': 'south africa',
-    'ישראל': 'israel',
-    'טורקיה': 'turkey'
+    'איי הבתולה הבריטיים': 'virgin islands, british',
+    'איי הבתולה האמריקניים': 'virgin islands, u.s.',
+    'אורוגוואי': 'uruguay',
+    'אוזבקיסטן': 'uzbekistan',
+    'ונואטו': 'vanuatu',
+    'ונצואלה': 'venezuela',
+    'וייטנאם': 'vietnam',
+    'ווליס ופוטונה': 'wallis and futuna',
+    'סהרה המערבית': 'western sahara',
+    'תימן': 'yemen',
+    'זמביה': 'zambia',
+    'זימבבואה': 'zimbabwe'
 };
+
+// חשיפה של מיפוי המדינות למרחב הגלובלי
+window.countries = countries;
 
 function performSearch() {
     const searchTerm = countrySearch.value.toLowerCase();
@@ -287,46 +496,42 @@ function openCountryModal(countryCode, countryNameHeb) {
     // Get the proper flag code
     const flagCode = getFlagCode(countryCode);
     
-    // Get events and soldiers for this country
-    Promise.all([
-        fetch("/events/").then(res => res.json()),
-        fetch("/soldiers/").then(res => res.json())
-    ])
-    .then(([events, soldiers]) => {
-        // Filter events and soldiers for this country
-        const englishName = countryCode;
-        const countryEvents = events.filter(ev => {
-            const eventCountry = (ev.country__name || "").trim().toLowerCase();
-            return eventCountry === englishName;
+    // Load events only (soldiers will be loaded by modalHandler via API)
+    fetch("/events/")
+        .then(res => res.json())
+        .then(events => {
+            // Filter events for this country
+            const englishName = countryCode;
+            const countryEvents = events.filter(ev => {
+                const eventCountry = (ev.country__name || "").trim().toLowerCase();
+                return eventCountry === englishName;
+            });
+            
+            console.log(`Found ${countryEvents.length} events for ${countryNameHeb}`);
+            
+            // Set up events global
+            window.currentEvents = countryEvents;
+            window.currentIndex = 0;
+            
+            // Update flag in the modal
+            const mapPlaceholder = document.getElementById("insetMapPlaceholder");
+            if (mapPlaceholder) {
+                mapPlaceholder.innerHTML = flagCode
+                    ? `<img id="countryFlag" src="https://flagcdn.com/w320/${flagCode}.png" alt="דגל ${countryNameHeb}">`
+                    : "מפת הקרב";
+            }
+            
+            // Show the modal with the country events
+            // Pass an empty array for soldiers as they will be loaded by the modal
+            showCountryEventsModal(countryNameHeb, countryEvents, []);
+        })
+        .catch(error => {
+            console.error("Error loading events data:", error);
         });
-        
-        const countrySoldiers = soldiers.filter(soldier => {
-            const soldierCountry = (soldier.country || "").toLowerCase().trim();
-            return soldierCountry === englishName;
-        });
-        
-        console.log(`Found ${countryEvents.length} events and ${countrySoldiers.length} soldiers for ${countryNameHeb}`);
-        
-        // Set up globals
-        window.currentEvents = countryEvents;
-        window.currentSoldiers = countrySoldiers;
-        window.currentIndex = 0;
-        
-        // Update flag in the modal
-        const mapPlaceholder = document.getElementById("insetMapPlaceholder");
-        if (mapPlaceholder) {
-            mapPlaceholder.innerHTML = flagCode
-                ? `<img id="countryFlag" src="https://flagcdn.com/w320/${flagCode}.png" alt="דגל ${countryNameHeb}">`
-                : "מפת הקרב";
-        }
-        
-        // Show the modal with the country events
-        showCountryEventsModal(countryNameHeb, countryEvents, countrySoldiers);
-    })
-    .catch(error => {
-        console.error("Error loading country data:", error);
-    });
 }
+
+// חשיפה של פונקציית openCountryModal כפונקציה גלובלית
+window.openCountryModal = openCountryModal;
 
 // Function to get the correct flag code
 function getFlagCode(countryCode) {

@@ -86,12 +86,12 @@
     <!-- מודאל משודרג -->
     <div id="eventModal" class="modal">
         <div id="eventContent" class="content">
-            <!-- כפתור סגירה -->
-            <div class="modal-controls">
-                <button id="eventClose" class="eventClose" onclick="closeModal()">
-                    <span class="closeText">סגור</span>
-                    <span class="closeX">×</span>
-                </button>
+        <!-- כפתור סגירה -->
+        <div class="modal-controls">
+            <button id="eventClose" class="eventClose" onclick="closeModal()">
+                <span class="closeText">סגור</span>
+                <span class="closeX">×</span>
+            </button>
             </div>
 
             <div class="modal-layout-grid">
@@ -101,7 +101,68 @@
                     <div class="soldiers-search-container">
                         <input type="text" id="soldiersSearch" class="soldiers-search" placeholder="חפש לוחמים..." aria-label="חפש לוחמים">
                         <button id="clearSearch" class="clear-search" aria-label="נקה חיפוש">×</button>
+                        <button id="advancedFilterButton" class="advanced-filter-button" title="סינון מתקדם">
+                            <i class="filter-icon">⚙️</i>
+                        </button>
                     </div>
+                    
+                    <div id="advancedFilters" class="advanced-filters">
+                        <form id="filterForm" class="filter-form">
+                            <div class="filter-row">
+                                <div class="filter-group">
+                                    <label for="genderFilter">מגדר:</label>
+                                    <select id="genderFilter">
+                                        <option value="">הכל</option>
+                                        <option value="1">זכר</option>
+                                        <option value="0">נקבה</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="filter-group">
+                                    <label for="rankFilter">דרגה:</label>
+                                    <select id="rankFilter">
+                                        <option value="">הכל</option>
+                                        <option value="רב סרן">רב סרן</option>
+                                        <option value="סרן">סרן</option>
+                                        <option value="סגן">סגן</option>
+                                        <option value="רב סמל">רב סמל</option>
+                                        <option value="סמל">סמל</option>
+                                        <option value="טוראי">טוראי</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-row">
+                                <div class="filter-group">
+                                    <label for="yearFromFilter">משנת לידה:</label>
+                                    <input type="number" id="yearFromFilter" min="1900" max="1945" placeholder="מ...">
+                                </div>
+                                
+                                <div class="filter-group">
+                                    <label for="yearToFilter">עד שנת לידה:</label>
+                                    <input type="number" id="yearToFilter" min="1900" max="1945" placeholder="עד...">
+                                </div>
+                            </div>
+                            
+                            <div class="filter-row">
+                                <div class="filter-group">
+                                    <label for="sortByFilter">מיון לפי:</label>
+                                    <select id="sortByFilter">
+                                        <option value="name">שם</option>
+                                        <option value="birth_date">תאריך לידה</option>
+                                        <option value="rank">דרגה</option>
+                                        <option value="aliya_date">תאריך עלייה</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-buttons">
+                                <button type="button" id="applyFilters" class="apply-filters-btn">החל סינון</button>
+                                <button type="button" id="resetFilters" class="reset-filters-btn">איפוס</button>
+                            </div>
+                        </form>
+                    </div>
+                    
                     <div id="soldiersContainer" class="soldiers-list scrollable"></div>
                 </div>
 
@@ -151,6 +212,114 @@
                     <div class="multimedia">
                         <img id="eventImage" class="event-image" src="" alt="תמונה מהאירוע" style="display: none;" />
                         <video id="eventVideo" class="event-media" controls preload="metadata" style="display: none;"></video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- מודאל לפרטי לוחם -->
+    <div id="soldierModal" class="modal">
+        <div id="soldierContent" class="content">
+            <!-- כפתור סגירה -->
+            <div class="modal-controls">
+                <button id="soldierClose" class="eventClose" onclick="closeSoldierModal()">
+                    <span class="closeText">סגור</span>
+                    <span class="closeX">×</span>
+                </button>
+            </div>
+
+            <div class="soldier-layout-grid">
+                <!-- Left Column - Soldier Profile -->
+                <div class="soldier-profile">
+                    <div class="soldier-header">
+                        <div class="soldier-avatar">
+                            <img id="soldierImage" src="" alt="תמונת הלוחם">
+                        </div>
+                        <div class="soldier-title">
+                            <h2 id="soldierName" class="uppercase"></h2>
+                            <div id="soldierBadge" class="badge"></div>
+                        </div>
+                    </div>
+
+                    <div class="soldier-details scrollable">
+                        <div class="details-section">
+                            <h3>פרטים אישיים</h3>
+                            <div class="details-grid">
+                                <div class="info-row">
+                                    <strong>שם באנגלית:</strong>
+                                    <span id="soldierNameEn"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>מגדר:</strong>
+                                    <span id="soldierGender"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>תאריך לידה:</strong>
+                                    <span id="soldierBirthDate"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>עיר לידה:</strong>
+                                    <span id="soldierBirthCity"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>מדינת לידה:</strong>
+                                    <span id="soldierBirthCountry"></span>
+                                </div>
+                               
+                                <div class="info-row">
+                                    <strong>תאריך עלייה:</strong>
+                                    <span id="soldierAliyaDate"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="details-section">
+                            <h3>שירות צבאי</h3>
+                            <div class="details-grid">
+                                <div class="info-row">
+                                    <strong>צבא:</strong>
+                                    <span id="soldierArmy"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>תפקיד:</strong>
+                                    <span id="soldierRole"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>דרגה:</strong>
+                                    <span id="soldierRank"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="details-section">
+                            <h3>השתתפות במלחמה</h3>
+                            <div id="soldierParticipation" class="text-block"></div>
+                        </div>
+
+                        <div class="details-section">
+                            <h3>עיטורים</h3>
+                            <div id="soldierDecorations" class="text-block"></div>
+                        </div>
+
+                        <div class="details-section">
+                            <h3>ביוגרפיה</h3>
+                            <div id="soldierBiography" class="text-block"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Media and extra info -->
+                <div class="soldier-media">
+                    <div class="media-container">
+                        <img id="soldierLargeImage" class="soldier-large-image" src="" alt="תמונת הלוחם מורחבת">
+                        <video id="soldierVideo" class="media-item" controls preload="metadata" style="display: none;"></video>
+                    </div>
+                    <div class="additional-info">
+                        <div class="info-section">
+                            <h3>תיאור לחימה</h3>
+                            <div id="soldierFightingDesc" class="text-block scrollable"></div>
+                        </div>
                     </div>
                 </div>
             </div>

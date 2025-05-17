@@ -84,6 +84,23 @@
         </form>
     </div>
 
+    <div class="buttons-container">
+        <a href="{% url 'ww2map' %}" class="action-button map-button">
+            <i class="action-icon map-icon"></i>
+            <span>מפה אינטראקטיבית</span>
+        </a>
+        
+        <a href="{% url 'dashboard' %}" class="action-button dashboard-button">
+            <i class="action-icon stats-icon"></i>
+            <span>נתונים וגרפים</span>
+        </a>
+        
+        <a href="https://www.jwmww2.org/" class="action-button website-button">
+            <i class="action-icon website-icon"></i>
+            <span>אתר המוזיאון</span>
+        </a>
+    </div>
+
     <script src="{% static 'mapapp/js/home.js' %}"></script>
 </body>
 </html>

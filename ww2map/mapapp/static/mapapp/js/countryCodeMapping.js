@@ -29,7 +29,7 @@ export const countryCodeMapping = {
     "morocco": "ma", "mozambique": "mz", // תוספת לאזור
     "namibia": "na", // תוספת שביקשת
     "netherlands": "nl", "new zealand": "nz", "nigeria": "ng", "norway": "no",
-    "pakistan": "pk", "palestine": "ps", "peru": "pe", "philippines": "ph",
+    "pakistan": "pk", "peru": "pe", "philippines": "ph",
     "poland": "pl", "portugal": "pt", "qatar": "qa", "romania": "ro",
     "russia": "ru", "saudi arabia": "sa", "serbia": "rs", "singapore": "sg",
     "slovakia": "sk", "slovenia": "si", "south africa": "za", "south korea": "kr",

@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import Home, ww2map_view, event_list
-from .views import soldiers_list
+from .views import soldiers_list, dashboard_view, dashboard_data, paginated_soldiers, soldier_detail
 
 urlpatterns = [
     path('', Home.as_view(), name='home'),  # דף הבית
@@ -8,5 +8,8 @@ urlpatterns = [
     path('events/', event_list, name='event_list'),  # API לשליפת אירועים
     
     path("soldiers/", soldiers_list, name="soldiers"),
-
+    path("soldiers/paginated/", paginated_soldiers, name="paginated_soldiers"),  # API לטעינה הדרגתית של חיילים
+    path("soldier/<int:soldier_id>/", soldier_detail, name="soldier_detail"),  # API לפרטי לוחם בודד
+    path("dashboard/", dashboard_view, name="dashboard"),  # דף הגרפים והנתונים
+    path("dashboard/data/", dashboard_data, name="dashboard_data"),  # API לנתוני הדשבורד
 ]

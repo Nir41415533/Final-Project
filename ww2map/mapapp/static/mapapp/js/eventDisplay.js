@@ -33,7 +33,7 @@ export function displayEvent(event) {
     let description = event.description || event.summary || "אין תיאור זמין";
     if (window.showdown) {
         try {
-            const converter = new showdown.Converter();
+    const converter = new showdown.Converter();
             description = converter.makeHtml(description);
         } catch (error) {
             console.error("Error converting markdown:", error);
@@ -123,7 +123,7 @@ export function showCountryEvents(countryName, events) {
                         <div class="card-content">
                             <div class="event-card-title">${eventTitle}</div>
                             <div class="event-card-date">${eventDate}</div>
-                        </div>
+                </div>
                     `;
                     
                     // Add click event
