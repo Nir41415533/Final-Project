@@ -40,9 +40,7 @@
     </div>
 
     <div class="main-container">
-        <div class="header-hint">
-            <img src="{% static 'mapapp/images/down-arrow.svg' %}" alt="רמז לפתיחת תפריט">
-        </div>
+        
         <header class="map-header">
             <div class="logo-container">
                 <a href="{% url 'home' %}">
@@ -79,6 +77,16 @@
                     <button id="searchButton" aria-label="חפש מדינה" style="display:none;">חיפוש</button>
                 </div>
                 <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+        
+        <!-- Timeline Container -->
+        <div id="timeline-container">
+            <div class="timeline-header">
+                <h2>ציר זמן מלחמת העולם השנייה</h2>
+            </div>
+            <div id="timeline-events" class="timeline-events">
+                <!-- Events will be dynamically added here -->
             </div>
         </div>
     </div>

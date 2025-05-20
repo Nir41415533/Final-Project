@@ -5,6 +5,8 @@ class Country(models.Model):
     code = models.IntegerField(unique=True)  # קוד המדינה מתוך קובץ הקודים
     name_he = models.CharField(max_length=100)  # שם המדינה בעברית
     name_en = models.CharField(max_length=100)  # שם המדינה באנגלית
+    latitude = models.FloatField(null=True, blank=True)  # קו רוחב
+    longitude = models.FloatField(null=True, blank=True)  # קו אורך
 
     def __str__(self):
         return self.name_he  # אפשר לשנות ל-name_en אם תעדיף ברירת מחדל באנגלית

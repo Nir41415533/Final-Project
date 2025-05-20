@@ -2,9 +2,54 @@ import { createMap } from "./mapSetup.js";
 import { addCountriesLayer } from "./countryLayer.js";
 import { setupModalClose, showCountryEventsModal } from "./modalHandler.js";
 import { countryCodeMapping } from "./countryCodeMapping.js";
+import { initializeTimeline } from "./timeline.js";
 
 // מפתח MapTiler שלך
 const MAPTILER_KEY = "id6E01naKP3UCWgW7hY1";
+
+// Function to open country modal
+function openCountryModal(countryCode, countryNameHeb) {
+    console.log(`Opening modal for country: ${countryCode}`);
+    
+    // Get the proper flag code
+    const flagCode = getFlagCode(countryCode);
+    
+    // Load events only (soldiers will be loaded by modalHandler via API)
+    fetch("/events/")
+        .then(res => res.json())
+        .then(events => {
+            // Filter events for this country
+            const englishName = countryCode;
+            const countryEvents = events.filter(ev => {
+                const eventCountry = (ev.country__name || "").trim().toLowerCase();
+                return eventCountry === englishName;
+            });
+            
+            console.log(`Found ${countryEvents.length} events for ${countryNameHeb}`);
+            
+            // Set up events global
+            window.currentEvents = countryEvents;
+            window.currentIndex = 0;
+            
+            // Update flag in the modal
+            const mapPlaceholder = document.getElementById("insetMapPlaceholder");
+            if (mapPlaceholder) {
+                mapPlaceholder.innerHTML = flagCode
+                    ? `<img id="countryFlag" src="https://flagcdn.com/w320/${flagCode}.png" alt="דגל ${countryNameHeb}">`
+                    : "מפת הקרב";
+            }
+            
+            // Show the modal with the country events
+            // Pass an empty array for soldiers as they will be loaded by the modal
+            showCountryEventsModal(countryNameHeb, countryEvents, []);
+        })
+        .catch(error => {
+            console.error("Error loading events data:", error);
+        });
+}
+
+// חשיפה של פונקציית openCountryModal כפונקציה גלובלית
+window.openCountryModal = openCountryModal;
 
 // טוען אירועים
 function loadEvents() {
@@ -95,6 +140,7 @@ function initializeMap() {
         loadEvents();
         loadCountries(map);
         setupModalClose(map);
+        initializeTimeline(map);
     });
 
     // Add error handling
@@ -488,50 +534,6 @@ document.addEventListener('click', (e) => {
         searchResults.style.display = 'none';
     }
 });
-
-// Function to open country modal
-function openCountryModal(countryCode, countryNameHeb) {
-    console.log(`Opening modal for country: ${countryCode}`);
-    
-    // Get the proper flag code
-    const flagCode = getFlagCode(countryCode);
-    
-    // Load events only (soldiers will be loaded by modalHandler via API)
-    fetch("/events/")
-        .then(res => res.json())
-        .then(events => {
-            // Filter events for this country
-            const englishName = countryCode;
-            const countryEvents = events.filter(ev => {
-                const eventCountry = (ev.country__name || "").trim().toLowerCase();
-                return eventCountry === englishName;
-            });
-            
-            console.log(`Found ${countryEvents.length} events for ${countryNameHeb}`);
-            
-            // Set up events global
-            window.currentEvents = countryEvents;
-            window.currentIndex = 0;
-            
-            // Update flag in the modal
-            const mapPlaceholder = document.getElementById("insetMapPlaceholder");
-            if (mapPlaceholder) {
-                mapPlaceholder.innerHTML = flagCode
-                    ? `<img id="countryFlag" src="https://flagcdn.com/w320/${flagCode}.png" alt="דגל ${countryNameHeb}">`
-                    : "מפת הקרב";
-            }
-            
-            // Show the modal with the country events
-            // Pass an empty array for soldiers as they will be loaded by the modal
-            showCountryEventsModal(countryNameHeb, countryEvents, []);
-        })
-        .catch(error => {
-            console.error("Error loading events data:", error);
-        });
-}
-
-// חשיפה של פונקציית openCountryModal כפונקציה גלובלית
-window.openCountryModal = openCountryModal;
 
 // Function to get the correct flag code
 function getFlagCode(countryCode) {
