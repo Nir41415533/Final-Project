@@ -1,9 +1,12 @@
 {% load static %}
+{% load i18n %}
+
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="{{ LANGUAGE_CODE }}" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>מפה אינטראקטיבית של מלחמת העולם השנייה</title>
+    <title>{% trans "Interactive Map" %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <!-- ספריות צד שלישי -->
@@ -18,6 +21,7 @@
     <link rel="stylesheet" href="{% static 'mapapp/css/modal.css' %}">
     <link rel="icon" href="{% static 'mapapp/favicon.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="{% static 'mapapp/css/home.css' %}">
 
     <style>
         #map {
@@ -27,6 +31,57 @@
     </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav>
+        <div class="nav-buttons">
+            <!-- חיפוש מדינה (בצד ימין) -->
+            <div class="simple-search">
+                <input type="text" id="countrySearch" placeholder="חפש מדינה..." aria-label="חיפוש מדינה">
+                <div id="searchResults" class="search-results"></div>
+            </div>
+            
+            <div class="right-side-buttons">
+                <!-- כפתור חזרה -->
+                <a href="{% url 'home' %}" class="nav-button" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background-color: #f5f5f5; color: #333; border: 1px solid #ddd; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease;">
+                    <i class="fas fa-arrow-right"></i>
+                    {% if LANGUAGE_CODE == 'he' %}
+                        Back
+                    {% else %}
+                        חזרה
+                    {% endif %}
+                </a>
+                
+                <!-- כפתור החלפת שפה -->
+                <form method="POST" action="{% url 'set_language' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    {% if LANGUAGE_CODE == 'he' %}
+                        <input type="hidden" name="language" value="en">
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button type="submit" class="flag-button" title="Switch to English">
+                            <img src="{% static 'mapapp/images/flag_us.png' %}" alt="English">
+                        </button>
+                    {% else %}
+                        <input type="hidden" name="language" value="he">
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button type="submit" class="flag-button" title="עבור לעברית">
+                            <img src="{% static 'mapapp/images/flag_il.png' %}" alt="עברית">
+                        </button>
+                    {% endif %}
+                </form>
+
+                <!-- כפתור ציר זמן -->
+                <button id="timeline-toggle" class="nav-button">
+                    <i class="fas fa-clock"></i>
+                    {% if LANGUAGE_CODE == 'he' %}
+                        Timeline
+                    {% else %}
+                        ציר זמן
+                    {% endif %}
+                </button>
+            </div>
+        </div>
+    </nav>
+
     <!-- מסך טעינה -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loading-content">
@@ -67,21 +122,11 @@
             </div>
         </header>
         <div id="map">
-            <div class="search-container">
-                <div class="search-input-container">
-                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input type="text" id="countrySearch" placeholder="חפש מדינה..." aria-label="חיפוש מדינה">
-                    <button id="searchButton" aria-label="חפש מדינה" style="display:none;">חיפוש</button>
-                </div>
-                <div id="searchResults" class="search-results"></div>
-            </div>
+            <!-- אין כאן חיפוש, החיפוש נמצא בתוך הnavbar -->
         </div>
         
         <!-- Timeline Container -->
-        <div id="timeline-container">
+        <div id="timeline-container" style="display: none;">
             <div class="timeline-header">
                 <h2>ציר זמן מלחמת העולם השנייה</h2>
             </div>
@@ -339,5 +384,28 @@
 
     <!-- קובץ JS ראשי -->
     <script type="module" src="{% static 'mapapp/js/index.js' %}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const timelineToggle = document.getElementById('timeline-toggle');
+            const timelineContainer = document.getElementById('timeline-container');
+            
+            timelineToggle.addEventListener('click', function() {
+                if (timelineContainer.style.display === 'none') {
+                    timelineContainer.style.display = 'flex';
+                    setTimeout(() => {
+                        timelineContainer.classList.add('visible');
+                    }, 10);
+                    timelineToggle.classList.add('active');
+                } else {
+                    timelineContainer.classList.remove('visible');
+                    setTimeout(() => {
+                        timelineContainer.style.display = 'none';
+                    }, 300);
+                    timelineToggle.classList.remove('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

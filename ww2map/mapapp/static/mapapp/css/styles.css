@@ -130,25 +130,100 @@ html, body {
 /* ============================ */
 .nav-buttons {
     display: flex;
-    gap: 10px;
-    margin-left: auto;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.right-side-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-right: auto;
 }
 
 .nav-button {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
     padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 20px;
     font-size: 0.9rem;
-    color: #333;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-family: inherit;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 .nav-button:hover {
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #e0e0e0;
+    color: #000;
+    text-decoration: none;
     transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-button i {
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flag-button {
+    background-color: white;
+    border: 2px solid #ddd;
+    border-radius: 30px;
+    padding: 8px 12px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.flag-button:hover {
+    background-color: #eee;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.flag-button img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Dark mode support */
+body.dark-mode nav {
+    background-color: rgba(30, 30, 30, 0.95);
+    color: #fff;
+}
+
+body.dark-mode .nav-button {
+    background-color: #333;
+    color: #fff;
+    border-color: #444;
+}
+
+body.dark-mode .nav-button:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+body.dark-mode .flag-button {
+    background-color: #333;
+    border-color: #444;
+}
+
+body.dark-mode .flag-button:hover {
+    background-color: #444;
 }
 
 /* ============================ */
@@ -393,55 +468,61 @@ html, body {
 
 /* Search functionality in the map - Google Maps style */
 .search-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1500;
-    width: 380px;
+    width: 250px;
     display: flex;
     flex-direction: column;
     gap: 4px;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    margin-left: 15px;
+    margin-right: 0;
+    box-shadow: none;
+    position: static;
 }
 
 .search-input-container {
     display: flex;
     align-items: center;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+}
+
+.search-input-container:focus-within {
     background-color: white;
-    border-radius: 8px;
-    padding: 10px 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .search-icon {
-    width: 18px;
-    height: 18px;
-    margin-left: 10px;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
     opacity: 0.7;
 }
 
 .search-container input {
     width: 100%;
-    padding: 6px 0;
+    padding: 0;
     border: none;
     outline: none;
-    font-size: 15px;
+    font-size: 0.9rem;
     direction: rtl;
     background: transparent;
 }
 
-.search-container button {
-    display: none; /* Hide the button, we'll make the search automatic */
-}
-
 .search-results {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 100%;
     max-height: 300px;
     overflow-y: auto;
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     display: none;
+    margin-top: 4px;
 }
 
 .search-results.active {
@@ -480,11 +561,11 @@ html, body {
 /* Dark mode support for search */
 body.dark-mode .search-input-container {
     background-color: #333;
+    border-color: #444;
 }
 
 body.dark-mode .search-container input {
     color: #fff;
-    background: transparent;
 }
 
 body.dark-mode .search-icon {
@@ -499,12 +580,12 @@ body.dark-mode .search-results {
 body.dark-mode .search-results div {
     border-bottom-color: #444;
     color: #fff;
-    }
-    
+}
+
 body.dark-mode .search-results div:hover {
     background-color: #444;
-    }
-    
+}
+
 body.dark-mode .search-results div.active {
     background-color: #2d3740;
 }
@@ -512,33 +593,23 @@ body.dark-mode .search-results div.active {
 /* Responsive design for search */
 @media screen and (max-width: 768px) {
     .search-container {
-        width: 300px;
-        top: 15px;
-        right: 15px;
-    }
-    
-    .search-input-container {
-        padding: 8px 14px;
-    }
-    
-    .search-container input {
-        font-size: 14px;
+        width: 180px;
+        margin-left: 8px;
     }
 }
 
 @media screen and (max-width: 480px) {
     .search-container {
-        width: calc(100% - 30px);
-        top: 10px;
-        right: 15px;
+        width: 120px;
+        margin-left: 4px;
     }
     
     .search-input-container {
-        padding: 7px 12px;
+        padding: 6px 12px;
     }
     
     .search-container input {
-        font-size: 13px;
+        font-size: 0.8rem;
     }
 }
 
@@ -555,6 +626,14 @@ body.dark-mode .search-results div.active {
     display: flex;
     flex-direction: column;
     font-family: 'Special Elite', cursive;
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+#timeline-container.visible {
+    opacity: 1;
+    transform: translateX(0);
 }
 
 .timeline-header {
@@ -700,5 +779,186 @@ body.dark-mode .search-results div.active {
     margin: 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-left: 3px solid #e74c3c;
+}
+
+/* סגנון לכפתור ציר זמן כשהוא פעיל */
+.nav-button.active {
+    background-color: #e0e0e0;
+    color: #000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Navbar styling */
+nav {
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #333;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-right: auto;
+}
+
+.nav-button {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-family: inherit;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.nav-button:hover {
+    background-color: #e0e0e0;
+    color: #000;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-button i {
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flag-button {
+    background-color: white;
+    border: 2px solid #ddd;
+    border-radius: 30px;
+    padding: 8px 12px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.flag-button:hover {
+    background-color: #eee;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.flag-button img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Dark mode support */
+body.dark-mode nav {
+    background-color: rgba(30, 30, 30, 0.95);
+    color: #fff;
+}
+
+body.dark-mode .nav-button {
+    background-color: #333;
+    color: #fff;
+    border-color: #444;
+}
+
+body.dark-mode .nav-button:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+body.dark-mode .flag-button {
+    background-color: #333;
+    border-color: #444;
+}
+
+body.dark-mode .flag-button:hover {
+    background-color: #444;
+}
+
+/* Simple search in navbar */
+.simple-search {
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-left: auto;
+}
+
+.simple-search input {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 8px 16px;
+    width: 200px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    direction: rtl;
+    outline: none;
+}
+
+.simple-search input:focus {
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    display: none;
+    margin-top: 5px;
+    z-index: 1600;
+}
+
+/* Responsive styles for simple search */
+@media screen and (max-width: 768px) {
+    .simple-search input {
+        width: 150px;
+        padding: 6px 12px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .simple-search input {
+        width: 120px;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Dark mode support for simple search */
+body.dark-mode .simple-search input {
+    background-color: #333;
+    border-color: #444;
+    color: white;
+}
+
+body.dark-mode .simple-search input:focus {
+    background-color: #444;
 }
 
