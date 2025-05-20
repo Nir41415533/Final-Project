@@ -37,8 +37,10 @@ export function initializeTimeline(map) {
     //     { date: '1945-08-15', title: 'כניעת יפן', latitude: 35.6762, longitude: 139.6503 },
     //     { date: '1945-09-02', title: 'סיום מלחמת העולם השנייה', latitude: 35.6762, longitude: 139.6503 }
     ];
-    
+        
     // Load events from server
+
+    
     fetch("/events/")
         .then(response => {
             if (!response.ok) {
