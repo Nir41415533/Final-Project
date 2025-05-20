@@ -123,7 +123,7 @@ def paginated_soldiers(request):
     """
     page = int(request.GET.get('page', 1))
     limit = int(request.GET.get('limit', 50))
-    country = request.GET.get('country', '').strip().lower()
+    country = request.GET.get('country', '').strip()
     search = request.GET.get('search', '').strip()
     
     # Advanced filters
@@ -138,7 +138,21 @@ def paginated_soldiers(request):
     
     # Apply country filter if provided
     if country:
-        soldiers_query = soldiers_query.filter(birth_country__name_en__iexact=country)
+        # התאמה לשמות מדינות שונים - במיוחד עבור ארה"ב
+        if country.lower() in ['united states', 'usa', 'america', 'united states of america']:
+            # חיפוש של כל הווריאציות של ארה"ב
+            soldiers_query = soldiers_query.filter(
+                Q(birth_country__name_en__icontains='USA') |
+                Q(birth_country__name_en__icontains='United States') |
+                Q(birth_country__name_en__icontains='America') |
+                Q(birth_country__name_he__icontains='ארצות הברית')
+            )
+        else:
+            # חיפוש רגיל לפי שם המדינה
+            soldiers_query = soldiers_query.filter(
+                Q(birth_country__name_en__icontains=country) |
+                Q(birth_country__name_he__icontains=country)
+            )
     
     # Apply search filter if provided
     if search:
