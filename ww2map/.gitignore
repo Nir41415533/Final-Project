@@ -8,10 +8,10 @@
 __pycache__/
 **/__pycache__/
 
-# SQLite database (specific path)
-*.sqlite3
-*.sqlite3.db
-/ww2map/db.sqlite3
+# # SQLite database (specific path)
+# *.sqlite3
+# *.sqlite3.db
+# /ww2map/db.sqlite3
 
 # VSCode config
 .vscode/
