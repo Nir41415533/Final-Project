@@ -1,17 +1,19 @@
-# Virtual environments
-venv/
-env/
+# Virtual Environments
+/venv/
+/env/
+/ww2map/venv/
 
-# Byte-compiled / optimized / DLL files
+# Byte-compiled files
 *.py[cod]
 __pycache__/
 **/__pycache__/
 
-# SQLite database
+# SQLite database (specific path)
 *.sqlite3
 *.sqlite3.db
+/ww2map/db.sqlite3
 
-# VS Code settings
+# VSCode config
 .vscode/
 
 # Logs and temp files
@@ -21,16 +23,16 @@ __pycache__/
 *.swp
 *.swo
 
-# macOS & Windows system files
+# OS system files
 .DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Jupyter notebooks
+# Jupyter
 .ipynb_checkpoints/
 
-# Media and uploads
+# Media
 media/
 uploads/
 
@@ -38,9 +40,5 @@ uploads/
 .env
 .env.*
 
-# Data (adjust path based on real location)
-data/
-
-# Django migrations cache (compiled)
-**/migrations/*.pyc
-**/migrations/__pycache__/ 
+# Data folder
+/data/
