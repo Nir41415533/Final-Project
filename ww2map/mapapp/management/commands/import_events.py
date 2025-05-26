@@ -187,7 +187,7 @@ class Command(BaseCommand):
     },
     "image": None,
     "video": None
-  },
+  }, 
   {
     "title": "פרסום “הספר הלבן”",
     "date": "1939-05-17",
