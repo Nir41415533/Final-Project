@@ -52,14 +52,7 @@
                 </a>
 
                 
-                <a href="{% url 'dashboard' %}" class="nav-button">
-                    <i class="fas fa-tachometer-alt"></i>
-                    {% if LANGUAGE_CODE == 'he' %}
-                        Dashboard
-                    {% else %}
-                        דשבורד
-                    {% endif %}
-                </a>
+               
 
                 
                 <!-- כפתור החלפת שפה -->
@@ -80,6 +73,14 @@
                     {% endif %}
                 </form>
 
+                <a href="{% url 'dashboard' %}" class="nav-button">
+                    <i class="fas fa-tachometer-alt"></i>
+                    {% if LANGUAGE_CODE == 'he' %}
+                        Dashboard
+                    {% else %}
+                        דשבורד
+                    {% endif %}
+                </a>
                 <!-- כפתור ציר זמן -->
                 <button id="timeline-toggle" class="nav-button" data-action="timeline">
                     <i class="fas fa-clock"></i>
