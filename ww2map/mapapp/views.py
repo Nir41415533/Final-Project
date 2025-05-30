@@ -40,23 +40,6 @@ class Home(View):
         elif action == 'website':
             return redirect('https://www.jwmww2.org/')
 
-        elif action == 'select_time_range':
-            form = DateRangeForm(request.POST)
-            if form.is_valid():
-                start_date = form.cleaned_data['start_date']
-                end_date = form.cleaned_data['end_date']
-                return render(request, template_name, {
-                    'form': None,
-                    'show_date_range_form': True,
-                    'success': f'Time range selected: {start_date} to {end_date}.' if language == 'en' else f'טווח תאריכים נבחר: {start_date} עד {end_date}.'
-                })
-            else:
-                return render(request, template_name, {
-                    'form': form,
-                    'show_date_range_form': True,
-                    'success': None
-                })
-
         elif action == 'explore_map':
             return redirect('ww2map')  # הפניה לדף המפה הישנה
 
@@ -418,14 +401,12 @@ def dashboard_data(request):
         count=Count('id')
     ).order_by('-count')[:10]
     
-    print(f"Soldiers by country: {list(soldiers_by_country)}")
     
     # Get statistics for soldiers by gender
     soldiers_by_gender = Soldier.objects.values('gender').annotate(
         count=Count('id')
     ).order_by('-count')
     
-    print(f"Soldiers by gender: {list(soldiers_by_gender)}")
     
     # Get statistics for events by country
     events_by_country = Event.objects.values('country__name_he').annotate(
@@ -500,6 +481,5 @@ def dashboard_data(request):
         'total_decorations': total_decorations,
     }
     
-    print(f"Final data being returned: {data}")
     
     return JsonResponse(data)
