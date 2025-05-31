@@ -65,8 +65,8 @@ def event_list(request):
         )
         
         # Debug information
-        print("🔍 כל האירועים:", list(events))
-        print("🔍 מדינות ייחודיות:", set(ev["country__name_en"] for ev in events if ev["country__name_en"]))
+        # print("🔍 כל האירועים:", list(events))
+        # print("🔍 מדינות ייחודיות:", set(ev["country__name_en"] for ev in events if ev["country__name_en"]))
 
         results = []
         for event in events:
@@ -394,7 +394,6 @@ def dashboard_data(request):
     """
     API endpoint to get dashboard data in JSON format
     """
-    print("Dashboard data API called")
     
     # Get statistics for soldiers by country
     soldiers_by_country = Soldier.objects.values('birth_country__name_he').annotate(

@@ -114,7 +114,7 @@ function showInteractiveTimeline() {
                                         <span class="month">${event.month}</span>
                                     </div>
                                     <h3>${event.title}</h3>
-                                    ${event.country && event.country.name ? `<p class="timeline-location"> ${event.country.name}</p>` : ''}
+                                    ${event.country && event.country.name_he ? `<p class="timeline-location"> ${event.country.name_he}</p>` : ''}
                                     <button class="timeline-details-btn" data-index="${index}">קרא עוד</button>
                                 </div>
                             </div>
@@ -215,26 +215,17 @@ function showEventDetails(event) {
     detailModal.className = 'event-detail-modal';
     detailModal.innerHTML = `
         <div class="event-detail-content">
-            <div class="event-header" style="border-color: ${event.color}">
-                <span class="event-icon" style="background-color: ${event.color}">${event.icon}</span>
+            <div class="event-header">
                 <div class="event-title-section">
                     <h2>${event.title}</h2>
                     <p class="event-date">${event.month} ${event.year}</p>
-                    ${event.country && event.country.name ? `<p class="event-location">📍 ${event.country.name}</p>` : ''}
+                    ${event.country && event.country.name_he ? `<p class="event-location">${event.country.name_he}</p>` : ''}
                 </div>
             </div>
             <div class="event-body">
                 <div class="event-description-section">
-                    <h4>תיאור האירוע:</h4>
+                    <h4>תיאור האירוע</h4>
                     <p class="event-main-description">${event.description}</p>
-                </div>
-                <div class="event-significance">
-                    <h4>חשיבות היסטורית:</h4>
-                    <p>אירוע זה היה בין האירועים המכריעים של מלחמת העולם השנייה והשפיע על מהלך המלחמה וההיסטוריה העולמית.</p>
-                </div>
-                <div class="event-timeline-context">
-                    <h4>הקשר כרונולוגי:</h4>
-                    <p>האירוע התרחש ב${event.year}, בתקופה שבה מלחמת העולם השנייה הייתה בעיצומה והעולם התמודד עם אתגרים חסרי תקדים.</p>
                 </div>
             </div>
             <button class="close-event-detail">סגור</button>
