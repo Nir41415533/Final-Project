@@ -50,6 +50,10 @@
                         חזרה
                     {% endif %}
                 </a>
+
+                
+               
+
                 
                 <!-- כפתור החלפת שפה -->
                 <form method="POST" action="{% url 'set_language' %}" style="margin: 0;">
@@ -69,8 +73,16 @@
                     {% endif %}
                 </form>
 
+                <a href="{% url 'dashboard' %}" class="nav-button">
+                    <i class="fas fa-tachometer-alt"></i>
+                    {% if LANGUAGE_CODE == 'he' %}
+                        Dashboard
+                    {% else %}
+                        לוח נתונים
+                    {% endif %}
+                </a>
                 <!-- כפתור ציר זמן -->
-                <button id="timeline-toggle" class="nav-button">
+                <button id="timeline-toggle" class="nav-button" data-action="timeline">
                     <i class="fas fa-clock"></i>
                     {% if LANGUAGE_CODE == 'he' %}
                         Timeline
@@ -79,7 +91,8 @@
                     {% endif %}
                 </button>
 
-                
+</div> <!-- right-side-buttons -->
+
             </div>
         </div>
     </nav>
