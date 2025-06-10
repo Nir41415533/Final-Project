@@ -1062,23 +1062,37 @@
     text-align: center;
 }
 
-/* Soldier Modal Styles */
+/* Soldier Modal Styles - Single Column with Original Modal Style */
 .soldier-layout-grid {
     background-image: url("/static/mapapp/images/paperOrange.jpg");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
+    background-attachment: fixed;
     width: 100%;
-    max-width: 1200px;
+    max-width: 800px;
     margin: 60px auto 40px auto;
     padding: 40px;
     border-radius: 15px;
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 50px;
-    align-items: start;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     animation: contentSlideIn 0.4s ease-out;
+}
+
+.soldier-layout-grid .soldier-profile-full {
+    background-image: url("/static/mapapp/images/paper-bg.jpg");
+    background-color: #f5e8c7;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: 2px solid #d4af37;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    height: 700px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .soldier-profile {
@@ -1144,6 +1158,24 @@
     overflow-y: auto;
     flex: 1;
     padding-right: 10px;
+}
+
+.soldier-details::-webkit-scrollbar {
+    width: 8px;
+}
+
+.soldier-details::-webkit-scrollbar-track {
+    background: rgba(245, 232, 199, 0.1);
+    border-radius: 4px;
+}
+
+.soldier-details::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.6);
+    border-radius: 4px;
+}
+
+.soldier-details::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.8);
 }
 
 .details-section {

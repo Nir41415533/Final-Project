@@ -9,6 +9,7 @@ export async function showSoldierDetails(soldier) {
     
     // Get the soldier ID to fetch full details
     const soldierId = soldier.id;
+    console.log("🔍 Fetching details for soldier ID:", soldierId);
     
     // Show modal and loading state
     const modal = document.getElementById("soldierModal");
@@ -24,13 +25,47 @@ export async function showSoldierDetails(soldier) {
     
     try {
         // Fetch soldier details from API
-        const response = await fetch(`/soldier/${soldierId}/`);
+        let apiUrl = `/soldier/${soldierId}/`;
+        console.log("🔍 API URL (attempt 1):", apiUrl);
+        
+        let response = await fetch(apiUrl);
+        console.log("🔍 API Response status (attempt 1):", response.status);
+        
+        // If first attempt fails, try with language prefix
+        if (!response.ok && response.status === 404) {
+            apiUrl = `/he/soldier/${soldierId}/`;
+            console.log("🔍 API URL (attempt 2 with /he/):", apiUrl);
+            response = await fetch(apiUrl);
+            console.log("🔍 API Response status (attempt 2):", response.status);
+        }
+        
+        // If still fails, try without leading slash
+        if (!response.ok && response.status === 404) {
+            apiUrl = `soldier/${soldierId}/`;
+            console.log("🔍 API URL (attempt 3 without leading /):", apiUrl);
+            response = await fetch(apiUrl);
+            console.log("🔍 API Response status (attempt 3):", response.status);
+        }
+        
+        console.log("🔍 Final API Response headers:", response.headers);
         
         if (!response.ok) {
+            console.error(`🔍 API Response not OK: ${response.status} ${response.statusText}`);
             throw new Error(`שגיאה בקבלת מידע על הלוחם: ${response.status}`);
         }
         
-        const soldierDetails = await response.json();
+        const responseText = await response.text();
+        console.log("🔍 Raw API Response:", responseText);
+        
+        let soldierDetails;
+        try {
+            soldierDetails = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error("🔍 JSON Parse Error:", parseError);
+            throw new Error("שגיאה בפענוח תגובת השרת");
+        }
+        
+        console.log("🔍 Parsed API Response data:", soldierDetails);
         
         // Populate the modal with soldier details
         populateSoldierModal(soldierDetails);
@@ -43,6 +78,8 @@ export async function showSoldierDetails(soldier) {
         
     } catch (error) {
         console.error("❌ שגיאה בטעינת פרטי הלוחם:", error);
+        console.log("🔍 Error details:", error.message);
+        console.log("🔍 Falling back to basic info");
         
         // If fetch fails, still show the modal with basic info
         populateSoldierModal(soldier, true);
@@ -58,12 +95,14 @@ function showLoadingState() {
     // Set basic elements to loading state
     document.getElementById("soldierName").textContent = "טוען...";
     document.getElementById("soldierImage").src = "";
-    document.getElementById("soldierLargeImage").src = "";
     
     // Add loading spinners to content areas
     const sections = [
         "soldierDetails",
-        "soldierFightingDesc"
+        "soldierFightingDesc",
+        "soldierGettoDesc",
+        "soldierWounds",
+        "soldierDeathDetails"
     ];
     
     sections.forEach(sectionId => {
@@ -85,13 +124,15 @@ function showLoadingState() {
  * @param {boolean} isBasicInfo - Whether we're using basic info or complete details
  */
 function populateSoldierModal(soldier, isBasicInfo = false) {
+    console.log("🔍 populateSoldierModal called with:", soldier);
+    console.log("🔍 isBasicInfo:", isBasicInfo);
+    
     // Basic info elements
     document.getElementById("soldierName").textContent = soldier.name || `לוחם ${soldier.id}`;
     
     // Set images
     const imageUrl = soldier.image_url || soldier.image || getDefaultImageByGender(soldier.gender);
     document.getElementById("soldierImage").src = imageUrl;
-    document.getElementById("soldierLargeImage").src = imageUrl;
     
     // Set badge with gender or rank info
     const badge = document.getElementById("soldierBadge");
@@ -102,92 +143,118 @@ function populateSoldierModal(soldier, isBasicInfo = false) {
     }
     
     if (isBasicInfo) {
+        console.log("🔍 Using basic info only");
         // We only have basic info, so display that with a message
         setBasicSoldierInfo(soldier);
         return;
     }
     
-    // Full soldier details
+    console.log("🔍 Processing full soldier details");
     
-    // Personal details
-    setElementText("soldierNameEn", getFullNameEn(soldier));
-    setElementText("soldierGender", getGenderText(soldier.gender));
+    // Debug: log all available fields
+    console.log("🔍 Available fields in soldier object:");
+    Object.keys(soldier).forEach(key => {
+        console.log(`🔍 ${key}:`, soldier[key]);
+    });
+    
+    // Helper function to check if value has meaningful content
+    const hasValue = (value) => {
+        return value && 
+               value !== null && 
+               value !== undefined && 
+               value !== '' && 
+               value.toString().trim() !== '' &&
+               value.toString().toLowerCase() !== 'nan';
+    };
+    
+    // Helper function to set element and hide row if empty
+    const setElementText = (elementId, value) => {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        const parentRow = element.closest('.info-row');
+        
+        if (hasValue(value)) {
+            element.textContent = value;
+            if (parentRow) parentRow.style.display = '';
+        } else {
+            element.textContent = '';
+            if (parentRow) parentRow.style.display = 'none';
+        }
+    };
+    
+    // Helper function to set text block and hide section if empty
+    const setTextBlock = (elementId, value) => {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        const parentSection = element.closest('.details-section');
+        
+        if (hasValue(value)) {
+            element.textContent = value;
+            if (parentSection) parentSection.style.display = '';
+        } else {
+            element.textContent = '';
+            if (parentSection) parentSection.style.display = 'none';
+        }
+    };
+    
+    // Show all sections and rows first
+    document.querySelectorAll('.details-section').forEach(section => {
+        section.style.display = '';
+    });
+    document.querySelectorAll('.info-row').forEach(row => {
+        row.style.display = '';
+    });
+    
+    // Personal details - using helper functions
+    console.log("🔍 Setting personal details:");
+    console.log("🔍 father_name:", soldier.father_name);
+    console.log("🔍 mother_name:", soldier.mother_name);
+    
     setElementText("soldierBirthDate", formatDate(soldier.date_of_birth));
     setElementText("soldierBirthCity", soldier.birth_city_he);
     setElementText("soldierBirthCountry", soldier.birth_country?.name_he);
     setElementText("soldierAliyaDate", formatDate(soldier.aliya_date));
+    setElementText("soldierFatherName", soldier.father_name);
+    setElementText("soldierMotherName", soldier.mother_name);
+    setElementText("soldierPreviousLastName", soldier.previous_last_name_he);
+    setElementText("soldierNickname", soldier.nickname_he);
     
     // Military service
     setElementText("soldierArmy", soldier.army_he);
     setElementText("soldierRole", soldier.army_role_he);
     setElementText("soldierRank", soldier.rank);
     
-    // Check if each section has any visible children after setting text
-    // For text blocks, check if content exists
-    const setTextBlock = (elementId, text) => {
-        const element = document.getElementById(elementId);
-        if (!element) return;
-        
-        const parentSection = element.closest('.details-section');
-        
-        if (!text || text === "nan" || text === "NaN" || text === "undefined" || text === "null") {
-            element.style.display = 'none';
-            // If this is the only element in the section, hide the section
-            if (parentSection) {
-                parentSection.style.display = 'none';
-            }
-        } else {
-            element.textContent = text;
-            element.style.display = '';
-            if (parentSection) {
-                parentSection.style.display = '';
-            }
-        }
-    };
+    // Death information
+    setElementText("soldierDeathDate", formatDate(soldier.date_of_death));
+    setElementText("soldierDeathPlace", soldier.place_of_death_he);
     
-    // Longer text fields
+    // Text blocks
     setTextBlock("soldierParticipation", soldier.participation_he);
     setTextBlock("soldierDecorations", soldier.decorations_he);
     setTextBlock("soldierBiography", soldier.biography_he);
     setTextBlock("soldierFightingDesc", soldier.fighting_description_he);
+    setTextBlock("soldierGettoDesc", soldier.getto_description_he);
+    setTextBlock("soldierWounds", soldier.wounds_he);
+    setTextBlock("soldierDeathDetails", soldier.death_details_he);
     
-    // Check sections with multiple info-rows to see if all are hidden
-    const checkSectionVisibility = (sectionId) => {
-        const section = document.getElementById(sectionId);
-        if (!section) return;
-        
-        const infoRows = section.querySelectorAll('.info-row');
-        let allHidden = true;
-        
-        infoRows.forEach(row => {
-            if (row.style.display !== 'none') {
-                allHidden = false;
+    // Check if sections have any visible content and hide empty sections
+    setTimeout(() => {
+        document.querySelectorAll('.details-section').forEach(section => {
+            const visibleRows = section.querySelectorAll('.info-row:not([style*="display: none"])');
+            const visibleTextBlocks = section.querySelectorAll('.text-block:not([style*="display: none"])');
+            
+            // If section has no visible rows or text blocks, hide it
+            if (visibleRows.length === 0 && visibleTextBlocks.length === 0) {
+                section.style.display = 'none';
             }
         });
-        
-        // If all info-rows are hidden, hide the section
-        const parentSection = section.closest('.details-section');
-        if (parentSection) {
-            parentSection.style.display = allHidden ? 'none' : '';
-        }
-    };
+    }, 10);
     
-    // Check visibility of sections with multiple fields
-    setTimeout(() => {
-        // Use setTimeout to ensure DOM updates have completed
-        checkSectionVisibility(document.querySelector('.details-grid'));
-    }, 0);
+    console.log("🔍 Finished setting all fields");
     
-    // Display video if available
-    const videoElement = document.getElementById("soldierVideo");
-    if (videoElement && soldier.video_url) {
-        videoElement.src = soldier.video_url;
-        videoElement.style.display = "block";
-        document.getElementById("soldierLargeImage").style.display = "none";
-    } else if (videoElement) {
-        videoElement.style.display = "none";
-        document.getElementById("soldierLargeImage").style.display = "block";
-    }
+    // Note: Removed video and large image handling since we now use single column layout
 }
 
 /**
@@ -204,7 +271,7 @@ function setBasicSoldierInfo(soldier) {
     // Hide all text blocks
     const textBlocks = [
         "soldierParticipation", "soldierDecorations", "soldierBiography",
-        "soldierFightingDesc"
+        "soldierFightingDesc", "soldierGettoDesc", "soldierWounds", "soldierDeathDetails"
     ];
     
     textBlocks.forEach(id => {
@@ -218,16 +285,6 @@ function setBasicSoldierInfo(soldier) {
             }
         }
     });
-    
-    // Set gender if available
-    if (soldier.gender) {
-        const genderElement = document.getElementById("soldierGender");
-        const genderRow = genderElement?.closest('.info-row');
-        if (genderElement && genderRow) {
-            genderElement.textContent = getGenderText(soldier.gender);
-            genderRow.style.display = '';
-        }
-    }
     
     // Set country if available
     if (soldier.country) {
@@ -263,44 +320,6 @@ function setBasicSoldierInfo(soldier) {
         // Hide section if it has no visible content
         section.style.display = hasVisibleContent ? '' : 'none';
     });
-    
-    // Hide video
-    const videoElement = document.getElementById("soldierVideo");
-    if (videoElement) {
-        videoElement.style.display = "none";
-        document.getElementById("soldierLargeImage").style.display = "block";
-    }
-}
-
-/**
- * Helper function to set text content of an element
- * @param {string} elementId - The ID of the element
- * @param {string} text - The text to set
- */
-function setElementText(elementId, text) {
-    const element = document.getElementById(elementId);
-    if (!element) return;
-    
-    // Check for empty, null, undefined, or "nan" values
-    if (!text || text === "--" || text === "nan" || text === "NaN" || text === "undefined" || text === "null") {
-        // Find the parent info-row and hide it
-        const parentRow = element.closest('.info-row');
-        if (parentRow) {
-            parentRow.style.display = 'none';
-        } else {
-            // If not in an info-row, just hide the element
-            element.style.display = 'none';
-        }
-    } else {
-        // Show the element and its parent row if they exist
-        element.textContent = text;
-        element.style.display = '';
-        
-        const parentRow = element.closest('.info-row');
-        if (parentRow) {
-            parentRow.style.display = '';
-        }
-    }
 }
 
 /**
@@ -327,20 +346,6 @@ function getDefaultImageByGender(gender) {
         return "https://media.istockphoto.com/id/666545204/vector/default-placeholder-profile-icon.jpg?s=612x612&w=0&k=20&c=UGYk-MX0pFWUZOr5hloXDREB6vfCqsyS7SgbQ1-heY8=";
     }
     return "https://media.istockphoto.com/id/666545148/vector/default-placeholder-profile-icon.jpg?s=612x612&w=0&k=20&c=swBnLcHy6L9v5eaiRkDwfGLr5cfLkH9hKW-sZfH-m90=";
-}
-
-/**
- * Combine English first and last name
- * @param {Object} soldier - Soldier data
- * @returns {string} - Full English name
- */
-function getFullNameEn(soldier) {
-    const firstName = soldier.first_name_en || "";
-    const lastName = soldier.last_name_en || "";
-    if (firstName || lastName) {
-        return `${firstName} ${lastName}`.trim();
-    }
-    return "--";
 }
 
 /**
