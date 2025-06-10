@@ -26,29 +26,29 @@ class Soldier(models.Model):
     customer_id = models.IntegerField(unique=True)
 
     # Names
-    first_name_he = models.CharField(max_length=100)
-    first_name_en = models.CharField(max_length=100, blank=True, null=True)
-    last_name_he = models.CharField(max_length=100)
-    last_name_en = models.CharField(max_length=100, blank=True, null=True)
-    previous_last_name_he = models.CharField(max_length=100, blank=True, null=True)
-    father_name = models.CharField(max_length=100, blank=True, null=True)
-    mother_name = models.CharField(max_length=100, blank=True, null=True)
-    nickname_he = models.CharField(max_length=100, blank=True, null=True)
+    first_name_he = models.CharField(max_length=500)
+    first_name_en = models.CharField(max_length=500, blank=True, null=True)
+    last_name_he = models.CharField(max_length=500)
+    last_name_en = models.CharField(max_length=500, blank=True, null=True)
+    previous_last_name_he = models.CharField(max_length=500, blank=True, null=True)
+    father_name = models.CharField(max_length=500, blank=True, null=True)
+    mother_name = models.CharField(max_length=500, blank=True, null=True)
+    nickname_he = models.CharField(max_length=500, blank=True, null=True)
 
     # Demographics
     gender = models.CharField(max_length=10, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
-    birth_city_he = models.CharField(max_length=100, blank=True, null=True)
-    birth_city_en = models.CharField(max_length=100, blank=True, null=True)
+    birth_city_he = models.CharField(max_length=500, blank=True, null=True)
+    birth_city_en = models.CharField(max_length=500, blank=True, null=True)
     birth_country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, related_name="soldiers")
     aliya_date = models.DateField(blank=True, null=True)
 
     # Military service
-    army_he = models.CharField(max_length=200, blank=True, null=True)
-    army_en = models.CharField(max_length=200, blank=True, null=True)
-    army_role_he = models.CharField(max_length=200, blank=True, null=True)
-    army_role_en = models.CharField(max_length=200, blank=True, null=True)
-    rank = models.CharField(max_length=100, blank=True, null=True)
+    army_he = models.CharField(max_length=500, blank=True, null=True)
+    army_en = models.CharField(max_length=500, blank=True, null=True)
+    army_role_he = models.CharField(max_length=500, blank=True, null=True)
+    army_role_en = models.CharField(max_length=500, blank=True, null=True)
+    rank = models.CharField(max_length=500, blank=True, null=True)
     participation_he = models.TextField(blank=True, null=True)
     participation_en = models.TextField(blank=True, null=True)
     decorations_he = models.TextField(blank=True, null=True)
@@ -69,18 +69,17 @@ class Soldier(models.Model):
 
     # Death
     date_of_death = models.DateField(blank=True, null=True)
-    place_of_death_he = models.CharField(max_length=100, blank=True, null=True)
-    place_of_death_en = models.CharField(max_length=100, blank=True, null=True)
+    place_of_death_he = models.CharField(max_length=500, blank=True, null=True)
+    place_of_death_en = models.CharField(max_length=500, blank=True, null=True)
     death_details_he = models.TextField(blank=True, null=True)
     death_details_en = models.TextField(blank=True, null=True)
 
     # Media
-    image_url = models.URLField(blank=True, null=True)
+    image_url = models.URLField(max_length=500, blank=True, null=True) # Increased max_length
+
     video_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.first_name_he} {self.last_name_he}" if self.first_name_he else f"Soldier {self.customer_id}"
-    
-    
 
 

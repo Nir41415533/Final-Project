@@ -385,9 +385,9 @@ def dashboard_view(request):
         'birth_city_he'
     ).annotate(count=Count('id')).order_by('-count')
     
-    # Timeline data - events by year
+    # Timeline data - events by year (PostgreSQL compatible)
     timeline_data = Event.objects.exclude(date__isnull=True).extra(
-        select={'year': "strftime('%%Y', date)"}
+        select={'year': "EXTRACT(year FROM date)"}
     ).values('year').annotate(count=Count('id')).order_by('year')
     
     # Context data to pass to the template
@@ -562,9 +562,9 @@ def dashboard_data(request):
         'birth_city_he'
     ).annotate(count=Count('id')).order_by('-count')
     
-    # Timeline data
+    # Timeline data - PostgreSQL compatible
     timeline_data = Event.objects.exclude(date__isnull=True).extra(
-        select={'year': "strftime('%%Y', date)"}
+        select={'year': "EXTRACT(year FROM date)"}
     ).values('year').annotate(count=Count('id')).order_by('year')
     
     data = {

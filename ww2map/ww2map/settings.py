@@ -60,8 +60,12 @@ WSGI_APPLICATION = 'ww2map.wsgi.application'
 # Database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ww2map',
+        'USER': 'ww2user',
+        'PASSWORD': '41415533',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
