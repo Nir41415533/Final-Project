@@ -105,23 +105,32 @@
 
         // Setup advanced filter toggle
         if (advancedFilterButton) {
+            console.log("🔍 Found advanced filter button, setting up event listener");
             // Remove any existing event listeners to prevent duplicates
             const newFilterButton = advancedFilterButton.cloneNode(true);
             advancedFilterButton.parentNode.replaceChild(newFilterButton, advancedFilterButton);
             
             // Add event listener to new element
             newFilterButton.addEventListener("click", function() {
+                console.log("🔍 Advanced filter button clicked");
                 if (advancedFilters) {
+                    console.log("🔍 Advanced filters element found, current display:", advancedFilters.style.display);
                     // Toggle visibility
                     if (advancedFilters.style.display === "none" || !advancedFilters.style.display) {
                         advancedFilters.style.display = "block";
                         this.classList.add("active");
+                        console.log("🔍 Showing advanced filters");
                     } else {
                         advancedFilters.style.display = "none";
                         this.classList.remove("active");
+                        console.log("🔍 Hiding advanced filters");
                     }
+                } else {
+                    console.error("❌ Advanced filters element not found!");
                 }
             });
+        } else {
+            console.error("❌ Advanced filter button not found!");
         }
 
         // Setup filter form
@@ -396,12 +405,16 @@
 
     // Function to setup the filter form
     function setupFilterForm() {
+        console.log("🔍 Setting up filter form...");
         const filterForm = document.getElementById("filterForm");
-        if (!filterForm) return;
+        if (!filterForm) {
+            console.error("❌ Filter form not found!");
+            return;
+        }
+        console.log("🔍 Filter form found successfully");
         
         // Get filter elements
         const genderFilter = document.getElementById("genderFilter");
-        const rankFilter = document.getElementById("rankFilter");
         const yearFromFilter = document.getElementById("yearFromFilter");
         const yearToFilter = document.getElementById("yearToFilter");
         const sortByFilter = document.getElementById("sortByFilter");
@@ -410,7 +423,6 @@
         
         // Clear any existing values
         if (genderFilter) genderFilter.value = "";
-        if (rankFilter) rankFilter.value = "";
         if (yearFromFilter) yearFromFilter.value = "";
         if (yearToFilter) yearToFilter.value = "";
         if (sortByFilter) sortByFilter.value = "name";
@@ -418,7 +430,6 @@
         // Initialize filter state
         let filters = {
             gender: "",
-            rank: "",
             yearFrom: "",
             yearTo: "",
             sortBy: "name"
@@ -432,13 +443,15 @@
             // Add event listener to new element
             newApplyBtn.addEventListener("click", function(e) {
                 e.preventDefault();
+                console.log("🔍 Apply filters button clicked");
                 
                 // Update filter state
                 filters.gender = genderFilter ? genderFilter.value : "";
-                filters.rank = rankFilter ? rankFilter.value : "";
                 filters.yearFrom = yearFromFilter ? yearFromFilter.value : "";
                 filters.yearTo = yearToFilter ? yearToFilter.value : "";
                 filters.sortBy = sortByFilter ? sortByFilter.value : "name";
+                
+                console.log("🔍 Applying filters:", filters);
                 
                 // Reset pagination
                 currentPage = 1;
@@ -469,7 +482,6 @@
                 
                 // Reset filter UI
                 if (genderFilter) genderFilter.value = "";
-                if (rankFilter) rankFilter.value = "";
                 if (yearFromFilter) yearFromFilter.value = "";
                 if (yearToFilter) yearToFilter.value = "";
                 if (sortByFilter) sortByFilter.value = "name";
@@ -477,7 +489,6 @@
                 // Reset filter state
                 filters = {
                     gender: "",
-                    rank: "",
                     yearFrom: "",
                     yearTo: "",
                     sortBy: "name"
@@ -530,7 +541,6 @@
             
             // Add filter parameters if they exist
             if (filters.gender) params.append("gender", filters.gender);
-            if (filters.rank) params.append("rank", filters.rank);
             if (filters.yearFrom) params.append("year_from", filters.yearFrom);
             if (filters.yearTo) params.append("year_to", filters.yearTo);
             if (filters.sortBy) params.append("sort_by", filters.sortBy);

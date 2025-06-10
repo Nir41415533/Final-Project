@@ -81,6 +81,17 @@
                         לוח נתונים
                     {% endif %}
                 </a>
+                
+                <!-- כפתור חיפוש חיילים -->
+                <button id="soldier-search-toggle" class="nav-button" title="חיפוש חיילים">
+                    <i class="fas fa-user-alt"></i>
+                    {% if LANGUAGE_CODE == 'he' %}
+                        Search Soldiers
+                    {% else %}
+                        חיפוש חיילים
+                    {% endif %}
+                </button>
+                
                 <!-- כפתור ציר זמן -->
                 <button id="timeline-toggle" class="nav-button" data-action="timeline">
                     <i class="fas fa-clock"></i>
@@ -179,21 +190,8 @@
                                     <label for="genderFilter">מגדר:</label>
                                     <select id="genderFilter">
                                         <option value="">הכל</option>
-                                        <option value="1">זכר</option>
-                                        <option value="0">נקבה</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="filter-group">
-                                    <label for="rankFilter">דרגה:</label>
-                                    <select id="rankFilter">
-                                        <option value="">הכל</option>
-                                        <option value="רב סרן">רב סרן</option>
-                                        <option value="סרן">סרן</option>
-                                        <option value="סגן">סגן</option>
-                                        <option value="רב סמל">רב סמל</option>
-                                        <option value="סמל">סמל</option>
-                                        <option value="טוראי">טוראי</option>
+                                        <option value="זכר">זכר</option>
+                                        <option value="נקבה">נקבה</option>
                                     </select>
                                 </div>
                             </div>
@@ -216,8 +214,6 @@
                                     <select id="sortByFilter">
                                         <option value="name">שם</option>
                                         <option value="birth_date">תאריך לידה</option>
-                                        <option value="rank">דרגה</option>
-                                        <option value="aliya_date">תאריך עלייה</option>
                                     </select>
                                 </div>
                             </div>
@@ -411,6 +407,23 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- מודל חיפוש חיילים -->
+    <div id="soldierSearchModal" class="modal">
+        <div class="modal-content soldier-search-modal">
+            <div class="modal-header">
+                <h2>חיפוש חיילים</h2>
+                <button class="close-button" onclick="closeSoldierSearchModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-input-container">
+                    <input type="text" id="soldierSearchInput" placeholder="הקלד שם חייל..." autofocus>
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div id="soldierSearchResults" class="soldier-search-results"></div>
             </div>
         </div>
     </div>
