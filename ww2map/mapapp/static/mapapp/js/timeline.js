@@ -1,12 +1,18 @@
 export function initializeTimeline(map) {
     const timelineContainer = document.getElementById('timeline-events');
     
+    // Get current language
+    const currentLang = document.documentElement.lang || 'he';
+    
     // עיצוב חדש: רשימה אנכית עם גלילה
     timelineContainer.innerHTML = '';
     timelineContainer.classList.add('timeline-list');
     
+    // Add language parameter to the API call
+    const apiUrl = currentLang === 'he' ? "/events/?lang=he" : "/events/?lang=en";
+    
     // טוען אירועים מהשרת
-    fetch("/events/")
+    fetch(apiUrl)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -15,7 +21,8 @@ export function initializeTimeline(map) {
         })
         .then(events => {
             if (!Array.isArray(events) || events.length === 0) {
-                throw new Error("לא התקבלו אירועים מהשרת");
+                const noEventsMessage = currentLang === 'he' ? "לא התקבלו אירועים מהשרת" : "No events received from server";
+                throw new Error(noEventsMessage);
             }
             // קיבוץ לפי שנה
             const validEvents = events.filter(event => event.title && event.date);
@@ -26,60 +33,80 @@ export function initializeTimeline(map) {
                 eventsByYear[year].push(event);
             });
             const years = Object.keys(eventsByYear).sort((a, b) => parseInt(a) - parseInt(b));
-            createYearCards(years, eventsByYear, timelineContainer, map);
+            createYearCards(years, eventsByYear, timelineContainer, map, currentLang);
         })
         .catch(error => {
-            timelineContainer.innerHTML = `<div class="timeline-error">שגיאה: ${error.message}</div>`;
+            const errorMessage = currentLang === 'he' ? `שגיאה: ${error.message}` : `Error: ${error.message}`;
+            timelineContainer.innerHTML = `<div class="timeline-error">${errorMessage}</div>`;
         });
 }
 
-function createYearCards(years, eventsByYear, container, map) {
+function createYearCards(years, eventsByYear, container, map, currentLang) {
     container.innerHTML = '';
     container.className = 'timeline-list';
-    // כותרת
+    
+    // כותרת - bilingual
     const header = document.createElement('div');
     header.className = 'timeline-list-header';
-    header.innerHTML = '<h2>בחר שנה</h2><div class="timeline-instruction">לחץ על שנה לצפייה באירועים</div>';
+    const headerTitle = currentLang === 'he' ? 'בחר שנה' : 'Select Year';
+    const headerInstruction = currentLang === 'he' ? 'לחץ על שנה לצפייה באירועים' : 'Click on a year to view events';
+    header.innerHTML = `<h2>${headerTitle}</h2><div class="timeline-instruction">${headerInstruction}</div>`;
     container.appendChild(header);
+    
     // רשימת שנים
     years.forEach(year => {
         const card = document.createElement('div');
         card.className = 'timeline-card timeline-year-card';
-        card.innerHTML = `<div class="timeline-card-title">${year}</div><div class="timeline-card-sub">${eventsByYear[year].length} אירועים</div>`;
+        const eventsText = currentLang === 'he' ? 'אירועים' : 'events';
+        
+        // Set tooltip attributes for CSS hover effects
+        const clickTooltip = currentLang === 'he' ? `לחץ לצפייה ב-${year}` : `Click to view ${year}`;
+        const eventsCountText = `${eventsByYear[year].length} ${eventsText}`;
+        card.setAttribute('data-tooltip', clickTooltip);
+        card.setAttribute('data-events-text', eventsCountText);
+        
+        card.innerHTML = `<div class="timeline-card-title">${year}</div><div class="timeline-card-sub">${eventsByYear[year].length} ${eventsText}</div>`;
         card.addEventListener('click', () => {
-            createEventCards(year, eventsByYear[year], container, map, () => createYearCards(years, eventsByYear, container, map));
+            createEventCards(year, eventsByYear[year], container, map, currentLang, () => createYearCards(years, eventsByYear, container, map, currentLang));
         });
         container.appendChild(card);
     });
 }
 
-function createEventCards(year, events, container, map, backCallback) {
+function createEventCards(year, events, container, map, currentLang, backCallback) {
     container.innerHTML = '';
     container.className = 'timeline-list';
-    // כותרת + כפתור חזרה
+    
+    // כותרת + כפתור חזרה - bilingual
     const header = document.createElement('div');
     header.className = 'timeline-list-header';
-    header.innerHTML = `<h2>אירועי ${year}</h2><div class="timeline-instruction">לחץ על אירוע למעבר במפה</div>`;
+    const yearTitle = currentLang === 'he' ? `אירועי ${year}` : `Events of ${year}`;
+    const yearInstruction = currentLang === 'he' ? 'לחץ על אירוע למעבר במפה' : 'Click on an event to navigate on the map';
+    header.innerHTML = `<h2>${yearTitle}</h2><div class="timeline-instruction">${yearInstruction}</div>`;
     container.appendChild(header);
+    
     const backBtn = document.createElement('button');
     backBtn.className = 'timeline-back-btn';
-    backBtn.textContent = 'חזרה לשנים';
+    backBtn.textContent = currentLang === 'he' ? 'חזרה לשנים' : 'Back to Years';
     backBtn.onclick = backCallback;
     container.appendChild(backBtn);
+    
     // אין אירועים
     if (!events || events.length === 0) {
         const noEvents = document.createElement('div');
         noEvents.className = 'timeline-no-events';
-        noEvents.textContent = 'לא נמצאו אירועים לשנה זו';
+        const noEventsText = currentLang === 'he' ? 'לא נמצאו אירועים לשנה זו' : 'No events found for this year';
+        noEvents.textContent = noEventsText;
         container.appendChild(noEvents);
         return;
     }
+    
     // רשימת אירועים
     events.sort((a, b) => new Date(a.date) - new Date(b.date));
     events.forEach(event => {
         const card = document.createElement('div');
         card.className = 'timeline-card timeline-event-card';
-        card.innerHTML = `<div class="timeline-card-title">${event.title}</div><div class="timeline-card-date">${formatDate(event.date)}</div>`;
+        card.innerHTML = `<div class="timeline-card-title">${event.title}</div><div class="timeline-card-date">${formatDate(event.date, currentLang)}</div>`;
         card.addEventListener('click', () => {
             let lat = event.latitude, lng = event.longitude;
             if ((!lat || !lng) && event.country) {
@@ -96,11 +123,19 @@ function createEventCards(year, events, container, map, backCallback) {
     });
 }
 
-function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return '';
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+// Update formatDate function to support both languages
+function formatDate(dateString, currentLang = 'he') {
+    const date = new Date(dateString);
+    
+    if (currentLang === 'he') {
+        const hebrewMonths = [
+            'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+            'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
+        ];
+        return `${date.getDate()} ${hebrewMonths[date.getMonth()]} ${date.getFullYear()}`;
+    } else {
+        // English format
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
+    }
 }

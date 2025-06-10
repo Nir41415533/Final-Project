@@ -682,7 +682,7 @@ body.dark-mode .timeline-button:hover {
 }
 
 .timeline-content-item {
-    margin-left: 50px;
+    margin-left: 0;
 }
 
 .timeline-date {

@@ -863,9 +863,9 @@ body.dark-mode .search-results div.active {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Timeline year label - מוצג רק בהובר */
+/* Timeline year label - responsive to language */
 .timeline-year::before {
-    content: "לחץ לצפייה ב-" attr(data-year);
+    content: attr(data-tooltip);
     position: absolute;
     left: 27px;
     white-space: nowrap;
@@ -886,9 +886,9 @@ body.dark-mode .search-results div.active {
     border: 1px solid rgba(245, 230, 211, 0.4);
 }
 
-/* Timeline year events count - מוצג רק בהובר */
+/* Timeline year events count - responsive to language */
 .timeline-year::after {
-    content: attr(data-events-count) " אירועים";
+    content: attr(data-events-text);
     position: absolute;
     right: 27px;
     white-space: nowrap;

@@ -62,7 +62,11 @@
     <div class="map-buttons">
         <!-- Buttons -->
         <button id="show-timeline" class="timeline-button">
-            {% trans "Interactive Timeline" %}
+            {% if LANGUAGE_CODE == 'he' %}  
+                ציר זמן אינטראקטיבי
+            {% else %}
+                Interactive Timeline
+            {% endif %}
         </button>
         <form method="POST">
             {% csrf_token %}

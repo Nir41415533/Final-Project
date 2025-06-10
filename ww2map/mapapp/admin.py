@@ -6,13 +6,12 @@ class CountryAdmin(admin.ModelAdmin):
 
 class EventAdmin(admin.ModelAdmin):
     list_filter = ['country', 'date']  # 🔹 סינון לפי מדינה ושנה
-    search_fields = ['title', 'description', 'country__name']  # 🔹 חיפוש לפי כותרת, תיאור ומדינה
-    list_display = ('title', 'country', 'date')  # 🔹 תצוגת האירועים עם תאריך
+    search_fields = ['title', 'title_en', 'description', 'description_en', 'country__name_he', 'country__name_en']  # 🔹 חיפוש לפי כותרת, תיאור ומדינה
+    list_display = ('title', 'title_en', 'country', 'date')  # 🔹 תצוגת האירועים עם תאריך
+    fields = ('title', 'title_en', 'description', 'description_en', 'date', 'country', 'image', 'video')
 
 class SoldierAdmin(admin.ModelAdmin):
-    list_display = ('first_name_he', 'last_name_he', 'birth_country', 'rank', 'date_of_birth', 'gender')  # 🔹 תצוגה של הלוחמים
-    search_fields = ['first_name_he', 'last_name_he', 'birth_country__name_he', 'rank']  # 🔹 חיפוש לפי שם, מדינה ודרגה
-    list_filter = ['birth_country', 'gender', 'rank']  # 🔹 סינון לפי מדינה, מגדר ודרגה
+    search_fields = ['first_name_he', 'last_name_he', 'first_name_en', 'last_name_en']
 
 admin.site.register(Country, CountryAdmin)  # 🔹 רישום טבלת מדינות
 admin.site.register(Event, EventAdmin)  # 🔹 רישום טבלת אירועים

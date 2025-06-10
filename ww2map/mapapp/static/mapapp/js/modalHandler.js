@@ -224,12 +224,19 @@
         }
         
         try {
+            // Get search query from the input
+            const searchQuery = document.getElementById("soldiersSearch")?.value?.trim() || "";
+            
+            // Get current language from document or default to 'he'
+            const currentLang = document.documentElement.lang || 'he';
+            
             // Call the paginated API
             const params = new URLSearchParams({
                 country: country,
                 page: page,
                 limit: 50, // Load 50 soldiers at a time
-                search: searchQuery
+                search: searchQuery,
+                lang: currentLang
             });
             
             const response = await fetch(`/soldiers/paginated/?${params}`);
@@ -241,7 +248,11 @@
             // Update soldiers heading
             if (soldiersTitle) {
                 if (data.pagination.total > 0) {
-                    soldiersTitle.textContent = `לוחמים ממדינה זו (${data.pagination.total})`;
+                    if (currentLang === 'he') {
+                        soldiersTitle.textContent = `לוחמים ממדינה זו (${data.pagination.total})`;
+                    } else {
+                        soldiersTitle.textContent = `Soldiers from this country (${data.pagination.total})`;
+                    }
                     soldiersTitle.style.display = "block";
                 } else {
                     soldiersTitle.textContent = "לא נמצאו לוחמים למדינה זו";
@@ -531,12 +542,19 @@
         }
         
         try {
+            // Get search query from the input
+            const searchQuery = document.getElementById("soldiersSearch")?.value?.trim() || "";
+            
+            // Get current language from document or default to 'he'
+            const currentLang = document.documentElement.lang || 'he';
+            
             // Build URL parameters
             const params = new URLSearchParams({
                 country: country,
                 page: page,
                 limit: 50,
-                search: searchQuery
+                search: searchQuery,
+                lang: currentLang
             });
             
             // Add filter parameters if they exist

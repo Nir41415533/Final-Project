@@ -14,37 +14,64 @@ function openCountryModal(countryCode, countryNameHeb) {
     // Get the proper flag code
     const flagCode = getFlagCode(countryCode);
     
-    // Load events only (soldiers will be loaded by modalHandler via API)
-    fetch("/events/")
+    // Get current language from document or default to 'he'
+    const currentLang = document.documentElement.lang || 'he';
+    
+    // First get the correct country name for the current language
+    fetch(`/country/name/?country=${encodeURIComponent(countryCode)}&lang=${currentLang}`)
         .then(res => res.json())
-        .then(events => {
-            // Filter events for this country
-            const englishName = countryCode;
-            const countryEvents = events.filter(ev => {
-                const eventCountry = (ev.country__name || "").trim().toLowerCase();
-                return eventCountry === englishName;
-            });
+        .then(countryData => {
+            const displayCountryName = countryData.name || countryNameHeb;
             
-            console.log(`Found ${countryEvents.length} events for ${countryNameHeb}`);
-            
-            // Set up events global
-            window.currentEvents = countryEvents;
-            window.currentIndex = 0;
-            
-            // Update flag in the modal
-            const mapPlaceholder = document.getElementById("insetMapPlaceholder");
-            if (mapPlaceholder) {
-                mapPlaceholder.innerHTML = flagCode
-                    ? `<img id="countryFlag" src="https://flagcdn.com/w320/${flagCode}.png" alt="דגל ${countryNameHeb}">`
-                    : "מפת הקרב";
-            }
-            
-            // Show the modal with the country events
-            // Pass an empty array for soldiers as they will be loaded by the modal
-            showCountryEventsModal(countryNameHeb, countryEvents, []);
+            // Now load events
+            return fetch(`/events/?lang=${currentLang}`)
+                .then(res => res.json())
+                .then(events => {
+                    // Filter events for this country
+                    const englishName = countryCode;
+                    const countryEvents = events.filter(ev => {
+                        const eventCountry = (ev.country?.name || "").trim().toLowerCase();
+                        return eventCountry === englishName.toLowerCase() || 
+                               eventCountry === countryNameHeb.toLowerCase() ||
+                               eventCountry === displayCountryName.toLowerCase();
+                    });
+                    
+                    console.log(`Found ${countryEvents.length} events for country: ${displayCountryName}`);
+                    
+                    // Set up events global
+                    window.currentEvents = countryEvents;
+                    window.currentIndex = 0;
+                    
+                    // Update flag in the modal
+                    const mapPlaceholder = document.getElementById("insetMapPlaceholder");
+                    if (mapPlaceholder) {
+                        mapPlaceholder.innerHTML = flagCode
+                            ? `<img id="countryFlag" src="https://flagcdn.com/w320/${flagCode}.png" alt="דגל ${displayCountryName}">`
+                            : "מפת הקרב";
+                    }
+                    
+                    // Show the modal with the country events using the language-appropriate name
+                    showCountryEventsModal(displayCountryName, countryEvents, []);
+                });
         })
         .catch(error => {
-            console.error("Error loading events data:", error);
+            console.error("Error loading country name or events:", error);
+            // Fallback to original behavior if API fails
+            const currentLang = document.documentElement.lang || 'he';
+            fetch(`/events/?lang=${currentLang}`)
+                .then(res => res.json())
+                .then(events => {
+                    const englishName = countryCode;
+                    const countryEvents = events.filter(ev => {
+                        const eventCountry = (ev.country?.name || "").trim().toLowerCase();
+                        return eventCountry === englishName.toLowerCase() || 
+                               eventCountry === countryNameHeb.toLowerCase();
+                    });
+                    
+                    // Use Hebrew name as fallback
+                    showCountryEventsModal(countryNameHeb, countryEvents, []);
+                })
+                .catch(err => console.error("Fallback error:", err));
         });
 }
 
@@ -53,7 +80,10 @@ window.openCountryModal = openCountryModal;
 
 // טוען אירועים
 function loadEvents() {
-    fetch("/events/")
+    // Get current language from document or default to 'he'
+    const currentLang = document.documentElement.lang || 'he';
+    
+    fetch(`/events/?lang=${currentLang}`)
         .then(response => response.json())
         .then(events => {
             window.historicalEvents = events;
@@ -426,9 +456,21 @@ function performSearch() {
         return;
     }
     
-    const results = Object.keys(countries).filter(country => 
-        country.toLowerCase().includes(searchTerm)
-    );
+    // Get current language from document
+    const currentLang = document.documentElement.lang || 'he';
+    
+    let results = [];
+    if (currentLang === 'he') {
+        // Search in Hebrew names
+        results = Object.keys(countries).filter(country => 
+            country.toLowerCase().includes(searchTerm)
+        );
+    } else {
+        // Search in English names
+        results = Object.keys(countries).filter(country => 
+            countries[country].toLowerCase().includes(searchTerm)
+        );
+    }
     
     displayResults(results);
 }
@@ -441,9 +483,13 @@ function displayResults(results) {
         return;
     }
     
+    // Get current language from document
+    const currentLang = document.documentElement.lang || 'he';
+    
     results.forEach(country => {
         const div = document.createElement('div');
-        div.textContent = country;
+        // Display the name in the current language
+        div.textContent = currentLang === 'he' ? country : countries[country];
         div.addEventListener('click', () => {
             selectCountry(country);
         });
@@ -581,7 +627,10 @@ function performSoldierSearch() {
     
     // Debounce the search
     soldierSearchTimeout = setTimeout(() => {
-        fetch(`/soldiers/search/?q=${encodeURIComponent(searchTerm)}&limit=10`)
+        // Get current language from document or default to 'he'
+        const currentLang = document.documentElement.lang || 'he';
+        
+        fetch(`/soldiers/search/?q=${encodeURIComponent(searchTerm)}&limit=10&lang=${currentLang}`)
             .then(response => response.json())
             .then(data => {
                 displaySoldierResults(data.soldiers);

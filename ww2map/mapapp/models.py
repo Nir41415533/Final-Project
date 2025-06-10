@@ -13,8 +13,10 @@ class Country(models.Model):
     
 class Event(models.Model):
     title = models.CharField(max_length=255)  # שם האירוע
+    title_en = models.CharField(max_length=255, blank=True, null=True)  # Event name in English
     date = models.DateField()  # תאריך האירוע
     description = models.TextField()  # תיאור האירוע
+    description_en = models.TextField(blank=True, null=True)  # Event description in English
     country = models.ForeignKey(Country, on_delete=models.CASCADE)  # שיוך למדינה
     image = models.CharField(max_length=255, blank=True, null=True)  # תמונה (לא חובה)
     video = models.CharField(max_length=255, blank=True, null=True)  # וידאו (לא חובה)
