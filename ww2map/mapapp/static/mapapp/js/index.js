@@ -154,11 +154,17 @@ function initializeMap() {
 // Start initialization when document is ready
 document.addEventListener('DOMContentLoaded', initializeMap);
 
-// Search functionality
+// Get DOM elements for country search
 const countrySearch = document.getElementById('countrySearch');
-const searchButton = document.getElementById('searchButton');
 const searchResults = document.getElementById('searchResults');
-const searchContainer = document.querySelector('.search-container');
+const searchContainer = document.querySelector('.simple-search');
+const searchButton = document.getElementById('searchButton');
+
+// Get DOM elements for soldier search modal
+const soldierSearchToggle = document.getElementById('soldier-search-toggle');
+const soldierSearchModal = document.getElementById('soldierSearchModal');
+const soldierSearchInput = document.getElementById('soldierSearchInput');
+const soldierSearchResults = document.getElementById('soldierSearchResults');
 
 // List of countries with their Hebrew names - using all countries from countryCodeMapping
 const countries = {
@@ -552,3 +558,205 @@ function getFlagCode(countryCode) {
     // Then use the countryCodeMapping to get the flag code
     return countryCodeMapping[countryName] || countryCode;
 }
+
+// Soldier search functionality
+let soldierSearchTimeout;
+
+function performSoldierSearch() {
+    const searchTerm = soldierSearchInput.value.trim();
+    
+    // Clear previous timeout
+    if (soldierSearchTimeout) {
+        clearTimeout(soldierSearchTimeout);
+    }
+    
+    if (searchTerm.length < 2) {
+        soldierSearchResults.style.display = 'none';
+        return;
+    }
+    
+    // Add loading indicator
+    soldierSearchResults.innerHTML = '<div class="search-loading">מחפש...</div>';
+    soldierSearchResults.style.display = 'block';
+    
+    // Debounce the search
+    soldierSearchTimeout = setTimeout(() => {
+        fetch(`/soldiers/search/?q=${encodeURIComponent(searchTerm)}&limit=10`)
+            .then(response => response.json())
+            .then(data => {
+                displaySoldierResults(data.soldiers);
+            })
+            .catch(error => {
+                console.error('Error searching soldiers:', error);
+                soldierSearchResults.innerHTML = '<div class="search-error">שגיאה בחיפוש</div>';
+            });
+    }, 300);
+}
+
+function displaySoldierResults(soldiers) {
+    soldierSearchResults.innerHTML = '';
+    
+    if (soldiers.length === 0) {
+        soldierSearchResults.innerHTML = '<div class="no-results">לא נמצאו תוצאות</div>';
+        soldierSearchResults.style.display = 'block';
+        return;
+    }
+    
+    soldiers.forEach(soldier => {
+        const div = document.createElement('div');
+        div.className = 'soldier-result';
+        div.innerHTML = `
+            <div class="soldier-info">
+                ${soldier.image ? `<img src="${soldier.image}" alt="${soldier.name}" class="soldier-thumb">` : '<div class="soldier-no-image">📷</div>'}
+                <div class="soldier-details">
+                    <div class="soldier-name">${soldier.name}</div>
+                    <div class="soldier-country">${soldier.country}</div>
+                </div>
+            </div>
+        `;
+        div.addEventListener('click', () => {
+            selectSoldier(soldier);
+        });
+        soldierSearchResults.appendChild(div);
+    });
+    
+    soldierSearchResults.style.display = 'block';
+}
+
+function selectSoldier(soldier) {
+    // Close soldier search modal
+    closeSoldierSearchModal();
+    
+    // Open soldier detail modal
+    openSoldierModal(soldier.id);
+}
+
+function openSoldierModal(soldierId) {
+    // Import and use the existing soldier modal functionality
+    import('./soldierHandler.js').then(module => {
+        const soldier = { id: soldierId };
+        module.showSoldierDetails(soldier);
+    }).catch(error => {
+        console.error('Error loading soldier modal:', error);
+        // Fallbook to basic modal if import fails
+        alert('שגיאה בטעינת פרטי הלוחם');
+    });
+}
+
+// Event listeners for soldier search
+if (soldierSearchInput) {
+    // Show results when input receives focus
+    soldierSearchInput.addEventListener('focus', () => {
+        if (soldierSearchInput.value.length >= 2) {
+            performSoldierSearch();
+        }
+    });
+    
+    // Perform search as user types
+    soldierSearchInput.addEventListener('input', performSoldierSearch);
+    
+    // Handle keyboard navigation
+    soldierSearchInput.addEventListener('keydown', (e) => {
+        const resultItems = soldierSearchResults.querySelectorAll('.soldier-result');
+        const currentActiveIndex = [...resultItems].findIndex(item => item.classList.contains('active'));
+        
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                if (resultItems.length > 0) {
+                    const nextIndex = currentActiveIndex >= 0 && currentActiveIndex < resultItems.length - 1 ? 
+                        currentActiveIndex + 1 : 0;
+                    
+                    resultItems.forEach(item => item.classList.remove('active'));
+                    resultItems[nextIndex].classList.add('active');
+                    resultItems[nextIndex].scrollIntoView({ block: 'nearest' });
+                }
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                if (resultItems.length > 0) {
+                    const prevIndex = currentActiveIndex > 0 ? 
+                        currentActiveIndex - 1 : resultItems.length - 1;
+                    
+                    resultItems.forEach(item => item.classList.remove('active'));
+                    resultItems[prevIndex].classList.add('active');
+                    resultItems[prevIndex].scrollIntoView({ block: 'nearest' });
+                }
+                break;
+                
+            case 'Enter':
+                if (currentActiveIndex >= 0) {
+                    e.preventDefault();
+                    const soldierElement = resultItems[currentActiveIndex];
+                    soldierElement.click();
+                } else if (resultItems.length > 0) {
+                    e.preventDefault();
+                    resultItems[0].click();
+                }
+                break;
+                
+            case 'Escape':
+                e.preventDefault();
+                soldierSearchResults.style.display = 'none';
+                break;
+        }
+    });
+}
+
+
+
+// Soldier search modal functions
+function openSoldierSearchModal() {
+    if (soldierSearchModal) {
+        soldierSearchModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Focus on search input after modal opens
+        setTimeout(() => {
+            if (soldierSearchInput) {
+                soldierSearchInput.focus();
+            }
+        }, 100);
+    }
+}
+
+function closeSoldierSearchModal() {
+    if (soldierSearchModal) {
+        soldierSearchModal.style.display = 'none';
+        document.body.style.overflow = '';
+        
+        // Clear search results and input
+        if (soldierSearchInput) {
+            soldierSearchInput.value = '';
+        }
+        if (soldierSearchResults) {
+            soldierSearchResults.style.display = 'none';
+            soldierSearchResults.innerHTML = '';
+        }
+    }
+}
+
+// Make closeSoldierSearchModal available globally
+window.closeSoldierSearchModal = closeSoldierSearchModal;
+
+// Event listeners for soldier search modal
+if (soldierSearchToggle) {
+    soldierSearchToggle.addEventListener('click', openSoldierSearchModal);
+}
+
+// Close modal when clicking outside
+if (soldierSearchModal) {
+    soldierSearchModal.addEventListener('click', (e) => {
+        if (e.target === soldierSearchModal) {
+            closeSoldierSearchModal();
+        }
+    });
+}
+
+// Close modal with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && soldierSearchModal && soldierSearchModal.style.display === 'block') {
+        closeSoldierSearchModal();
+    }
+});

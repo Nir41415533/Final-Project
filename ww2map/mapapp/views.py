@@ -145,7 +145,11 @@ def paginated_soldiers(request):
             Q(last_name_he__icontains=search)
         )
     if gender:
-        soldiers_query = soldiers_query.filter(gender=gender)
+        # Convert gender string to numeric value
+        if gender == 'זכר':
+            soldiers_query = soldiers_query.filter(gender__in=['1', '1.0'])
+        elif gender == 'נקבה':
+            soldiers_query = soldiers_query.filter(gender__in=['0', '0.0'])
     if rank:
         soldiers_query = soldiers_query.filter(rank__icontains=rank)
     if year_from:
@@ -582,3 +586,37 @@ def dashboard_data(request):
     
     
     return JsonResponse(data)
+
+@api_view(['GET'])
+def search_soldiers(request):
+    """
+    API endpoint לחיפוש לוחמים על פי שם
+    """
+    query = request.GET.get('q', '').strip()
+    limit = int(request.GET.get('limit', 10))
+    
+    if not query or len(query) < 2:
+        return JsonResponse({'soldiers': []})
+    
+    # Filter soldiers with valid names and data
+    valid_name_regex = r'^[A-Za-zא-ת\s\-]+$'
+    soldiers_query = Soldier.objects.select_related('birth_country') \
+        .exclude(gender__isnull=True).exclude(gender__exact='') \
+        .filter(first_name_he__regex=valid_name_regex, last_name_he__regex=valid_name_regex)
+    
+    # Search in first name or last name
+    soldiers_query = soldiers_query.filter(
+        Q(first_name_he__icontains=query) | 
+        Q(last_name_he__icontains=query)
+    ).order_by('first_name_he', 'last_name_he')[:limit]
+    
+    soldiers = []
+    for soldier in soldiers_query:
+        soldiers.append({
+            "id": soldier.customer_id,
+            "name": f"{soldier.first_name_he} {soldier.last_name_he}",
+            "country": soldier.birth_country.name_he if soldier.birth_country else "לא ידוע",
+            "image": soldier.image_url if soldier.image_url else None
+        })
+    
+    return JsonResponse({'soldiers': soldiers})
