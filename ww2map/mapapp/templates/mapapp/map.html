@@ -296,8 +296,8 @@
             </div>
 
             <div class="soldier-layout-grid">
-                <!-- Left Column - Soldier Profile -->
-                <div class="soldier-profile">
+                <!-- Soldier Profile - Full Width -->
+                <div class="soldier-profile-full">
                     <div class="soldier-header">
                         <div class="soldier-avatar">
                             <img id="soldierImage" src="" alt="תמונת הלוחם">
@@ -313,14 +313,6 @@
                             <h3>פרטים אישיים</h3>
                             <div class="details-grid">
                                 <div class="info-row">
-                                    <strong>שם באנגלית:</strong>
-                                    <span id="soldierNameEn"></span>
-                                </div>
-                                <div class="info-row">
-                                    <strong>מגדר:</strong>
-                                    <span id="soldierGender"></span>
-                                </div>
-                                <div class="info-row">
                                     <strong>תאריך לידה:</strong>
                                     <span id="soldierBirthDate"></span>
                                 </div>
@@ -332,10 +324,25 @@
                                     <strong>מדינת לידה:</strong>
                                     <span id="soldierBirthCountry"></span>
                                 </div>
-                               
                                 <div class="info-row">
                                     <strong>תאריך עלייה:</strong>
                                     <span id="soldierAliyaDate"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>שם האב:</strong>
+                                    <span id="soldierFatherName"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>שם האם:</strong>
+                                    <span id="soldierMotherName"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>שם משפחה קודם:</strong>
+                                    <span id="soldierPreviousLastName"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>כינוי:</strong>
+                                    <span id="soldierNickname"></span>
                                 </div>
                             </div>
                         </div>
@@ -372,19 +379,35 @@
                             <h3>ביוגרפיה</h3>
                             <div id="soldierBiography" class="text-block"></div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Right Column - Media and extra info -->
-                <div class="soldier-media">
-                    <div class="media-container">
-                        <img id="soldierLargeImage" class="soldier-large-image" src="" alt="תמונת הלוחם מורחבת">
-                        <video id="soldierVideo" class="media-item" controls preload="metadata" style="display: none;"></video>
-                    </div>
-                    <div class="additional-info">
-                        <div class="info-section">
-                            <h3>תיאור לחימה</h3>
-                            <div id="soldierFightingDesc" class="text-block scrollable"></div>
+                        <div class="details-section">
+                            <h3>תיאור הלחימה</h3>
+                            <div id="soldierFightingDesc" class="text-block"></div>
+                        </div>
+
+                        <div class="details-section">
+                            <h3>תיאור הגטו</h3>
+                            <div id="soldierGettoDesc" class="text-block"></div>
+                        </div>
+
+                        <div class="details-section">
+                            <h3>פציעות</h3>
+                            <div id="soldierWounds" class="text-block"></div>
+                        </div>
+
+                        <div class="details-section">
+                            <h3>מידע על פטירה</h3>
+                            <div class="details-grid">
+                                <div class="info-row">
+                                    <strong>תאריך פטירה:</strong>
+                                    <span id="soldierDeathDate"></span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>מקום פטירה:</strong>
+                                    <span id="soldierDeathPlace"></span>
+                                </div>
+                            </div>
+                            <div id="soldierDeathDetails" class="text-block"></div>
                         </div>
                     </div>
                 </div>
