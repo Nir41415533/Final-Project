@@ -21,7 +21,6 @@
     <link rel="stylesheet" href="{% static 'mapapp/css/modal.css' %}">
     <link rel="icon" href="{% static 'mapapp/favicon.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link rel="stylesheet" href="{% static 'mapapp/css/home.css' %}">
 
     <style>
         #map {
@@ -38,11 +37,29 @@
             <div class="simple-search">
                 <input type="text" id="countrySearch" placeholder="חפש מדינה..." aria-label="חיפוש מדינה">
                 <div id="searchResults" class="search-results"></div>
+                <!-- כפתור חיפוש חיילים -->
+                <button id="soldier-search-toggle" class="nav-button" title="חיפוש חיילים">
+                    <i class="fas fa-user-alt"></i>
+                    {% if LANGUAGE_CODE == 'he' %}
+                        Search Soldiers
+                    {% else %}
+                        חיפוש חיילים
+                    {% endif %}
+                </button>
+                <!-- כפתור לוח נתונים -->
+                <a href="{% url 'dashboard' %}" class="nav-button">
+                    <i class="fas fa-tachometer-alt"></i>
+                    {% if LANGUAGE_CODE == 'he' %}
+                        Dashboard
+                    {% else %}
+                        לוח נתונים
+                    {% endif %}
+                </a>
             </div>
             
             <div class="right-side-buttons">
                 <!-- כפתור חזרה -->
-                <a href="{% url 'home' %}" class="nav-button" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background-color: #f5f5f5; color: #333; border: 1px solid #ddd; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease;">
+                <a href="{% url 'home' %}" class="nav-button" id="back-button">
                     <i class="fas fa-arrow-right"></i>
                     {% if LANGUAGE_CODE == 'he' %}
                         Back
@@ -51,10 +68,6 @@
                     {% endif %}
                 </a>
 
-                
-               
-
-                
                 <!-- כפתור החלפת שפה -->
                 <form method="POST" action="{% url 'set_language' %}" style="margin: 0;">
                     {% csrf_token %}
@@ -72,24 +85,9 @@
                         </button>
                     {% endif %}
                 </form>
-
-                <a href="{% url 'dashboard' %}" class="nav-button">
-                    <i class="fas fa-tachometer-alt"></i>
-                    {% if LANGUAGE_CODE == 'he' %}
-                        Dashboard
-                    {% else %}
-                        לוח נתונים
-                    {% endif %}
-                </a>
-                
-                <!-- כפתור חיפוש חיילים -->
-                <button id="soldier-search-toggle" class="nav-button" title="חיפוש חיילים">
-                    <i class="fas fa-user-alt"></i>
-                    {% if LANGUAGE_CODE == 'he' %}
-                        Search Soldiers
-                    {% else %}
-                        חיפוש חיילים
-                    {% endif %}
+                <!-- כפתור Dark Mode -->
+                <button id="dark-mode-toggle" class="flag-button" title="Dark Mode">
+                    🌙
                 </button>
                 
                 <!-- כפתור ציר זמן -->
@@ -101,9 +99,6 @@
                         ציר זמן
                     {% endif %}
                 </button>
-
-</div> <!-- right-side-buttons -->
-
             </div>
         </div>
     </nav>
@@ -480,5 +475,6 @@
             }
         });
     </script>
+    <script src="{% static 'mapapp/js/map.js' %}"></script>
 </body>
 </html>

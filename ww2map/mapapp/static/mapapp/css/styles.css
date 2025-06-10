@@ -144,9 +144,10 @@ html, body {
     margin-right: auto;
 }
 
-.nav-button {
-    background-color: #f5f5f5;
-    color: #333;
+.nav-button,
+.flag-button {
+    background-color: white; /* Ensure buttons are white in light mode */
+    color: #333; /* Default text color */
     border: 1px solid #ddd;
     padding: 8px 16px;
     border-radius: 20px;
@@ -162,10 +163,9 @@ html, body {
     white-space: nowrap;
 }
 
-.nav-button:hover {
-    background-color: #e0e0e0;
-    color: #000;
-    text-decoration: none;
+.nav-button:hover,
+.flag-button:hover {
+    background-color: #e0e0e0; /* Light hover effect for light mode */
     transform: translateY(-1px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -175,24 +175,6 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.flag-button {
-    background-color: white;
-    border: 2px solid #ddd;
-    border-radius: 30px;
-    padding: 8px 12px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.flag-button:hover {
-    background-color: #eee;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .flag-button img {
@@ -209,20 +191,37 @@ html, body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.simple-search input {
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 8px 16px;
-    width: 200px;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    direction: rtl;
-    outline: none;
+.simple-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 15px;
+    position: relative;
 }
 
-.simple-search input:focus {
-    background-color: white;
+.simple-search input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    width: 200px;
+    transition: all 0.3s ease;
+}
+
+.simple-search .nav-button {
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    background-color: white !important;
+    border: 1px solid #ddd;
+    color: #333 !important;
+    transition: all 0.3s ease;
+}
+
+.simple-search .nav-button:hover {
+    background-color: #e0e0e0 !important;
+    transform: translateY(-1px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
@@ -244,27 +243,71 @@ html, body {
 /* Dark mode support */
 body.dark-mode nav {
     background-color: rgba(30, 30, 30, 0.95);
-    color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    color: #fff; /* Ensure text in nav is white */
 }
 
-body.dark-mode .nav-button {
-    background-color: #333;
-    color: #fff;
-    border-color: #444;
-}
-
-body.dark-mode .nav-button:hover {
-    background-color: #444;
-    color: #fff;
-}
-
+body.dark-mode .nav-button,
 body.dark-mode .flag-button {
-    background-color: #333;
-    border-color: #444;
+    background-color: #333; /* Dark background */
+    color: #fff; /* White text */
+    border-color: #555;
 }
 
+body.dark-mode .nav-button:hover,
 body.dark-mode .flag-button:hover {
-    background-color: #444;
+    background-color: #555; /* Lighter dark background on hover */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Back button specific styles (using ID for highest precedence) */
+#back-button {
+    background-color: white !important; /* Force white background in light mode */
+    color: #333 !important; /* Force black text in light mode */
+    border: 1px solid #ddd !important; /* Force light border in light mode */
+    border-radius: 20px !important; /* Ensure consistent rounded corners */
+    padding: 8px 16px !important; /* Ensure consistent padding */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important; /* Ensure box-shadow is applied */
+}
+
+#back-button:hover {
+    background-color: #e0e0e0 !important; /* Light hover effect for light mode */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode #back-button {
+    background-color: #333 !important; /* Dark background in dark mode */
+    color: #fff !important; /* White text in dark mode */
+    border-color: #555 !important; /* Darker border in dark mode */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important; /* Darker box-shadow in dark mode */
+}
+
+body.dark-mode #back-button:hover {
+    background-color: #555 !important; /* Lighter dark background on hover in dark mode */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Timeline button specific styles (placed after general styles for precedence) */
+#timeline-toggle {
+    background-color: white !important; /* light mode */
+    color: #333 !important; /* light mode */
+}
+
+#timeline-toggle:hover {
+    background-color: #e0e0e0 !important; /* light hover effect for light mode */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode #timeline-toggle {
+    background-color: #333 !important; /* dark mode, override any previous styles */
+    color: #fff !important; /* dark mode, override any previous styles */
+}
+
+body.dark-mode #timeline-toggle:hover {
+    background-color: #555 !important; /* Lighter dark background on hover in dark mode */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 /* ============================ */
@@ -1489,6 +1532,144 @@ nav.timeline-open {
 
 .soldier-search-results::-webkit-scrollbar-track {
     background-color: #f1f1f1;
+}
+
+#timeline-toggle {
+    background-color: white !important; /* light mode */
+    color: #333 !important; /* light mode */
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#timeline-toggle:hover {
+    background-color: #e0e0e0 !important; /* light hover effect for light mode */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode #timeline-toggle {
+    background-color: #333 !important; /* dark mode, override any previous styles */
+    color: #fff !important; /* dark mode, override any previous styles */
+}
+
+body.dark-mode #timeline-toggle:hover {
+    background-color: #555 !important; /* Lighter dark background on hover in dark mode */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.soldier-search-modal .modal-content {
+    background-color: #fdfcf9; /* Light beige/brown for modal content */
+    margin: auto;
+    padding: 0;
+    border: 1px solid #b58e65; /* Darker brown border */
+    width: 80%; /* Could be adjusted */
+    max-width: 600px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 15px 20px;
+    background: linear-gradient(to right, #7b5d40, #5c412f); /* Brown gradient for header */
+    color: white;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-button {
+    color: white; /* Ensure close button is white */
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #ccc;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.search-input-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #b58e65; /* Match timeline border */
+    border-radius: 20px;
+    padding: 8px 12px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    background-color: white; /* Ensure background is white in light mode */
+}
+
+.search-input-container input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    background-color: transparent;
+    color: #4a4a4a; /* Dark text for consistency */
+    width: 100%;
+    padding: 0;
+}
+
+.soldier-search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #b58e65; /* Match timeline border */
+    border-radius: 8px;
+    padding: 10px;
+    background-color: white; /* Ensure background is white in light mode */
+}
+
+/* Dark mode styles for soldier search modal */
+body.dark-mode .soldier-search-modal .modal-content {
+    background-color: #3c3c3c;
+    border: 1px solid #666;
+}
+
+body.dark-mode .modal-header {
+    background: linear-gradient(to right, #4a3a2d, #3d2c20);
+    color: #fff;
+}
+
+body.dark-mode .close-button {
+    color: #fff;
+}
+
+body.dark-mode .search-input-container {
+    border: 1px solid #666;
+    background-color: #3c3c3c;
+}
+
+body.dark-mode .search-input-container input {
+    color: #fff;
+}
+
+body.dark-mode .soldier-search-results {
+    border: 1px solid #666;
+    background-color: #3c3c3c;
 }
 
 
