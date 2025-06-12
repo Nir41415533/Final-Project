@@ -22,13 +22,17 @@ timelineButton.addEventListener("click", (e) => {
 });
 
 function showInteractiveTimeline() {
+    // Get current language
+    const currentLang = document.documentElement.lang || 'he';
+    
     // יצירת חלון טעינה
     const loadingModal = document.createElement('div');
     loadingModal.className = 'timeline-modal';
+    const loadingTitle = currentLang === 'he' ? 'טוען אירועים...' : 'Loading events...';
     loadingModal.innerHTML = `
         <div class="timeline-content">
             <div class="timeline-header">
-                <h2>טוען אירועים...</h2>
+                <h2>${loadingTitle}</h2>
                 <div class="loading-spinner"></div>
             </div>
         </div>
@@ -39,42 +43,49 @@ function showInteractiveTimeline() {
         loadingModal.classList.add('timeline-modal-active');
     }, 10);
 
+    // Add language parameter to the API call
+    const apiUrl = currentLang === 'he' ? '/events/?lang=he' : '/events/?lang=en';
+
     // קריאה לשרת לקבלת האירועים
-    fetch('/events/')
+    fetch(apiUrl)
         .then(response => response.json())
         .then(events => {
             // הסרת חלון הטעינה
             loadingModal.remove();
-            
-            // עיבוד האירועים
+
             const processedEvents = events.map((event, index) => {
-                const eventDate = new Date(event.date);
-                const year = eventDate.getFullYear().toString();
-                const month = eventDate.toLocaleDateString('he-IL', { month: 'long' });
+                const date = new Date(event.date);
+                const year = date.getFullYear();
+                const month = date.toLocaleDateString(currentLang === 'he' ? 'he-IL' : 'en-US', { month: 'long' });
+
+                // אייקונים לפי סוג האירוע
+                let icon = '⚔️';
+                let color = '#8B4513';
                 
-                // בחירת אייקון וצבע על בסיס תוכן האירוע
-                let icon = '📅';
-                let color = '#007bff';
-                
-                const title = event.title.toLowerCase();
-                if (title.includes('קרב') || title.includes('battle') || title.includes('מלחמה') || title.includes('war')) {
-                    icon = '⚔️';
-                    color = '#dc3545';
-                } else if (title.includes('שחרור') || title.includes('liberation') || title.includes('חירות')) {
-                    icon = '🕊️';
-                    color = '#28a745';
-                } else if (title.includes('פלישה') || title.includes('invasion') || title.includes('כיבוש')) {
-                    icon = '🔥';
-                    color = '#fd7e14';
-                } else if (title.includes('הפצצה') || title.includes('bombing') || title.includes('תקיפה')) {
-                    icon = '💥';
-                    color = '#ffc107';
-                } else if (title.includes('כניעה') || title.includes('surrender') || title.includes('נפילה')) {
-                    icon = '🏳️';
-                    color = '#6c757d';
-                } else if (title.includes('ניצחון') || title.includes('victory')) {
-                    icon = '🏆';
-                    color = '#28a745';
+                if (event.title && currentLang === 'he') {
+                    if (event.title.includes('פלישה') || event.title.includes('פולש')) {
+                        icon = '🚀'; color = '#e74c3c';
+                    } else if (event.title.includes('כניעה') || event.title.includes('נכנע')) {
+                        icon = '🏳️'; color = '#95a5a6';
+                    } else if (event.title.includes('פצצה') || event.title.includes('הפצצה')) {
+                        icon = '💥'; color = '#f39c12';
+                    } else if (event.title.includes('שחרור') || event.title.includes('משחרר')) {
+                        icon = '🎉'; color = '#27ae60';
+                    } else if (event.title.includes('קרב') || event.title.includes('לחימה')) {
+                        icon = '⚔️'; color = '#8B4513';
+                    }
+                } else if (event.title && currentLang === 'en') {
+                    if (event.title.toLowerCase().includes('invasion') || event.title.toLowerCase().includes('invade')) {
+                        icon = '🚀'; color = '#e74c3c';
+                    } else if (event.title.toLowerCase().includes('surrender') || event.title.toLowerCase().includes('capitulation')) {
+                        icon = '🏳️'; color = '#95a5a6';
+                    } else if (event.title.toLowerCase().includes('bomb') || event.title.toLowerCase().includes('bombing')) {
+                        icon = '💥'; color = '#f39c12';
+                    } else if (event.title.toLowerCase().includes('liberation') || event.title.toLowerCase().includes('liberate')) {
+                        icon = '🎉'; color = '#27ae60';
+                    } else if (event.title.toLowerCase().includes('battle') || event.title.toLowerCase().includes('fight')) {
+                        icon = '⚔️'; color = '#8B4513';
+                    }
                 }
                 
                 return {
@@ -83,7 +94,7 @@ function showInteractiveTimeline() {
                     month: month,
                     icon: icon,
                     color: color,
-                    details: event.description || 'לא מוגדר תיאור מפורט לאירוע זה.'
+                    details: event.description || (currentLang === 'he' ? 'לא מוגדר תיאור מפורט לאירוע זה.' : 'No detailed description available for this event.')
                 };
             }).sort((a, b) => new Date(a.date) - new Date(b.date)); // מיון לפי תאריך
 
@@ -92,14 +103,21 @@ function showInteractiveTimeline() {
 
             const modal = document.createElement('div');
             modal.className = 'timeline-modal';
+            
+            const mainTitle = currentLang === 'he' ? 'ציר הזמן של מלחמת העולם השנייה' : 'World War II Timeline';
+            const subtitle = currentLang === 'he' ? 
+                `האירועים המכריעים שעיצבו את ההיסטוריה • ${processedEvents.length} אירועים` :
+                `The decisive events that shaped history • ${processedEvents.length} events`;
+            const allYearsText = currentLang === 'he' ? 'כל השנים' : 'All Years';
+            
             modal.innerHTML = `
                 <div class="timeline-content">
                     <div class="timeline-header">
-                        <h2>ציר הזמן של מלחמת העולם השנייה</h2>
-                        <p class="timeline-subtitle">האירועים המכריעים שעיצבו את ההיסטוריה • ${processedEvents.length} אירועים</p>
+                        <h2>${mainTitle}</h2>
+                        <p class="timeline-subtitle">${subtitle}</p>
                     </div>
                     <div class="timeline-navigation">
-                        <button class="timeline-nav-btn active" data-year="all">כל השנים</button>
+                        <button class="timeline-nav-btn active" data-year="all">${allYearsText}</button>
                         ${years.map(year => `
                             <button class="timeline-nav-btn" data-year="${year}">${year}</button>
                         `).join('')}
@@ -107,22 +125,21 @@ function showInteractiveTimeline() {
                     <div class="timeline-container">
                         ${processedEvents.map((event, index) => `
                             <div class="timeline-item enhanced" data-year="${event.year}" data-index="${index}">
-                            
                                 <div class="timeline-content-item">
                                     <div class="timeline-date">
                                         <span class="year">${event.year}</span>
                                         <span class="month">${event.month}</span>
                                     </div>
                                     <h3>${event.title}</h3>
-                                    ${event.country && event.country.name_he ? `<p class="timeline-location"> ${event.country.name_he}</p>` : ''}
-                                    <button class="timeline-details-btn" data-index="${index}">קרא עוד</button>
+                                    ${event.country && event.country.name_he ? `<p class="timeline-location">${currentLang === 'he' ? event.country.name_he : event.country.name_en || event.country.name_he}</p>` : ''}
+                                    <button class="timeline-details-btn" data-index="${index}">${currentLang === 'he' ? 'קרא עוד' : 'Read More'}</button>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                     <div class="timeline-progress">
                         <div class="progress-line"></div>
-                        <span class="progress-text">גלול למטה לראות עוד אירועים</span>
+                        <span class="progress-text">${currentLang === 'he' ? 'גלול למטה לראות עוד אירועים' : 'Scroll down to see more events'}</span>
                     </div>
                     <button class="close-timeline">✕</button>
                 </div>
@@ -147,7 +164,7 @@ function showInteractiveTimeline() {
             detailButtons.forEach(button => {
                 button.addEventListener('click', (e) => {
                     const index = parseInt(e.target.dataset.index);
-                    showEventDetails(processedEvents[index]);
+                    showEventDetails(processedEvents[index], currentLang);
                 });
             });
 
@@ -173,12 +190,16 @@ function showInteractiveTimeline() {
         })
         .catch(error => {
             // טיפול בשגיאות
+            const errorTitle = currentLang === 'he' ? 'שגיאה בטעינת האירועים' : 'Error Loading Events';
+            const errorMessage = currentLang === 'he' ? 'אנא נסה שוב מאוחר יותר' : 'Please try again later';
+            const closeText = currentLang === 'he' ? 'סגור' : 'Close';
+            
             loadingModal.innerHTML = `
                 <div class="timeline-content">
                     <div class="timeline-header">
-                        <h2>שגיאה בטעינת האירועים</h2>
-                        <p>אנא נסה שוב מאוחר יותר</p>
-                        <button class="close-timeline" onclick="this.closest('.timeline-modal').remove()">סגור</button>
+                        <h2>${errorTitle}</h2>
+                        <p>${errorMessage}</p>
+                        <button class="close-timeline" onclick="this.closest('.timeline-modal').remove()">${closeText}</button>
                     </div>
                 </div>
             `;
@@ -210,46 +231,62 @@ function filterTimelineByYear(selectedYear) {
     });
 }
 
-function showEventDetails(event) {
-    const detailModal = document.createElement('div');
-    detailModal.className = 'event-detail-modal';
-    detailModal.innerHTML = `
+function showEventDetails(event, currentLang = 'he') {
+    const modal = document.createElement('div');
+    modal.className = 'event-detail-modal';
+    
+    const detailsTitle = currentLang === 'he' ? 'פרטי האירוע' : 'Event Details';
+    const dateLabel = currentLang === 'he' ? 'תאריך:' : 'Date:';
+    const locationLabel = currentLang === 'he' ? 'מיקום:' : 'Location:';
+    const descriptionLabel = currentLang === 'he' ? 'תיאור מפורט' : 'Detailed Description';
+    const closeText = currentLang === 'he' ? 'סגור' : 'Close';
+    
+    // Format date based on language
+    const formattedDate = new Date(event.date).toLocaleDateString(
+        currentLang === 'he' ? 'he-IL' : 'en-US', 
+        { year: 'numeric', month: 'long', day: 'numeric' }
+    );
+    
+    modal.innerHTML = `
         <div class="event-detail-content">
-            <div class="event-header">
+            <div class="event-header" style="background: linear-gradient(135deg, ${event.color}dd, ${event.color}aa);">
+                <div class="event-icon" style="background-color: ${event.color};">${event.icon}</div>
                 <div class="event-title-section">
                     <h2>${event.title}</h2>
-                    <p class="event-date">${event.month} ${event.year}</p>
-                    ${event.country && event.country.name_he ? `<p class="event-location">${event.country.name_he}</p>` : ''}
+                    <div class="event-date">${dateLabel} ${formattedDate}</div>
+                    ${event.country ? `<div class="event-location">${locationLabel} ${currentLang === 'he' ? (event.country.name_he || event.country.name_en) : (event.country.name_en || event.country.name_he)}</div>` : ''}
                 </div>
+                <button class="close-event-detail">${closeText}</button>
             </div>
             <div class="event-body">
                 <div class="event-description-section">
-                    <h4>תיאור האירוע</h4>
-                    <p class="event-main-description">${event.description}</p>
+                    <h4>${descriptionLabel}</h4>
+                    <div class="event-main-description">
+                        ${event.details}
+                    </div>
                 </div>
             </div>
-            <button class="close-event-detail">סגור</button>
         </div>
     `;
     
-    document.body.appendChild(detailModal);
+    document.body.appendChild(modal);
     
     setTimeout(() => {
-        detailModal.classList.add('event-detail-active');
+        modal.classList.add('event-detail-active');
     }, 10);
-
-    // מאזין לסגירה
-    const closeButton = detailModal.querySelector('.close-event-detail');
+    
+    // Add event listener for close button
+    const closeButton = modal.querySelector('.close-event-detail');
     closeButton.addEventListener('click', () => {
-        detailModal.classList.remove('event-detail-active');
-        setTimeout(() => detailModal.remove(), 300);
+        modal.classList.remove('event-detail-active');
+        setTimeout(() => modal.remove(), 300);
     });
-
-    // סגירה בלחיצה על הרקע
-    detailModal.addEventListener('click', (e) => {
-        if (e.target === detailModal) {
-            detailModal.classList.remove('event-detail-active');
-            setTimeout(() => detailModal.remove(), 300);
+    
+    // Close on background click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('event-detail-active');
+            setTimeout(() => modal.remove(), 300);
         }
     });
 }

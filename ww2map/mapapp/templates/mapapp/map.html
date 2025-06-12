@@ -6,9 +6,9 @@
 <html lang="{{ LANGUAGE_CODE }}" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    {% if LANGUAGE_CODE == 'he' %}
     <title>{% trans "Interactive Map" %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
     <!-- ספריות צד שלישי -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
@@ -28,6 +28,29 @@
             height: 100vh;
         }
     </style>
+    {% else %}
+    <title>{% trans "Interactive Map" %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- Third-party libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+
+    <!-- MapLibre CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@3.3.1/dist/maplibre-gl.min.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'mapapp/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'mapapp/css/modal.css' %}">
+    <link rel="icon" href="{% static 'mapapp/favicon.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <style>
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+    {% endif %}
 </head>
 <body>
     <!-- Navbar -->
@@ -35,24 +58,27 @@
         <div class="nav-buttons">
             <!-- חיפוש מדינה (בצד ימין) -->
             <div class="simple-search">
-                <input type="text" id="countrySearch" placeholder="חפש מדינה..." aria-label="חיפוש מדינה">
+                <input type="text" id="countrySearch" 
+                       placeholder="{% if LANGUAGE_CODE == 'he' %}חפש מדינה...{% else %}Search Country...{% endif %}" 
+                       aria-label="{% if LANGUAGE_CODE == 'he' %}חיפוש מדינה{% else %}Country Search{% endif %}">
                 <div id="searchResults" class="search-results"></div>
                 <!-- כפתור חיפוש חיילים -->
-                <button id="soldier-search-toggle" class="nav-button" title="חיפוש חיילים">
+                <button id="soldier-search-toggle" class="nav-button" 
+                        title="{% if LANGUAGE_CODE == 'he' %}חיפוש חיילים{% else %}Search Soldiers{% endif %}">
                     <i class="fas fa-user-alt"></i>
                     {% if LANGUAGE_CODE == 'he' %}
-                        Search Soldiers
-                    {% else %}
                         חיפוש חיילים
+                    {% else %}
+                        Search Soldiers
                     {% endif %}
                 </button>
                 <!-- כפתור לוח נתונים -->
                 <a href="{% url 'dashboard' %}" class="nav-button">
                     <i class="fas fa-tachometer-alt"></i>
                     {% if LANGUAGE_CODE == 'he' %}
-                        Dashboard
-                    {% else %}
                         לוח נתונים
+                    {% else %}
+                        Dashboard
                     {% endif %}
                 </a>
             </div>
@@ -62,9 +88,9 @@
                 <a href="{% url 'home' %}" class="nav-button" id="back-button">
                     <i class="fas fa-arrow-right"></i>
                     {% if LANGUAGE_CODE == 'he' %}
-                        Back
-                    {% else %}
                         חזרה
+                    {% else %}
+                        Back
                     {% endif %}
                 </a>
 
@@ -94,9 +120,9 @@
                 <button id="timeline-toggle" class="nav-button" data-action="timeline">
                     <i class="fas fa-clock"></i>
                     {% if LANGUAGE_CODE == 'he' %}
-                        Timeline
-                    {% else %}
                         ציר זמן
+                    {% else %}
+                        Timeline
                     {% endif %}
                 </button>
             </div>
@@ -106,18 +132,31 @@
     <!-- מסך טעינה -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loading-content">
-            <h1 class="loading-title">טוען מפה אינטראקטיבית</h1>
+            <h1 class="loading-title">
+                {% if LANGUAGE_CODE == 'he' %}
+                    טוען מפה אינטראקטיבית
+                {% else %}
+                    Loading Interactive Map
+                {% endif %}
+            </h1>
             <div class="loading-spinner"></div>
             <div class="loading-progress">
                 <div id="progressBar" class="progress-bar"></div>
             </div>
-            <div id="loadingText" class="loading-text">טוען את המפה...</div>
+            <div id="loadingText" class="loading-text">
+                {% if LANGUAGE_CODE == 'he' %}
+                    טוען את המפה...
+                {% else %}
+                    Loading map...
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <!-- Timeline Fixed Container בצד שמאל (מוסתר כברירת מחדל) -->
     <div id="timeline-fixed-container" style="display: none;">
-        <button id="timeline-close-btn" title="סגור ציר זמן">×</button>
+        <button id="timeline-close-btn" 
+                title="{% if LANGUAGE_CODE == 'he' %}סגור ציר זמן{% else %}Close Timeline{% endif %}">×</button>
         <div id="timeline-container">
             <div class="timeline-header"></div>
             <div id="timeline-events" class="timeline-events"></div>
@@ -130,7 +169,13 @@
                 <a href="{% url 'home' %}">
                     <img src="{% static 'mapapp/images/logo.svg' %}" alt="לוגו המוזיאון">
                 </a>
-                <span class="logo-text">מוזיאון הלוחם היהודי</span>
+                <span class="logo-text">
+                    {% if LANGUAGE_CODE == 'he' %}
+                        מוזיאון הלוחם היהודי
+                    {% else %}
+                        Jewish Fighter Museum
+                    {% endif %}
+                </span>
             </div>
             <div class="nav-buttons">
                 <form method="POST" style="display: inline;">
@@ -169,11 +214,21 @@
             <div class="modal-layout-grid">
                 <!-- Rifht Column -->
                 <div class="soldiers-section">
-                    <h3 id="soldiersTitle">לוחמים ממדינה זו:</h3>
+                    <h3 id="soldiersTitle">
+                        {% if LANGUAGE_CODE == 'he' %}
+                            לוחמים ממדינה זו:
+                        {% else %}
+                            Fighters from this country:
+                        {% endif %}
+                    </h3>
                     <div class="soldiers-search-container">
-                        <input type="text" id="soldiersSearch" class="soldiers-search" placeholder="חפש לוחמים..." aria-label="חפש לוחמים">
-                        <button id="clearSearch" class="clear-search" aria-label="נקה חיפוש">×</button>
-                        <button id="advancedFilterButton" class="advanced-filter-button" title="סינון מתקדם">
+                        <input type="text" id="soldiersSearch" class="soldiers-search" 
+                               placeholder="{% if LANGUAGE_CODE == 'he' %}חפש לוחמים...{% else %}Search fighters...{% endif %}" 
+                               aria-label="{% if LANGUAGE_CODE == 'he' %}חפש לוחמים{% else %}Search fighters{% endif %}">
+                        <button id="clearSearch" class="clear-search" 
+                                aria-label="{% if LANGUAGE_CODE == 'he' %}נקה חיפוש{% else %}Clear search{% endif %}">×</button>
+                        <button id="advancedFilterButton" class="advanced-filter-button" 
+                                title="{% if LANGUAGE_CODE == 'he' %}סינון מתקדם{% else %}Advanced Filter{% endif %}">
                             <i class="filter-icon">⚙️</i>
                         </button>
                     </div>
@@ -182,40 +237,54 @@
                         <form id="filterForm" class="filter-form">
                             <div class="filter-row">
                                 <div class="filter-group">
-                                    <label for="genderFilter">מגדר:</label>
+                                    <label for="genderFilter">
+                                        {% if LANGUAGE_CODE == 'he' %}מגדר:{% else %}Gender:{% endif %}
+                                    </label>
                                     <select id="genderFilter">
-                                        <option value="">הכל</option>
-                                        <option value="זכר">זכר</option>
-                                        <option value="נקבה">נקבה</option>
+                                        <option value="">{% if LANGUAGE_CODE == 'he' %}הכל{% else %}All{% endif %}</option>
+                                        <option value="זכר">{% if LANGUAGE_CODE == 'he' %}זכר{% else %}Male{% endif %}</option>
+                                        <option value="נקבה">{% if LANGUAGE_CODE == 'he' %}נקבה{% else %}Female{% endif %}</option>
                                     </select>
                                 </div>
                             </div>
                             
                             <div class="filter-row">
                                 <div class="filter-group">
-                                    <label for="yearFromFilter">משנת לידה:</label>
-                                    <input type="number" id="yearFromFilter" min="1900" max="1945" placeholder="מ...">
+                                    <label for="yearFromFilter">
+                                        {% if LANGUAGE_CODE == 'he' %}משנת לידה:{% else %}From birth year:{% endif %}
+                                    </label>
+                                    <input type="number" id="yearFromFilter" min="1900" max="1945" 
+                                           placeholder="{% if LANGUAGE_CODE == 'he' %}מ...{% else %}From...{% endif %}">
                                 </div>
                                 
                                 <div class="filter-group">
-                                    <label for="yearToFilter">עד שנת לידה:</label>
-                                    <input type="number" id="yearToFilter" min="1900" max="1945" placeholder="עד...">
+                                    <label for="yearToFilter">
+                                        {% if LANGUAGE_CODE == 'he' %}עד שנת לידה:{% else %}To birth year:{% endif %}
+                                    </label>
+                                    <input type="number" id="yearToFilter" min="1900" max="1945" 
+                                           placeholder="{% if LANGUAGE_CODE == 'he' %}עד...{% else %}To...{% endif %}">
                                 </div>
                             </div>
                             
                             <div class="filter-row">
                                 <div class="filter-group">
-                                    <label for="sortByFilter">מיון לפי:</label>
+                                    <label for="sortByFilter">
+                                        {% if LANGUAGE_CODE == 'he' %}מיון לפי:{% else %}Sort by:{% endif %}
+                                    </label>
                                     <select id="sortByFilter">
-                                        <option value="name">שם</option>
-                                        <option value="birth_date">תאריך לידה</option>
+                                        <option value="name">{% if LANGUAGE_CODE == 'he' %}שם{% else %}Name{% endif %}</option>
+                                        <option value="birth_date">{% if LANGUAGE_CODE == 'he' %}תאריך לידה{% else %}Birth Date{% endif %}</option>
                                     </select>
                                 </div>
                             </div>
                             
                             <div class="filter-buttons">
-                                <button type="button" id="applyFilters" class="apply-filters-btn">החל סינון</button>
-                                <button type="button" id="resetFilters" class="reset-filters-btn">איפוס</button>
+                                <button type="button" id="applyFilters" class="apply-filters-btn">
+                                    {% if LANGUAGE_CODE == 'he' %}החל סינון{% else %}Apply Filter{% endif %}
+                                </button>
+                                <button type="button" id="resetFilters" class="reset-filters-btn">
+                                    {% if LANGUAGE_CODE == 'he' %}איפוס{% else %}Reset{% endif %}
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -242,7 +311,11 @@
                     <!-- Event Details Section -->
                     <div id="eventDetails" class="event-details">
                         <div class="event-description">
+                            {% if LANGUAGE_CODE == 'he' %}
                             <h3>תיאור האירוע</h3>
+                            {% else %}
+                            <h3>Event Description</h3>
+                            {% endif %}
                             <div id="eventSummary" class="scrollable">
                                 <!-- Event description will be added here -->
                                 <div class="event-info">
@@ -264,13 +337,7 @@
                     </div>
                 </div>
 
-                <!-- Right Column -->
-                <div class="right-column">
-                    <div class="multimedia">
-                        <img id="eventImage" class="event-image" src="" alt="תמונה מהאירוע" style="display: none;" />
-                        <video id="eventVideo" class="event-media" controls preload="metadata" style="display: none;"></video>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
@@ -281,7 +348,7 @@
             <!-- כפתור סגירה -->
             <div class="modal-controls">
                 <button id="soldierClose" class="eventClose" onclick="closeSoldierModal()">
-                    <span class="closeText">סגור</span>
+                    <span class="closeText">{% if LANGUAGE_CODE == 'he' %}סגור{% else %}Close{% endif %}</span>
                     <span class="closeX">×</span>
                 </button>
             </div>
@@ -301,100 +368,96 @@
 
                     <div class="soldier-details scrollable">
                         <div class="details-section">
-                            <h3>פרטים אישיים</h3>
+                            <h3>{% if LANGUAGE_CODE == 'he' %}פרטים אישיים{% else %}Personal Details{% endif %}</h3>
                             <div class="details-grid">
                                 <div class="info-row">
-                                    <strong>תאריך לידה:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}תאריך לידה:{% else %}Birth Date:{% endif %}</strong>
                                     <span id="soldierBirthDate"></span>
                                 </div>
                                 <div class="info-row">
-                                    <strong>עיר לידה:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}עיר לידה:{% else %}Birth City:{% endif %}</strong>
                                     <span id="soldierBirthCity"></span>
                                 </div>
                                 <div class="info-row">
-                                    <strong>מדינת לידה:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}מדינת לידה:{% else %}Birth Country:{% endif %}</strong>
                                     <span id="soldierBirthCountry"></span>
                                 </div>
                                 <div class="info-row">
-                                    <strong>תאריך עלייה:</strong>
-                                    <span id="soldierAliyaDate"></span>
-                                </div>
-                                <div class="info-row">
-                                    <strong>שם האב:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}שם האב:{% else %}Father's Name:{% endif %}</strong>
                                     <span id="soldierFatherName"></span>
                                 </div>
                                 <div class="info-row">
-                                    <strong>שם האם:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}שם האם:{% else %}Mother's Name:{% endif %}</strong>
                                     <span id="soldierMotherName"></span>
                                 </div>
                                 <div class="info-row">
-                                    <strong>שם משפחה קודם:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}שם משפחה קודם:{% else %}Previous Last Name:{% endif %}</strong>
                                     <span id="soldierPreviousLastName"></span>
                                 </div>
                                 <div class="info-row">
-                                    <strong>כינוי:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}כינוי:{% else %}Nickname:{% endif %}</strong>
                                     <span id="soldierNickname"></span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="details-section">
-                            <h3>שירות צבאי</h3>
+                            <h3>{% if LANGUAGE_CODE == 'he' %}שירות צבאי{% else %}Military Service{% endif %}</h3>
                             <div class="details-grid">
                                 <div class="info-row">
-                                    <strong>צבא:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}צבא:{% else %}Army:{% endif %}</strong>
                                     <span id="soldierArmy"></span>
                                 </div>
                                 <div class="info-row">
-                                    <strong>תפקיד:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}תפקיד:{% else %}Role:{% endif %}</strong>
                                     <span id="soldierRole"></span>
                                 </div>
                                 <div class="info-row">
-                                    <strong>דרגה:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}דרגה:{% else %}Rank:{% endif %}</strong>
                                     <span id="soldierRank"></span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="details-section">
-                            <h3>השתתפות במלחמה</h3>
+                            <h3>{% if LANGUAGE_CODE == 'he' %}השתתפות במלחמה{% else %}War Participation{% endif %}</h3>
                             <div id="soldierParticipation" class="text-block"></div>
                         </div>
 
                         <div class="details-section">
-                            <h3>עיטורים</h3>
+                            <h3>{% if LANGUAGE_CODE == 'he' %}עיטורים{% else %}Decorations{% endif %}</h3>
                             <div id="soldierDecorations" class="text-block"></div>
                         </div>
 
                         <div class="details-section">
-                            <h3>ביוגרפיה</h3>
+                            <h3>{% if LANGUAGE_CODE == 'he' %}ביוגרפיה{% else %}Biography{% endif %}</h3>
                             <div id="soldierBiography" class="text-block"></div>
                         </div>
 
                         <div class="details-section">
-                            <h3>תיאור הלחימה</h3>
+                            <h3>{% if LANGUAGE_CODE == 'he' %}תיאור הלחימה{% else %}Fighting Description{% endif %}</h3>
                             <div id="soldierFightingDesc" class="text-block"></div>
                         </div>
 
                         <div class="details-section">
-                            <h3>תיאור הגטו</h3>
+                            <h3>{% if LANGUAGE_CODE == 'he' %}תיאור הגטו{% else %}Ghetto Description{% endif %}</h3>
                             <div id="soldierGettoDesc" class="text-block"></div>
                         </div>
 
                         <div class="details-section">
-                            <h3>פציעות</h3>
+                            <h3>{% if LANGUAGE_CODE == 'he' %}פציעות{% else %}Wounds{% endif %}</h3>
                             <div id="soldierWounds" class="text-block"></div>
                         </div>
 
                         <div class="details-section">
-                            <h3>מידע על פטירה</h3>
+                            <h3>{% if LANGUAGE_CODE == 'he' %}מידע על פטירה{% else %}Death Information{% endif %}</h3>
                             <div class="details-grid">
                                 <div class="info-row">
-                                    <strong>תאריך פטירה:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}תאריך פטירה:{% else %}Death Date:{% endif %}</strong>
                                     <span id="soldierDeathDate"></span>
                                 </div>
                                 <div class="info-row">
-                                    <strong>מקום פטירה:</strong>
+                                    <strong>{% if LANGUAGE_CODE == 'he' %}מקום פטירה:{% else %}Place of Death:{% endif %}</strong>
                                     <span id="soldierDeathPlace"></span>
                                 </div>
                             </div>
@@ -410,12 +473,14 @@
     <div id="soldierSearchModal" class="modal">
         <div class="modal-content soldier-search-modal">
             <div class="modal-header">
-                <h2>חיפוש חיילים</h2>
+                <h2>{% if LANGUAGE_CODE == 'he' %}חיפוש חיילים{% else %}Search Soldiers{% endif %}</h2>
                 <button class="close-button" onclick="closeSoldierSearchModal()">×</button>
             </div>
             <div class="modal-body">
                 <div class="search-input-container">
-                    <input type="text" id="soldierSearchInput" placeholder="הקלד שם חייל..." autofocus>
+                    <input type="text" id="soldierSearchInput" 
+                           placeholder="{% if LANGUAGE_CODE == 'he' %}הקלד שם חייל...{% else %}Type soldier name...{% endif %}" 
+                           autofocus>
                     <i class="fas fa-search search-icon"></i>
                 </div>
                 <div id="soldierSearchResults" class="soldier-search-results"></div>

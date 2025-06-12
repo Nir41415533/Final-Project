@@ -59,34 +59,61 @@ def ww2map_view(request):
 @api_view(['GET'])
 def event_list(request):
     try:
+        # Get language from session or URL parameter
+        language = request.session.get('language', 'en')
+        if 'lang' in request.GET:
+            language = request.GET.get('lang', 'en')
+        
         events = Event.objects.all().values(
-            "title", "date", "description", 
+            "title", "title_en", "date", "description", "description_en", 
             "country__name_en", "country__name_he", 
             "country__latitude", "country__longitude",
             "image", "video"
         )
         
-        # Debug information
-        # print("🔍 כל האירועים:", list(events))
-        # print("🔍 מדינות ייחודיות:", set(ev["country__name_en"] for ev in events if ev["country__name_en"]))
-
         results = []
         for event in events:
-            event["country__name"] = event.pop("country__name_en")
-            event["country__name_he"] = event.pop("country__name_he")
-            # Add country coordinates to the event data
-            event["country"] = {
-                "name": event["country__name"],
-                "name_he": event["country__name_he"],
-                "latitude": event.pop("country__latitude"),
-                "longitude": event.pop("country__longitude")
+            # Helper function to get field value based on language
+            def get_field_by_language(he_field, en_field):
+                if language == 'he':
+                    return he_field if he_field else en_field
+                else:
+                    return en_field if en_field else he_field
+            
+            # Choose event title and description based on language
+            event_title = get_field_by_language(event["title"], event["title_en"])
+            event_description = get_field_by_language(event["description"], event["description_en"])
+            
+            # Choose country name based on language (keeping existing logic)
+            country_name = event["country__name_he"] if language == 'he' else event["country__name_en"]
+            if not country_name:  # fallback to other language if empty
+                country_name = event["country__name_en"] if language == 'he' else event["country__name_he"]
+            
+            event_data = {
+                "title": event_title,
+                "date": event["date"],
+                "description": event_description,
+                "image": event["image"],
+                "video": event["video"],
+                "country": {
+                    "name": country_name,
+                    "latitude": event["country__latitude"],
+                    "longitude": event["country__longitude"]
+                }
             }
-        return JsonResponse(list(events), safe=False)
+            results.append(event_data)
+            
+        return JsonResponse(results, safe=False)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
 @api_view(['GET'])
 def soldiers_list(request):
+    # Get language from session or URL parameter
+    language = request.session.get('language', 'en')
+    if 'lang' in request.GET:
+        language = request.GET.get('lang', 'en')
+    
     # סינון חיילים עם מגדר תקין ושמות תקינים בלבד
     valid_name_regex = r'^[A-Za-zא-ת\s\-]+$'
     soldiers = Soldier.objects.select_related('birth_country') \
@@ -95,12 +122,27 @@ def soldiers_list(request):
 
     data = []
     for soldier in soldiers:
+        # Helper function to get field value based on language
+        def get_field_by_language(he_field, en_field):
+            if language == 'he':
+                return he_field
+            else:
+                return en_field
+        
+        # Get names and country based on language
+        first_name = get_field_by_language(soldier.first_name_he, soldier.first_name_en)
+        last_name = get_field_by_language(soldier.last_name_he, soldier.last_name_en)
+        country_name = get_field_by_language(
+            soldier.birth_country.name_he if soldier.birth_country else "",
+            soldier.birth_country.name_en if soldier.birth_country else ""
+        )
+        
         data.append({
             "id": soldier.customer_id,
-            "name": f"{soldier.first_name_he} {soldier.last_name_he}",
+            "name": f"{first_name} {last_name}",
             "image": soldier.image_url,
-            "gender":soldier.gender,
-            "country": soldier.birth_country.name_en if soldier.birth_country else "",
+            "gender": soldier.gender,
+            "country": country_name,
         })
 
     return JsonResponse(data, safe=False)
@@ -110,6 +152,11 @@ def paginated_soldiers(request):
     """
     API endpoint לטעינה הדרגתית של חיילים עם אפשרות לפילטור לפי מדינה
     """
+    # Get language from session or URL parameter
+    language = request.session.get('language', 'en')
+    if 'lang' in request.GET:
+        language = request.GET.get('lang', 'en')
+    
     valid_name_regex = r'^[A-Za-zא-ת\s\-]+$'
     page = int(request.GET.get('page', 1))
     limit = int(request.GET.get('limit', 50))
@@ -177,12 +224,27 @@ def paginated_soldiers(request):
     soldiers = soldiers_query[offset:offset + limit]
     data = []
     for soldier in soldiers:
+        # Helper function to get field value based on language
+        def get_field_by_language(he_field, en_field):
+            if language == 'he':
+                return he_field
+            else:
+                return en_field
+        
+        # Get names based on language
+        first_name = get_field_by_language(soldier.first_name_he, soldier.first_name_en)
+        last_name = get_field_by_language(soldier.last_name_he, soldier.last_name_en)
+        country_name = get_field_by_language(
+            soldier.birth_country.name_he if soldier.birth_country else "",
+            soldier.birth_country.name_en if soldier.birth_country else ""
+        )
+        
         data.append({
             "id": soldier.customer_id,
-            "name": f"{soldier.first_name_he} {soldier.last_name_he}",
+            "name": f"{first_name} {last_name}",
             "image": soldier.image_url,
             "gender": soldier.gender,
-            "country": soldier.birth_country.name_en if soldier.birth_country else "",
+            "country": country_name,
         })
     return JsonResponse({
         'soldiers': data,
@@ -200,6 +262,11 @@ def soldier_detail(request, soldier_id):
     API endpoint לקבלת מידע מפורט על לוחם ספציפי
     """
     try:
+        # Get language from session or URL parameter
+        language = request.session.get('language', 'en')
+        if 'lang' in request.GET:
+            language = request.GET.get('lang', 'en')
+        
         # Fetch the soldier by customer_id with related country
         soldier = Soldier.objects.select_related('birth_country').get(customer_id=soldier_id)
         
@@ -219,39 +286,53 @@ def soldier_detail(request, soldier_id):
         def clean_date(date_field):
             return date_field.isoformat() if date_field else None
         
-        # Prepare the detailed response
+        # Helper function to get field value based on language
+        def get_field_by_language(he_field, en_field):
+            if language == 'he':
+                return clean_text(he_field)
+            else:
+                return clean_text(en_field)
+        
+        # Prepare the detailed response based on language
         data = {
             "id": soldier.customer_id,
-            "first_name_he": clean_text(soldier.first_name_he),
-            "last_name_he": clean_text(soldier.last_name_he),
-            "name": f"{clean_text(soldier.first_name_he) or ''} {clean_text(soldier.last_name_he) or ''}".strip(),
-            "previous_last_name_he": clean_text(soldier.previous_last_name_he),
-            "nickname_he": clean_text(soldier.nickname_he),
+            "first_name": get_field_by_language(soldier.first_name_he, soldier.first_name_en),
+            "last_name": get_field_by_language(soldier.last_name_he, soldier.last_name_en),
+            "previous_last_name": clean_text(soldier.previous_last_name_he),
+            "nickname": clean_text(soldier.nickname_he),
             "father_name": clean_text(soldier.father_name),
             "mother_name": clean_text(soldier.mother_name),
             "gender": clean_text(soldier.gender),
             "date_of_birth": clean_date(soldier.date_of_birth),
-            "birth_city_he": clean_text(soldier.birth_city_he),
+            "birth_city": get_field_by_language(soldier.birth_city_he, soldier.birth_city_en),
             "birth_country": {
-                "name_he": clean_text(soldier.birth_country.name_he) if soldier.birth_country else None,
+                "name": get_field_by_language(
+                    soldier.birth_country.name_he, 
+                    soldier.birth_country.name_en
+                ) if soldier.birth_country else None,
                 "code": soldier.birth_country.code if soldier.birth_country else None
             } if soldier.birth_country else None,
             "aliya_date": clean_date(soldier.aliya_date),
-            "army_he": clean_text(soldier.army_he),
-            "army_role_he": clean_text(soldier.army_role_he),
+            "army": get_field_by_language(soldier.army_he, soldier.army_en),
+            "army_role": get_field_by_language(soldier.army_role_he, soldier.army_role_en),
             "rank": clean_text(soldier.rank),
-            "participation_he": clean_text(soldier.participation_he),
-            "decorations_he": clean_text(soldier.decorations_he),
-            "biography_he": clean_text(soldier.biography_he),
-            "fighting_description_he": clean_text(soldier.fighting_description_he),
-            "getto_description_he": clean_text(soldier.getto_description_he),
-            "wounds_he": clean_text(soldier.wounds_he),
+            "participation": get_field_by_language(soldier.participation_he, soldier.participation_en),
+            "decorations": get_field_by_language(soldier.decorations_he, soldier.decorations_en),
+            "biography": get_field_by_language(soldier.biography_he, soldier.biography_en),
+            "fighting_description": get_field_by_language(soldier.fighting_description_he, soldier.fighting_description_en),
+            "getto_description": get_field_by_language(soldier.getto_description_he, soldier.getto_description_en),
+            "wounds": get_field_by_language(soldier.wounds_he, soldier.wounds_en),
             "date_of_death": clean_date(soldier.date_of_death),
-            "place_of_death_he": clean_text(soldier.place_of_death_he),
-            "death_details_he": clean_text(soldier.death_details_he),
+            "place_of_death": get_field_by_language(soldier.place_of_death_he, soldier.place_of_death_en),
+            "death_details": get_field_by_language(soldier.death_details_he, soldier.death_details_en),
             "image_url": soldier.image_url if soldier.image_url and soldier.image_url.strip() else None,
             "video_url": soldier.video_url if soldier.video_url and soldier.video_url.strip() else None
         }
+        
+        # Add full name
+        first_name = data.get("first_name", "")
+        last_name = data.get("last_name", "")
+        data["name"] = f"{first_name} {last_name}".strip()
         
         # Return data - only remove None values, keep everything else
         filtered_data = {k: v for k, v in data.items() if v is not None}
@@ -590,33 +671,113 @@ def dashboard_data(request):
 @api_view(['GET'])
 def search_soldiers(request):
     """
-    API endpoint לחיפוש לוחמים על פי שם
+    API endpoint לחיפוש לוחמים לפי שם
     """
-    query = request.GET.get('q', '').strip()
-    limit = int(request.GET.get('limit', 10))
+    # Get language from session or URL parameter
+    language = request.session.get('language', 'en')
+    if 'lang' in request.GET:
+        language = request.GET.get('lang', 'en')
     
-    if not query or len(query) < 2:
+    search_query = request.GET.get('q', '').strip()
+    if not search_query:
         return JsonResponse({'soldiers': []})
     
-    # Filter soldiers with valid names and data
     valid_name_regex = r'^[A-Za-zא-ת\s\-]+$'
+    
+    def get_field_by_language(he_field, en_field):
+        if language == 'he':
+            return he_field
+        else:
+            return en_field
+    
+    # חיפוש לוחמים לפי שם פרטי או משפחה
     soldiers_query = Soldier.objects.select_related('birth_country') \
         .exclude(gender__isnull=True).exclude(gender__exact='') \
-        .filter(first_name_he__regex=valid_name_regex, last_name_he__regex=valid_name_regex)
-    
-    # Search in first name or last name
-    soldiers_query = soldiers_query.filter(
-        Q(first_name_he__icontains=query) | 
-        Q(last_name_he__icontains=query)
-    ).order_by('first_name_he', 'last_name_he')[:limit]
+        .filter(first_name_he__regex=valid_name_regex, last_name_he__regex=valid_name_regex) \
+        .filter(
+            Q(first_name_he__icontains=search_query) | 
+            Q(last_name_he__icontains=search_query) |
+            Q(first_name_en__icontains=search_query) | 
+            Q(last_name_en__icontains=search_query)
+        )[:20]  # מגביל ל-20 תוצאות
     
     soldiers = []
     for soldier in soldiers_query:
+        first_name = get_field_by_language(soldier.first_name_he, soldier.first_name_en)
+        last_name = get_field_by_language(soldier.last_name_he, soldier.last_name_en)
+        country_name = get_field_by_language(
+            soldier.birth_country.name_he if soldier.birth_country else "",
+            soldier.birth_country.name_en if soldier.birth_country else ""
+        ) or "לא ידוע"
+        
         soldiers.append({
             "id": soldier.customer_id,
-            "name": f"{soldier.first_name_he} {soldier.last_name_he}",
-            "country": soldier.birth_country.name_he if soldier.birth_country else "לא ידוע",
+            "name": f"{first_name} {last_name}",
+            "country": country_name,
             "image": soldier.image_url if soldier.image_url else None
         })
     
     return JsonResponse({'soldiers': soldiers})
+
+@api_view(['GET'])
+def country_name(request):
+    """
+    API endpoint לקבלת שם מדינה בשפה הנכונה
+    """
+    try:
+        # Get language from session or URL parameter
+        language = request.session.get('language', 'en')
+        if 'lang' in request.GET:
+            language = request.GET.get('lang', 'en')
+        
+        # Get country identifier (can be English name, Hebrew name, or code)
+        country_id = request.GET.get('country', '').strip()
+        if not country_id:
+            return JsonResponse({"error": "Country parameter is required"}, status=400)
+        
+        # Try to find the country by various fields
+        country = None
+        
+        # First try by exact English name match
+        try:
+            country = Country.objects.get(name_en__iexact=country_id)
+        except Country.DoesNotExist:
+            pass
+        
+        # Then try by exact Hebrew name match
+        if not country:
+            try:
+                country = Country.objects.get(name_he__iexact=country_id)
+            except Country.DoesNotExist:
+                pass
+        
+        # Then try by partial English name match
+        if not country:
+            try:
+                country = Country.objects.filter(name_en__icontains=country_id).first()
+            except:
+                pass
+        
+        # Then try by partial Hebrew name match
+        if not country:
+            try:
+                country = Country.objects.filter(name_he__icontains=country_id).first()
+            except:
+                pass
+        
+        if not country:
+            return JsonResponse({"error": "Country not found"}, status=404)
+        
+        # Return the appropriate language name
+        country_name = country.name_he if language == 'he' else country.name_en
+        if not country_name:  # fallback to other language if empty
+            country_name = country.name_en if language == 'he' else country.name_he
+        
+        return JsonResponse({
+            "name": country_name,
+            "name_he": country.name_he,
+            "name_en": country.name_en
+        })
+        
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

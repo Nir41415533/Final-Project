@@ -23,8 +23,6 @@
         // Initialize modal elements
         const eventTitle = document.getElementById("eventTitle");
         const eventSummary = document.getElementById("eventSummary");
-        const imageElement = document.getElementById("eventImage");
-        const videoElement = document.getElementById("eventVideo");
         const soldiersContainer = document.getElementById("soldiersContainer");
         const soldiersTitle = document.getElementById("soldiersTitle");
         const eventDetails = document.getElementById("eventDetails");
@@ -37,14 +35,6 @@
         // Reset modal content
         if (eventTitle) eventTitle.textContent = countryName;
         if (eventSummary) eventSummary.innerHTML = "אין תיאור זמין";
-        if (imageElement) {
-            imageElement.src = "";
-            imageElement.style.display = "none";
-        }
-        if (videoElement) {
-            videoElement.src = "";
-            videoElement.style.display = "none";
-        }
         
         // Note: We don't change the flag here because it is set by the caller
         // This ensures the flag stays visible when viewing different events
@@ -224,12 +214,19 @@
         }
         
         try {
+            // Get search query from the input
+            const searchQuery = document.getElementById("soldiersSearch")?.value?.trim() || "";
+            
+            // Get current language from document or default to 'he'
+            const currentLang = document.documentElement.lang || 'he';
+            
             // Call the paginated API
             const params = new URLSearchParams({
                 country: country,
                 page: page,
                 limit: 50, // Load 50 soldiers at a time
-                search: searchQuery
+                search: searchQuery,
+                lang: currentLang
             });
             
             const response = await fetch(`/soldiers/paginated/?${params}`);
@@ -241,7 +238,11 @@
             // Update soldiers heading
             if (soldiersTitle) {
                 if (data.pagination.total > 0) {
-                    soldiersTitle.textContent = `לוחמים ממדינה זו (${data.pagination.total})`;
+                    if (currentLang === 'he') {
+                        soldiersTitle.textContent = `לוחמים ממדינה זו (${data.pagination.total})`;
+                    } else {
+                        soldiersTitle.textContent = `Soldiers from this country (${data.pagination.total})`;
+                    }
                     soldiersTitle.style.display = "block";
                 } else {
                     soldiersTitle.textContent = "לא נמצאו לוחמים למדינה זו";
@@ -294,7 +295,11 @@
         }
         
         if (soldiers.length === 0 && !append) {
-            container.innerHTML = "<p>לא נמצאו לוחמים למדינה זו</p>";
+            if (currentLang === 'he') {
+                container.innerHTML = "<p>לא נמצאו לוחמים למדינה זו</p>";
+            } else {
+                container.innerHTML = "<p>No soldiers found for this country</p>";
+            }
             return;
         }
 
@@ -531,12 +536,19 @@
         }
         
         try {
+            // Get search query from the input
+            const searchQuery = document.getElementById("soldiersSearch")?.value?.trim() || "";
+            
+            // Get current language from document or default to 'he'
+            const currentLang = document.documentElement.lang || 'he';
+            
             // Build URL parameters
             const params = new URLSearchParams({
                 country: country,
                 page: page,
                 limit: 50,
-                search: searchQuery
+                search: searchQuery,
+                lang: currentLang
             });
             
             // Add filter parameters if they exist

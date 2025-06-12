@@ -345,7 +345,8 @@ body.dark-mode #timeline-toggle:hover {
 /* ============================ */
 @media screen and (max-width: 768px) {
     .map-header {
-        padding: 5px 10px;
+        padding: 8px 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .logo-container img {
@@ -357,31 +358,33 @@ body.dark-mode #timeline-toggle:hover {
     }
 
     .nav-buttons {
-        gap: 5px;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
     .nav-button {
         padding: 6px 12px;
         font-size: 0.8rem;
-}
+        min-width: auto;
+    }
 
     .language-buttons {
-        margin-left: 10px;
+        gap: 5px;
     }
 
     .language-button {
         padding: 4px 8px;
-        font-size: 0.7rem;
+        font-size: 0.75rem;
     }
 }
 
 @media screen and (max-width: 480px) {
     .map-header {
-        padding: 5px;
+        padding: 6px 12px;
     }
 
     .logo-container img {
-        height: 30px;
+        height: 35px;
     }
 
     .logo-text {
@@ -389,22 +392,17 @@ body.dark-mode #timeline-toggle:hover {
     }
 
     .nav-buttons {
-        flex-direction: column;
-        gap: 3px;
+        gap: 6px;
     }
 
     .nav-button {
-        padding: 4px 8px;
-        font-size: 0.7rem;
-}
-
-    .language-buttons {
-        margin-left: 5px;
+        padding: 5px 10px;
+        font-size: 0.75rem;
     }
 
     .language-button {
         padding: 3px 6px;
-        font-size: 0.6rem;
+        font-size: 0.7rem;
     }
 }
 
@@ -863,9 +861,9 @@ body.dark-mode .search-results div.active {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Timeline year label - מוצג רק בהובר */
+/* Timeline year label - responsive to language */
 .timeline-year::before {
-    content: "לחץ לצפייה ב-" attr(data-year);
+    content: attr(data-tooltip);
     position: absolute;
     left: 27px;
     white-space: nowrap;
@@ -886,9 +884,9 @@ body.dark-mode .search-results div.active {
     border: 1px solid rgba(245, 230, 211, 0.4);
 }
 
-/* Timeline year events count - מוצג רק בהובר */
+/* Timeline year events count - responsive to language */
 .timeline-year::after {
-    content: attr(data-events-count) " אירועים";
+    content: attr(data-events-text);
     position: absolute;
     right: 27px;
     white-space: nowrap;
@@ -1124,63 +1122,36 @@ nav.timeline-open {
 @media (max-width: 600px) {
     nav.timeline-open {
         left: 0;
-        padding-left: 20px;
-    }
-    
-    .timeline-card {
-        min-width: 90vw;
-        max-width: 98vw;
-        padding: 15px 20px;
-    }
-    
-    .timeline-list {
-        padding: 15px 0;
-        gap: 12px;
+        padding-left: 15px;
+        background: #f5e6d3;
     }
     
     #timeline-fixed-container {
-        width: 100vw;
-        height: 40vh;
-        position: static;
-        border-left: none;
-        border-bottom: 2px solid #bfae9e;
-        box-shadow: 0 2px 12px rgba(75,46,46,0.08);
-        padding-top: 0;
+        height: 50vh; /* Even more space on smaller screens */
+        padding-top: 75px;
     }
     
-    .main-container {
-        margin-left: 0;
-        margin-top: 40vh;
-        padding-top: 0;
+    .timeline-list {
+        max-height: calc(50vh - 75px);
+        padding: 15px 8px;
     }
     
-    nav {
-        z-index: 2000;
+    .timeline-card {
+        min-width: 88vw;
+        max-width: 92vw;
+        padding: 16px 20px;
     }
     
-    .timeline-back-btn {
-        padding: 8px 16px;
-        font-size: 0.9em;
-    }
-    
-    #timeline-close-btn {
-        top: 8px;
-        right: 10px;
-        width: 28px;
-        height: 28px;
-        font-size: 1.1em;
-    }
-    
-    .simple-search input {
-        width: 150px;
-        padding: 6px 12px;
+    nav.timeline-open + .main-container {
+        margin-top: 50vh;
+        height: 50vh;
     }
 }
 
 @media screen and (max-width: 480px) {
     .simple-search input {
-        width: 120px;
-        padding: 5px 10px;
+        width: 100px;
+        padding: 6px 10px;
         font-size: 0.8rem;
     }
 }
@@ -1236,12 +1207,6 @@ nav.timeline-open {
     overflow-wrap: break-word;
     box-sizing: border-box;
     transform-origin: center;
-}
-
-.timeline-card:hover {
-    box-shadow: 0 8px 28px rgba(75,46,46,0.18), 0 3px 10px rgba(75,46,46,0.12);
-    transform: translateY(-3px) scale(1.02);
-    border-color: #bfae9e;
 }
 
 .timeline-card:active {
@@ -1670,6 +1635,274 @@ body.dark-mode .search-input-container input {
 body.dark-mode .soldier-search-results {
     border: 1px solid #666;
     background-color: #3c3c3c;
+}
+
+/* Enhanced Mobile Styles - Timeline Improvements */
+@media (max-width: 768px) {
+    /* Main Layout Adjustments */
+    .main-container {
+        margin-left: 0;
+        padding-top: 70px; /* Increased for better header visibility */
+    }
+    
+    /* Header improvements */
+    .map-header {
+        padding: 8px 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .logo-container img {
+        height: 40px;
+    }
+    
+    .logo-text {
+        font-size: 1.2rem;
+    }
+    
+    /* Navigation improvements */
+    .nav-buttons {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .nav-button {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        min-width: auto;
+    }
+    
+    .language-buttons {
+        gap: 5px;
+    }
+    
+    .language-button {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
+    
+    /* Timeline container improvements */
+    #timeline-fixed-container {
+        width: 100vw;
+        height: 45vh; /* Increased height for better visibility */
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1500;
+        border-left: none;
+        border-bottom: 3px solid #bfae9e;
+        box-shadow: 0 4px 16px rgba(75,46,46,0.12);
+        padding-top: 70px; /* Account for header */
+        background: linear-gradient(135deg, #f5e6d3 0%, #fff 100%);
+    }
+    
+    /* Timeline list improvements */
+    .timeline-list {
+        padding: 20px 10px;
+        gap: 15px;
+        max-height: calc(45vh - 70px);
+    }
+    
+    .timeline-card {
+        min-width: 85vw;
+        max-width: 90vw;
+        padding: 18px 22px;
+        margin: 0 auto;
+        box-shadow: 0 3px 15px rgba(75,46,46,0.12);
+        border-radius: 12px;
+    }
+    
+    .timeline-year-card .timeline-card-title {
+        font-size: 1.4em;
+    }
+    
+    .timeline-event-card .timeline-card-title {
+        font-size: 1.2em;
+        line-height: 1.3;
+    }
+    
+    .timeline-event-card .timeline-card-date {
+        font-size: 1em;
+    }
+    
+    /* Back button improvements */
+    .timeline-back-btn {
+        padding: 10px 20px;
+        font-size: 1em;
+        margin: 10px auto 15px auto;
+        border-radius: 10px;
+    }
+    
+    /* Close button improvements */
+    #timeline-close-btn {
+        top: 75px;
+        right: 15px;
+        width: 32px;
+        height: 32px;
+        font-size: 1.2em;
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px solid #8B4513;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Map container when timeline is open */
+    nav.timeline-open + .main-container {
+        margin-top: 45vh;
+        height: 55vh;
+    }
+    
+    /* Search improvements */
+    .simple-search input {
+        width: 140px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
+}
+
+@media (max-width: 600px) {
+    /* Timeline specific improvements */
+    nav.timeline-open {
+        left: 0;
+        padding-left: 15px;
+        background: #f5e6d3;
+    }
+    
+    #timeline-fixed-container {
+        height: 50vh; /* Even more space on smaller screens */
+        padding-top: 75px;
+    }
+    
+    .timeline-list {
+        max-height: calc(50vh - 75px);
+        padding: 15px 8px;
+    }
+    
+    .timeline-card {
+        min-width: 88vw;
+        max-width: 92vw;
+        padding: 16px 20px;
+    }
+    
+    nav.timeline-open + .main-container {
+        margin-top: 50vh;
+        height: 50vh;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    /* Ultra-small screen optimizations */
+    .map-header {
+        padding: 6px 12px;
+    }
+    
+    .logo-container img {
+        height: 35px;
+    }
+    
+    .logo-text {
+        font-size: 1rem;
+    }
+    
+    .nav-buttons {
+        gap: 6px;
+    }
+    
+    .nav-button {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+    
+    .language-button {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+    }
+    
+    /* Timeline ultra-mobile */
+    #timeline-fixed-container {
+        height: 55vh; /* Maximum space for content */
+        padding-top: 65px;
+    }
+    
+    .timeline-list {
+        max-height: calc(55vh - 65px);
+        padding: 12px 6px;
+        gap: 12px;
+    }
+    
+    .timeline-card {
+        min-width: 90vw;
+        max-width: 95vw;
+        padding: 14px 18px;
+    }
+    
+    .timeline-year-card .timeline-card-title {
+        font-size: 1.3em;
+    }
+    
+    .timeline-event-card .timeline-card-title {
+        font-size: 1.1em;
+    }
+    
+    .timeline-back-btn {
+        padding: 8px 16px;
+        font-size: 0.9em;
+        margin: 8px auto 12px auto;
+    }
+    
+    #timeline-close-btn {
+        top: 70px;
+        right: 10px;
+        width: 28px;
+        height: 28px;
+        font-size: 1.1em;
+    }
+    
+    nav.timeline-open + .main-container {
+        margin-top: 55vh;
+        height: 45vh;
+    }
+    
+    .simple-search input {
+        width: 100px;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Additional Touch-Friendly Improvements */
+@media (max-width: 768px) {
+    /* Larger touch targets */
+    .timeline-card {
+        min-height: 80px;
+        touch-action: manipulation;
+    }
+    
+    .nav-button {
+        min-height: 36px;
+        touch-action: manipulation;
+    }
+    
+    /* Better scroll indicators */
+    .timeline-list::-webkit-scrollbar {
+        width: 12px;
+    }
+    
+    .timeline-list::-webkit-scrollbar-thumb {
+        background: #8B4513;
+        border-radius: 6px;
+        border: 2px solid #f5e6d3;
+    }
+    
+    /* Improved hover states for touch */
+    .timeline-card:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+    
+    .nav-button:active {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
 }
 
 

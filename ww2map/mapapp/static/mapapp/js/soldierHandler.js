@@ -24,8 +24,11 @@ export async function showSoldierDetails(soldier) {
     showLoadingState();
     
     try {
+        // Get current language from document or default to 'he'
+        const currentLang = document.documentElement.lang || 'he';
+        
         // Fetch soldier details from API
-        let apiUrl = `/soldier/${soldierId}/`;
+        let apiUrl = `/soldier/${soldierId}/?lang=${currentLang}`;
         console.log("🔍 API URL (attempt 1):", apiUrl);
         
         let response = await fetch(apiUrl);
@@ -33,7 +36,7 @@ export async function showSoldierDetails(soldier) {
         
         // If first attempt fails, try with language prefix
         if (!response.ok && response.status === 404) {
-            apiUrl = `/he/soldier/${soldierId}/`;
+            apiUrl = `/he/soldier/${soldierId}/?lang=${currentLang}`;
             console.log("🔍 API URL (attempt 2 with /he/):", apiUrl);
             response = await fetch(apiUrl);
             console.log("🔍 API Response status (attempt 2):", response.status);
@@ -41,7 +44,7 @@ export async function showSoldierDetails(soldier) {
         
         // If still fails, try without leading slash
         if (!response.ok && response.status === 404) {
-            apiUrl = `soldier/${soldierId}/`;
+            apiUrl = `soldier/${soldierId}/?lang=${currentLang}`;
             console.log("🔍 API URL (attempt 3 without leading /):", apiUrl);
             response = await fetch(apiUrl);
             console.log("🔍 API Response status (attempt 3):", response.status);
@@ -213,31 +216,31 @@ function populateSoldierModal(soldier, isBasicInfo = false) {
     console.log("🔍 mother_name:", soldier.mother_name);
     
     setElementText("soldierBirthDate", formatDate(soldier.date_of_birth));
-    setElementText("soldierBirthCity", soldier.birth_city_he);
-    setElementText("soldierBirthCountry", soldier.birth_country?.name_he);
+    setElementText("soldierBirthCity", soldier.birth_city);
+    setElementText("soldierBirthCountry", soldier.birth_country?.name);
     setElementText("soldierAliyaDate", formatDate(soldier.aliya_date));
     setElementText("soldierFatherName", soldier.father_name);
     setElementText("soldierMotherName", soldier.mother_name);
-    setElementText("soldierPreviousLastName", soldier.previous_last_name_he);
-    setElementText("soldierNickname", soldier.nickname_he);
+    setElementText("soldierPreviousLastName", soldier.previous_last_name);
+    setElementText("soldierNickname", soldier.nickname);
     
     // Military service
-    setElementText("soldierArmy", soldier.army_he);
-    setElementText("soldierRole", soldier.army_role_he);
+    setElementText("soldierArmy", soldier.army);
+    setElementText("soldierRole", soldier.army_role);
     setElementText("soldierRank", soldier.rank);
     
     // Death information
     setElementText("soldierDeathDate", formatDate(soldier.date_of_death));
-    setElementText("soldierDeathPlace", soldier.place_of_death_he);
+    setElementText("soldierDeathPlace", soldier.place_of_death);
     
     // Text blocks
-    setTextBlock("soldierParticipation", soldier.participation_he);
-    setTextBlock("soldierDecorations", soldier.decorations_he);
-    setTextBlock("soldierBiography", soldier.biography_he);
-    setTextBlock("soldierFightingDesc", soldier.fighting_description_he);
-    setTextBlock("soldierGettoDesc", soldier.getto_description_he);
-    setTextBlock("soldierWounds", soldier.wounds_he);
-    setTextBlock("soldierDeathDetails", soldier.death_details_he);
+    setTextBlock("soldierParticipation", soldier.participation);
+    setTextBlock("soldierDecorations", soldier.decorations);
+    setTextBlock("soldierBiography", soldier.biography);
+    setTextBlock("soldierFightingDesc", soldier.fighting_description);
+    setTextBlock("soldierGettoDesc", soldier.getto_description);
+    setTextBlock("soldierWounds", soldier.wounds);
+    setTextBlock("soldierDeathDetails", soldier.death_details);
     
     // Check if sections have any visible content and hide empty sections
     setTimeout(() => {
@@ -325,15 +328,19 @@ function setBasicSoldierInfo(soldier) {
 /**
  * Get gender text representation
  * @param {string|number} gender - Gender code
- * @returns {string} - Gender text in Hebrew
- */
+ * @returns {string} - Gender text in current language
+*/
 function getGenderText(gender) {
+    // Get current language from document
+    const currentLang = document.documentElement.lang || 'he';
+    
     if (gender === "1" || gender === "1.0" || gender === 1) {
-        return "זכר";
-    } else if (gender === "0" || gender === "0.0" || gender === 0) {
-        return "נקבה";
+        return currentLang === 'he' ? "זכר" : "Male";
+    } 
+    else if (gender === "0" || gender === "0.0" || gender === 0) {
+        return currentLang === 'he' ? "נקבה" : "Female";
     }
-    return "--";
+    return currentLang === 'he' ? "--" : "--";
 }
 
 /**
