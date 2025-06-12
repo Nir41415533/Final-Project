@@ -247,15 +247,18 @@
             
             // Update soldiers heading
             if (soldiersTitle) {
+                const lang = document.documentElement.lang || 'he';
                 if (data.pagination.total > 0) {
-                    if (currentLang === 'he') {
+                    if (lang === 'he') {
                         soldiersTitle.textContent = `לוחמים ממדינה זו (${data.pagination.total})`;
                     } else {
                         soldiersTitle.textContent = `Soldiers from this country (${data.pagination.total})`;
                     }
                     soldiersTitle.style.display = "block";
                 } else {
-                    soldiersTitle.textContent = "לא נמצאו לוחמים למדינה זו";
+                    soldiersTitle.textContent = lang === 'he' ? 
+                        "לא נמצאו לוחמים למדינה זו" : 
+                        "No soldiers found for this country";
                     soldiersTitle.style.display = "block";
                 }
             }
@@ -305,7 +308,11 @@
         }
         
         if (soldiers.length === 0 && !append) {
-            container.innerHTML = "<p>לא נמצאו לוחמים למדינה זו</p>";
+            if (currentLang === 'he') {
+                container.innerHTML = "<p>לא נמצאו לוחמים למדינה זו</p>";
+            } else {
+                container.innerHTML = "<p>No soldiers found for this country</p>";
+            }
             return;
         }
 
