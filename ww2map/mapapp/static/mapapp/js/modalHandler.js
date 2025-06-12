@@ -23,8 +23,6 @@
         // Initialize modal elements
         const eventTitle = document.getElementById("eventTitle");
         const eventSummary = document.getElementById("eventSummary");
-        const imageElement = document.getElementById("eventImage");
-        const videoElement = document.getElementById("eventVideo");
         const soldiersContainer = document.getElementById("soldiersContainer");
         const soldiersTitle = document.getElementById("soldiersTitle");
         const eventDetails = document.getElementById("eventDetails");
@@ -37,14 +35,6 @@
         // Reset modal content
         if (eventTitle) eventTitle.textContent = countryName;
         if (eventSummary) eventSummary.innerHTML = "אין תיאור זמין";
-        if (imageElement) {
-            imageElement.src = "";
-            imageElement.style.display = "none";
-        }
-        if (videoElement) {
-            videoElement.src = "";
-            videoElement.style.display = "none";
-        }
         
         // Note: We don't change the flag here because it is set by the caller
         // This ensures the flag stays visible when viewing different events
@@ -247,18 +237,15 @@
             
             // Update soldiers heading
             if (soldiersTitle) {
-                const lang = document.documentElement.lang || 'he';
                 if (data.pagination.total > 0) {
-                    if (lang === 'he') {
+                    if (currentLang === 'he') {
                         soldiersTitle.textContent = `לוחמים ממדינה זו (${data.pagination.total})`;
                     } else {
                         soldiersTitle.textContent = `Soldiers from this country (${data.pagination.total})`;
                     }
                     soldiersTitle.style.display = "block";
                 } else {
-                    soldiersTitle.textContent = lang === 'he' ? 
-                        "לא נמצאו לוחמים למדינה זו" : 
-                        "No soldiers found for this country";
+                    soldiersTitle.textContent = "לא נמצאו לוחמים למדינה זו";
                     soldiersTitle.style.display = "block";
                 }
             }

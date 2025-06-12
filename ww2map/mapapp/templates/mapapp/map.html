@@ -337,13 +337,7 @@
                     </div>
                 </div>
 
-                <!-- Right Column -->
-                <div class="right-column">
-                    <div class="multimedia">
-                        <img id="eventImage" class="event-image" src="" alt="תמונה מהאירוע" style="display: none;" />
-                        <video id="eventVideo" class="event-media" controls preload="metadata" style="display: none;"></video>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
@@ -387,10 +381,6 @@
                                 <div class="info-row">
                                     <strong>{% if LANGUAGE_CODE == 'he' %}מדינת לידה:{% else %}Birth Country:{% endif %}</strong>
                                     <span id="soldierBirthCountry"></span>
-                                </div>
-                                <div class="info-row">
-                                    <strong>{% if LANGUAGE_CODE == 'he' %}תאריך עלייה:{% else %}Immigration Date:{% endif %}</strong>
-                                    <span id="soldierAliyaDate"></span>
                                 </div>
                                 <div class="info-row">
                                     <strong>{% if LANGUAGE_CODE == 'he' %}שם האב:{% else %}Father's Name:{% endif %}</strong>
