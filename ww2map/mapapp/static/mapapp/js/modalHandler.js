@@ -2,6 +2,7 @@
 
     import { displayEvent, showCountryEvents } from "./eventDisplay.js";
     import { showSoldierDetails } from "./soldierHandler.js";
+    import { countryCodeMapping } from "./countryCodeMapping.js";
 
     // Keep a reference to all soldiers for search functionality
     let allSoldiers = [];
@@ -10,6 +11,49 @@
     let totalPages = 1;      // Total pages available
     let isLoading = false;   // Flag to prevent multiple simultaneous loads
     let searchQuery = "";    // Current search query
+
+    // Helper function to get flag code from country name
+    function getFlagCode(countryName) {
+        // Convert to lowercase for consistent matching
+        const normalizedName = countryName.toLowerCase().trim();
+        
+        // Check direct mapping first
+        if (countryCodeMapping[normalizedName]) {
+            return countryCodeMapping[normalizedName];
+        }
+        
+        // Try some common alternative names
+        const alternativeNames = {
+            'united states': 'us',
+            'usa': 'us',
+            'united kingdom': 'gb',
+            'uk': 'gb',
+            'soviet union': 'su',
+            'ussr': 'su',
+            'germany': 'de',
+            'france': 'fr',
+            'italy': 'it',
+            'japan': 'jp',
+            'poland': 'pl',
+            'czechoslovakia': 'cz',
+            'austria': 'at',
+            'hungary': 'hu',
+            'romania': 'ro',
+            'bulgaria': 'bg',
+            'yugoslavia': 'rs', // Using Serbia flag as fallback
+            'greece': 'gr',
+            'netherlands': 'nl',
+            'belgium': 'be',
+            'norway': 'no',
+            'finland': 'fi',
+            'australia': 'au',
+            'canada': 'ca',
+            'india': 'in',
+            'south africa': 'za'
+        };
+        
+        return alternativeNames[normalizedName] || null;
+    }
 
     export function showCountryEventsModal(countryName, events, soldiers) {
         const modal = document.getElementById("eventModal");
@@ -36,8 +80,18 @@
         if (eventTitle) eventTitle.textContent = countryName;
         if (eventSummary) eventSummary.innerHTML = "אין תיאור זמין";
         
-        // Note: We don't change the flag here because it is set by the caller
-        // This ensures the flag stays visible when viewing different events
+        // Set the flag in the modal - THIS IS THE FIX!
+        const mapPlaceholder = document.getElementById("insetMapPlaceholder");
+        if (mapPlaceholder) {
+            const flagCode = getFlagCode(countryName);
+            if (flagCode) {
+                mapPlaceholder.innerHTML = `<img id="countryFlag" src="https://flagcdn.com/w320/${flagCode}.png" alt="דגל ${countryName}">`;
+                console.log("Flag set for country:", countryName, "with code:", flagCode);
+            } else {
+                mapPlaceholder.innerHTML = "מפת הקרב";
+                console.log("No flag found for country:", countryName);
+            }
+        }
         
         // Reset pagination and search
         currentCountry = getEnglishCountryName(countryName);
