@@ -14,6 +14,8 @@ from django.db.models import Count
 from django.db.models import Q
 import re
 from collections import Counter
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 
 class Home(View):
     template_name_en = 'mapapp/home.html'
@@ -23,11 +25,15 @@ class Home(View):
         language = request.session.get('language', 'en')
         template_name = self.template_name_he if language == 'he' else self.template_name_en
 
-        return render(request, template_name, {
+        context = {
             'form': None,
             'show_date_range_form': False,
-            'success': None
-        })
+            'success': None,
+            'MAPTILER_API_KEY': os.getenv('MAPTILER_API_KEY', ''),
+            'GEMINI_API_KEY': os.getenv('GEMINI_API_KEY', ''),
+            'DEBUG': settings.DEBUG
+        }
+        return render(request, template_name, context)
 
     def post(self, request):
         action = request.POST.get('action', '')
@@ -45,15 +51,24 @@ class Home(View):
         elif action == 'explore_map':
             return redirect('ww2map')  # הפניה לדף המפה הישנה
 
-        return render(request, template_name, {
+        context = {
             'form': None,
             'show_date_range_form': False,
-            'success': None
-        })
+            'success': None,
+            'MAPTILER_API_KEY': os.getenv('MAPTILER_API_KEY', ''),
+            'GEMINI_API_KEY': os.getenv('GEMINI_API_KEY', ''),
+            'DEBUG': settings.DEBUG
+        }
+        return render(request, template_name, context)
 
 
 def ww2map_view(request):
-    return render(request, 'mapapp/map.html')
+    context = {
+        'MAPTILER_API_KEY': os.getenv('MAPTILER_API_KEY', ''),
+        'GEMINI_API_KEY': os.getenv('GEMINI_API_KEY', ''),
+        'DEBUG': settings.DEBUG
+    }
+    return render(request, 'mapapp/map.html', context)
 
 
 @api_view(['GET'])
@@ -837,14 +852,3 @@ def country_english_name(request):
         
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
-@api_view(['GET'])
-def frontend_config(request):
-    """
-    API endpoint to serve frontend configuration from environment variables
-    """
-    return JsonResponse({
-        'MAPTILER_API_KEY': os.getenv('MAPTILER_API_KEY', ''),
-        'GEMINI_API_KEY': os.getenv('GEMINI_API_KEY', ''),
-        'DEBUG': settings.DEBUG
-    })

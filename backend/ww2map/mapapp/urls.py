@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import Home, ww2map_view, event_list
-from .views import soldiers_list, dashboard_view, dashboard_data, paginated_soldiers, soldier_detail, search_soldiers, country_name, country_english_name, frontend_config
+from .views import soldiers_list, dashboard_view, dashboard_data, paginated_soldiers, soldier_detail, search_soldiers, country_name, country_english_name
 
 urlpatterns = [
     path('', Home.as_view(), name='home'),  # דף הבית
@@ -15,5 +15,4 @@ urlpatterns = [
     path("dashboard/data/", dashboard_data, name="dashboard_data"),  # API לנתוני הדשבורד
     path("country/name/", country_name, name="country_name"),  # API לקבלת שם מדינה בשפה הנכונה
     path("country/english-name/", country_english_name, name="country_english_name"),  # API לקבלת שם מדינה באנגלית לדגלים
-    path("config/", frontend_config, name="frontend_config"),  # API לקבלת הגדרות frontend
 ]
