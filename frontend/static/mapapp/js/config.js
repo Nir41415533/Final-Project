@@ -1,4 +1,4 @@
-// Frontend configuration that fetches API keys from backend
+// Frontend configuration - loads from template context
 let CONFIG = {
     MAPTILER_API_KEY: '',
     GEMINI_API_KEY: '',
@@ -6,26 +6,29 @@ let CONFIG = {
     loaded: false
 };
 
-// Function to load configuration from backend
+// Function to load configuration from template context
 async function loadConfig() {
     if (CONFIG.loaded) {
         return CONFIG;
     }
     
-    try {
-        const response = await fetch('/config/');
-        if (response.ok) {
-            const config = await response.json();
-            CONFIG.MAPTILER_API_KEY = config.MAPTILER_API_KEY;
-            CONFIG.GEMINI_API_KEY = config.GEMINI_API_KEY;
-            CONFIG.DEBUG = config.DEBUG;
-            CONFIG.loaded = true;
-            console.log('✅ Configuration loaded successfully');
-        } else {
-            console.error('❌ Failed to load configuration from backend');
+    // Load from global window configuration (set in template)
+    if (window.WW2_CONFIG) {
+        CONFIG.MAPTILER_API_KEY = window.WW2_CONFIG.MAPTILER_API_KEY || '';
+        CONFIG.GEMINI_API_KEY = window.WW2_CONFIG.GEMINI_API_KEY || '';
+        CONFIG.DEBUG = window.WW2_CONFIG.DEBUG || false;
+        CONFIG.loaded = true;
+        console.log('✅ Configuration loaded from template context');
+        
+        // Check if API keys are available
+        if (!CONFIG.MAPTILER_API_KEY) {
+            console.warn('⚠️ MAPTILER_API_KEY not found in template configuration');
         }
-    } catch (error) {
-        console.error('❌ Error loading configuration:', error);
+        if (!CONFIG.GEMINI_API_KEY) {
+            console.warn('⚠️ GEMINI_API_KEY not found in template configuration');
+        }
+    } else {
+        console.error('❌ WW2_CONFIG not found in template context');
     }
     
     return CONFIG;
