@@ -1,10 +1,12 @@
 # Environment variables
 .env
+.env.*
 .env.local
 .env.production
 
 # Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 *.so
@@ -32,28 +34,48 @@ db.sqlite3
 db.sqlite3-journal
 /staticfiles/
 /media/
+media/
+uploads/
 
 # Virtual environments
 venv/
 env/
 ENV/
 .venv/
+/backend/ww2map/venv/
 
-# IDE
+# Database files
+*.sqlite3
+*.sqlite3.db
+*.dump
+*.sql
+*.psql
+*.pgdump
+*.pgrestore
+
+# IDE and Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.sublime-workspace
+*.sublime-project
+
+# Jupyter
+.ipynb_checkpoints/
 
 # OS
 .DS_Store
 .DS_Store?
 ._*
+.AppleDouble
+.LSOverride
 .Spotlight-V100
 .Trashes
 ehthumbs.db
 Thumbs.db
+Desktop.ini
 
 # Node.js (if using npm for frontend dependencies)
 node_modules/
@@ -61,6 +83,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Backup files
+# Backup and temporary files
 *.bak
-*.backup 
+*.backup
+*.tmp
+
+# Data folders
+/data/
+/backend/ww2map/data/ 

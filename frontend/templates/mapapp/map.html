@@ -491,6 +491,19 @@
     <!-- MapLibre JS -->
     <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@3.3.1/dist/maplibre-gl.min.js"></script>
 
+    <!-- הגדרת מפתחות API בצורה בטוחה -->
+    <script>
+        // Global configuration for production
+        window.WW2_CONFIG = {
+            MAPTILER_API_KEY: '{{ MAPTILER_API_KEY|default:"" }}',
+            GEMINI_API_KEY: '{{ GEMINI_API_KEY|default:"" }}',
+            DEBUG: {% if DEBUG %}true{% else %}false{% endif %},
+            APP_NAME: 'WW2 Map',
+            VERSION: '1.0.0',
+            SUPPORTED_LANGUAGES: ['he', 'en']
+        };
+    </script>
+    
     <!-- קובץ JS ראשי -->
     <script type="module" src="{% static 'mapapp/js/index.js' %}"></script>
 
