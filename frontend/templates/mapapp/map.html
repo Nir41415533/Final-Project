@@ -55,9 +55,24 @@
 <body>
     <!-- Navbar -->
     <nav>
-        <div class="nav-buttons">
-            <!-- חיפוש מדינה (בצד ימין) -->
-            <div class="simple-search">
+        <!-- Mobile hamburger button (hidden on desktop) -->
+        <button class="hamburger-menu" id="hamburger-toggle" aria-label="Toggle menu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        
+        <!-- Mobile country search (hidden on desktop) -->
+        <div class="nav-search-mobile">
+            <input type="text" id="countrySearchMobile" 
+                   placeholder="{% if LANGUAGE_CODE == 'he' %}חפש מדינה...{% else %}Search Country...{% endif %}" 
+                   aria-label="{% if LANGUAGE_CODE == 'he' %}חיפוש מדינה{% else %}Country Search{% endif %}">
+            <div id="searchResultsMobile" class="search-results"></div>
+        </div>
+        
+        <div class="nav-buttons" id="nav-menu">
+            <!-- חיפוש מדינה (בצד ימין) - Desktop only -->
+            <div class="simple-search desktop-only">
                 <input type="text" id="countrySearch" 
                        placeholder="{% if LANGUAGE_CODE == 'he' %}חפש מדינה...{% else %}Search Country...{% endif %}" 
                        aria-label="{% if LANGUAGE_CODE == 'he' %}חיפוש מדינה{% else %}Country Search{% endif %}">
@@ -66,66 +81,111 @@
                 <button id="soldier-search-toggle" class="nav-button" 
                         title="{% if LANGUAGE_CODE == 'he' %}חיפוש חיילים{% else %}Search Soldiers{% endif %}">
                     <i class="fas fa-user-alt"></i>
-                    {% if LANGUAGE_CODE == 'he' %}
-                        חיפוש חיילים
-                    {% else %}
-                        Search Soldiers
-                    {% endif %}
+                    <span class="nav-text">
+                        {% if LANGUAGE_CODE == 'he' %}
+                            חיפוש חיילים
+                        {% else %}
+                            Search Soldiers
+                        {% endif %}
+                    </span>
                 </button>
                 <!-- כפתור לוח נתונים -->
                 <a href="{% url 'dashboard' %}" class="nav-button">
                     <i class="fas fa-tachometer-alt"></i>
-                    {% if LANGUAGE_CODE == 'he' %}
-                        לוח נתונים
-                    {% else %}
-                        Dashboard
-                    {% endif %}
+                    <span class="nav-text">
+                        {% if LANGUAGE_CODE == 'he' %}
+                            לוח נתונים
+                        {% else %}
+                            Dashboard
+                        {% endif %}
+                    </span>
                 </a>
             </div>
             
-            <div class="right-side-buttons">
-                <!-- כפתור חזרה -->
-                <a href="{% url 'home' %}" class="nav-button" id="back-button">
-                    <i class="fas fa-arrow-right"></i>
-                    {% if LANGUAGE_CODE == 'he' %}
-                        חזרה
-                    {% else %}
-                        Back
-                    {% endif %}
-                </a>
-
-                <!-- כפתור החלפת שפה -->
-                <form method="POST" action="{% url 'set_language' %}" style="margin: 0;">
-                    {% csrf_token %}
-                    {% if LANGUAGE_CODE == 'he' %}
-                        <input type="hidden" name="language" value="en">
-                        <input type="hidden" name="next" value="{{ request.path }}">
-                        <button type="submit" class="flag-button" title="Switch to English">
-                            <img src="{% static 'mapapp/images/flag_us.png' %}" alt="English">
-                        </button>
-                    {% else %}
-                        <input type="hidden" name="language" value="he">
-                        <input type="hidden" name="next" value="{{ request.path }}">
-                        <button type="submit" class="flag-button" title="עבור לעברית">
-                            <img src="{% static 'mapapp/images/flag_il.png' %}" alt="עברית">
-                        </button>
-                    {% endif %}
-                </form>
-                <!-- כפתור Dark Mode -->
-                <button id="dark-mode-toggle" class="flag-button" title="Dark Mode">
-                    🌙
+            <!-- Mobile menu items -->
+            <div class="mobile-menu-items">
+                <!-- כפתור חיפוש חיילים -->
+                <button id="soldier-search-toggle-mobile" class="nav-button mobile-item" 
+                        title="{% if LANGUAGE_CODE == 'he' %}חיפוש חיילים{% else %}Search Soldiers{% endif %}">
+                    <i class="fas fa-user-alt"></i>
+                    <span class="nav-text">
+                        {% if LANGUAGE_CODE == 'he' %}
+                            חיפוש חיילים
+                        {% else %}
+                            Search Soldiers
+                        {% endif %}
+                    </span>
                 </button>
                 
-                <!-- כפתור ציר זמן -->
-                <button id="timeline-toggle" class="nav-button" data-action="timeline">
-                    <i class="fas fa-clock"></i>
+                <!-- כפתור לוח נתונים -->
+                <a href="{% url 'dashboard' %}" class="nav-button mobile-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-text">
+                        {% if LANGUAGE_CODE == 'he' %}
+                            לוח נתונים
+                        {% else %}
+                            Dashboard
+                        {% endif %}
+                    </span>
+                </a>
+                
+                <!-- כפתור Dark Mode -->
+                <button id="dark-mode-toggle-mobile" class="nav-button mobile-item" title="Dark Mode">
+                    <i class="fas fa-moon"></i>
+                    <span class="nav-text">
+                        {% if LANGUAGE_CODE == 'he' %}
+                            מצב לילה
+                        {% else %}
+                            Dark Mode
+                        {% endif %}
+                    </span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Always visible buttons (timeline and language) - outside hamburger -->
+        <div class="nav-always-visible">
+            <!-- כפתור ציר זמן -->
+            <button id="timeline-toggle" class="nav-button compact" data-action="timeline">
+                <i class="fas fa-clock"></i>
+                <span class="nav-text">
                     {% if LANGUAGE_CODE == 'he' %}
                         ציר זמן
                     {% else %}
                         Timeline
                     {% endif %}
-                </button>
-            </div>
+                </span>
+            </button>
+            
+            <!-- כפתור החלפת שפה -->
+            <form method="POST" action="{% url 'set_language' %}" style="margin: 0;">
+                {% csrf_token %}
+                {% if LANGUAGE_CODE == 'he' %}
+                    <input type="hidden" name="language" value="en">
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button type="submit" class="flag-button" title="Switch to English">
+                        <img src="{% static 'mapapp/images/flag_us.png' %}" alt="English">
+                    </button>
+                {% else %}
+                    <input type="hidden" name="language" value="he">
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button type="submit" class="flag-button" title="עבור לעברית">
+                        <img src="{% static 'mapapp/images/flag_il.png' %}" alt="עברית">
+                    </button>
+                {% endif %}
+            </form>
+            
+            <!-- כפתור חזרה -->
+            <a href="{% url 'home' %}" class="nav-button compact" id="back-button">
+                <i class="fas fa-arrow-right"></i>
+                <span class="nav-text">
+                    {% if LANGUAGE_CODE == 'he' %}
+                        חזרה
+                    {% else %}
+                        Back
+                    {% endif %}
+                </span>
+            </a>
         </div>
     </nav>
 
@@ -504,11 +564,43 @@
         };
     </script>
     
+    <!-- Modal Manager -->
+    <script type="module" src="{% static 'mapapp/js/modalManager.js' %}"></script>
+    
     <!-- קובץ JS ראשי -->
     <script type="module" src="{% static 'mapapp/js/index.js' %}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Hamburger menu functionality
+            const hamburgerToggle = document.getElementById('hamburger-toggle');
+            const navMenu = document.getElementById('nav-menu');
+            
+            if (hamburgerToggle && navMenu) {
+                hamburgerToggle.addEventListener('click', function() {
+                    hamburgerToggle.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+                
+                // Close menu when clicking on nav items (only items inside the hamburger menu)
+                const navButtons = navMenu.querySelectorAll('.nav-button, .flag-button');
+                navButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        hamburgerToggle.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    });
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!hamburgerToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                        hamburgerToggle.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Timeline functionality
             const openBtn = document.getElementById('timeline-open-btn');
             const closeBtn = document.getElementById('timeline-close-btn');
             const timelineToggle = document.getElementById('timeline-toggle');
@@ -549,6 +641,166 @@
                     navbar.classList.remove('timeline-open');
                     if (openBtn) openBtn.style.display = 'block';
                     if (timelineToggle) timelineToggle.classList.remove('active');
+                });
+            }
+            
+            // Mobile search functionality
+            const countrySearchMobile = document.getElementById('countrySearchMobile');
+            const searchResultsMobile = document.getElementById('searchResultsMobile');
+            
+            if (countrySearchMobile && searchResultsMobile) {
+                // Mobile search functions
+                function performMobileSearch() {
+                    const searchTerm = countrySearchMobile.value.toLowerCase();
+                    if (searchTerm.length < 1) {
+                        searchResultsMobile.style.display = 'none';
+                        return;
+                    }
+                    
+                    // Get current language from document
+                    const currentLang = document.documentElement.lang || 'he';
+                    
+                    let results = [];
+                    if (currentLang === 'he') {
+                        // Search in Hebrew names
+                        results = Object.keys(window.countries || {}).filter(country => 
+                            country.toLowerCase().includes(searchTerm)
+                        );
+                    } else {
+                        // Search in English names
+                        results = Object.keys(window.countries || {}).filter(country => 
+                            (window.countries[country] || '').toLowerCase().includes(searchTerm)
+                        );
+                    }
+                    
+                    displayMobileResults(results);
+                }
+                
+                function displayMobileResults(results) {
+                    searchResultsMobile.innerHTML = '';
+                    
+                    if (results.length === 0) {
+                        searchResultsMobile.style.display = 'none';
+                        return;
+                    }
+                    
+                    // Get current language from document
+                    const currentLang = document.documentElement.lang || 'he';
+                    
+                    results.forEach(country => {
+                        const div = document.createElement('div');
+                        // Display the name in the current language
+                        div.textContent = currentLang === 'he' ? country : (window.countries[country] || country);
+                        div.addEventListener('click', () => {
+                            selectMobileCountry(country);
+                        });
+                        searchResultsMobile.appendChild(div);
+                    });
+                    
+                    searchResultsMobile.style.display = 'block';
+                }
+                
+                function selectMobileCountry(country) {
+                    if (window.countries && window.countries[country]) {
+                        const countryCode = window.countries[country];
+                        if (window.openCountryModal) {
+                            window.openCountryModal(countryCode, country);
+                        }
+                        searchResultsMobile.style.display = 'none';
+                        countrySearchMobile.value = country;
+                    }
+                }
+                
+                // Mobile search event listeners
+                countrySearchMobile.addEventListener('focus', () => {
+                    if (countrySearchMobile.value.length > 0) {
+                        performMobileSearch();
+                    }
+                });
+                
+                countrySearchMobile.addEventListener('input', performMobileSearch);
+                
+                countrySearchMobile.addEventListener('keydown', (e) => {
+                    const resultItems = searchResultsMobile.querySelectorAll('div');
+                    const currentActiveIndex = [...resultItems].findIndex(item => item.classList.contains('active'));
+                    
+                    switch (e.key) {
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            if (resultItems.length > 0) {
+                                const nextIndex = currentActiveIndex >= 0 && currentActiveIndex < resultItems.length - 1 ? 
+                                    currentActiveIndex + 1 : 0;
+                                
+                                resultItems.forEach(item => item.classList.remove('active'));
+                                resultItems[nextIndex].classList.add('active');
+                                resultItems[nextIndex].scrollIntoView({ block: 'nearest' });
+                            }
+                            break;
+                            
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            if (resultItems.length > 0) {
+                                const prevIndex = currentActiveIndex > 0 ? 
+                                    currentActiveIndex - 1 : resultItems.length - 1;
+                                
+                                resultItems.forEach(item => item.classList.remove('active'));
+                                resultItems[prevIndex].classList.add('active');
+                                resultItems[prevIndex].scrollIntoView({ block: 'nearest' });
+                            }
+                            break;
+                            
+                        case 'Enter':
+                            if (currentActiveIndex >= 0) {
+                                e.preventDefault();
+                                const countryName = resultItems[currentActiveIndex].textContent;
+                                selectMobileCountry(countryName);
+                            } else if (resultItems.length > 0) {
+                                e.preventDefault();
+                                const countryName = resultItems[0].textContent;
+                                selectMobileCountry(countryName);
+                            }
+                            break;
+                            
+                        case 'Escape':
+                            e.preventDefault();
+                            searchResultsMobile.style.display = 'none';
+                            break;
+                    }
+                });
+                
+                // Close mobile search results when clicking outside
+                document.addEventListener('click', (e) => {
+                    const mobileSearchContainer = document.querySelector('.nav-search-mobile');
+                    if (mobileSearchContainer && !mobileSearchContainer.contains(e.target)) {
+                        searchResultsMobile.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Close hamburger menu when mobile soldier search is clicked
+            const soldierSearchToggleMobile = document.getElementById('soldier-search-toggle-mobile');
+            if (soldierSearchToggleMobile) {
+                soldierSearchToggleMobile.addEventListener('click', function() {
+                    // Close hamburger menu
+                    hamburgerToggle.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            }
+            
+            // Mobile dark mode toggle functionality
+            const darkModeToggleMobile = document.getElementById('dark-mode-toggle-mobile');
+            if (darkModeToggleMobile) {
+                darkModeToggleMobile.addEventListener('click', function() {
+                    // Toggle dark mode
+                    document.body.classList.toggle('dark-mode');
+                    
+                    // Save preference to localStorage
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    localStorage.setItem('darkMode', isDarkMode);
+                    
+                    // Close hamburger menu
+                    hamburgerToggle.classList.remove('active');
+                    navMenu.classList.remove('active');
                 });
             }
         });

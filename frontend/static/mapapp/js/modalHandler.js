@@ -47,35 +47,7 @@
             console.log("🏳️ Error getting English name from database:", error);
         }
         
-        // Try some common alternative names as fallback
-        const alternativeNames = {
-            'united states': 'us',
-            'usa': 'us',
-            'united kingdom': 'gb',
-            'uk': 'gb',
-            'soviet union': 'su',
-            'ussr': 'su',
-            'germany': 'de',
-            'france': 'fr',
-            'italy': 'it',
-            'japan': 'jp',
-            'poland': 'pl',
-            'czechoslovakia': 'cz',
-            'austria': 'at',
-            'hungary': 'hu',
-            'romania': 'ro',
-            'bulgaria': 'bg',
-            'yugoslavia': 'rs', // Using Serbia flag as fallback
-            'greece': 'gr',
-            'netherlands': 'nl',
-            'belgium': 'be',
-            'norway': 'no',
-            'finland': 'fi',
-            'australia': 'au',
-            'canada': 'ca',
-            'india': 'in',
-            'south africa': 'za'
-        };
+        //
         
         const altResult = alternativeNames[normalizedName];
         if (altResult) {
@@ -117,9 +89,6 @@
         console.log("🏳️ mapPlaceholder element:", mapPlaceholder);
         
         if (mapPlaceholder) {
-            // Set loading state first
-            mapPlaceholder.innerHTML = "טוען דגל...";
-            
             // Get flag code asynchronously
             getFlagCode(countryName).then(flagCode => {
                 console.log("🏳️ Flag code result:", flagCode);
@@ -127,15 +96,18 @@
                 if (flagCode) {
                     const flagUrl = `https://flagcdn.com/w320/${flagCode}.png`;
                     console.log("🏳️ Setting flag URL:", flagUrl);
+                    mapPlaceholder.style.display = "block"; // Make sure it's visible
                     mapPlaceholder.innerHTML = `<img id="countryFlag" src="${flagUrl}" alt="דגל ${countryName}">`;
                     console.log("🏳️ Flag set for country:", countryName, "with code:", flagCode);
                 } else {
-                    mapPlaceholder.innerHTML = "מפת הקרב";
-                    console.log("🏳️ No flag found for country:", countryName);
+                    // Hide the flag container completely if no flag is available
+                    mapPlaceholder.style.display = "none";
+                    console.log("🏳️ No flag found for country:", countryName, "- hiding flag container");
                 }
             }).catch(error => {
                 console.error("🏳️ Error getting flag code:", error);
-                mapPlaceholder.innerHTML = "מפת הקרב";
+                // Hide the flag container on error too
+                mapPlaceholder.style.display = "none";
             });
         } else {
             console.error("🏳️ mapPlaceholder element not found!");
@@ -347,7 +319,11 @@
                     }
                     soldiersTitle.style.display = "block";
                 } else {
-                    soldiersTitle.textContent = "לא נמצאו לוחמים למדינה זו";
+                    if (currentLang === 'he') {
+                        soldiersTitle.textContent = "לא נמצאו לוחמים למדינה זו";
+                    } else {
+                        soldiersTitle.textContent = "No soldiers found for this country";
+                    }
                     soldiersTitle.style.display = "block";
                 }
             }
@@ -391,6 +367,9 @@
     // Function to render soldiers list
     function renderSoldiers(soldiers, container, append = false) {
         if (!container) return;
+        
+        // Get current language from document or default to 'he'
+        const currentLang = document.documentElement.lang || 'he';
         
         if (!append) {
             container.innerHTML = "";

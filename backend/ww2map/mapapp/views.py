@@ -204,7 +204,9 @@ def paginated_soldiers(request):
     if search:
         soldiers_query = soldiers_query.filter(
             Q(first_name_he__icontains=search) | 
-            Q(last_name_he__icontains=search)
+            Q(last_name_he__icontains=search) |
+            Q(first_name_en__icontains=search) | 
+            Q(last_name_en__icontains=search)
         )
     if gender:
         # Convert gender string to numeric value

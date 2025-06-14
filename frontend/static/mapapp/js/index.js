@@ -4,6 +4,7 @@ import { setupModalClose, showCountryEventsModal } from "./modalHandler.js";
 import { countryCodeMapping } from "./countryCodeMapping.js";
 import { initializeTimeline } from "./timeline.js";
 import { CONFIG, loadConfig } from './config.js';
+import { modalManager } from './modalManager.js';
 
 // MapTiler API key is now loaded from backend configuration
 
@@ -790,12 +791,19 @@ function closeSoldierSearchModal() {
     }
 }
 
-// Make closeSoldierSearchModal available globally
+// Make soldier search functions available globally
+window.openSoldierSearchModal = openSoldierSearchModal;
 window.closeSoldierSearchModal = closeSoldierSearchModal;
 
 // Event listeners for soldier search modal
 if (soldierSearchToggle) {
     soldierSearchToggle.addEventListener('click', openSoldierSearchModal);
+}
+
+// Also handle mobile soldier search button
+const soldierSearchToggleMobile = document.getElementById('soldier-search-toggle-mobile');
+if (soldierSearchToggleMobile) {
+    soldierSearchToggleMobile.addEventListener('click', openSoldierSearchModal);
 }
 
 // Close modal when clicking outside

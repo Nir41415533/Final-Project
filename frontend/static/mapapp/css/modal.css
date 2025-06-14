@@ -894,28 +894,113 @@
         line-height: 1.2;
     }
     
-    /* Modal controls */
+    /* Modal controls - Enhanced for mobile */
+.modal-controls {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 3500;
+}
+
+.eventClose {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3em;
+    border-radius: 50%;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+    background: rgba(212, 175, 55, 0.95);
+    border: 2px solid #fff;
+    color: #2c3e50;
+    font-weight: bold;
+    touch-action: manipulation;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eventClose:hover {
+    background: rgba(212, 175, 55, 1);
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.eventClose:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+/* Hide text on mobile, show only X */
+.eventClose .closeText {
+    display: none;
+}
+
+.eventClose .closeX {
+    display: block;
+    font-size: 1.2em;
+    line-height: 1;
+    font-weight: bold;
+}
+
+/* Ensure close button is always visible and clickable on mobile */
+@media screen and (max-width: 768px) {
     .modal-controls {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 3500;
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        z-index: 9999 !important;
     }
     
     .eventClose {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2em;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        background: rgba(255, 255, 255, 0.95);
-        border: 2px solid #d4af37;
-        touch-action: manipulation;
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 1.4em !important;
+        background: rgba(212, 175, 55, 0.95) !important;
+        border: 3px solid #fff !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent;
     }
     
     .eventClose:active {
-        transform: scale(0.95);
+        transform: scale(0.9) !important;
+        background: rgba(212, 175, 55, 1) !important;
     }
+}
+
+/* Extra small screens - even bigger close button */
+@media screen and (max-width: 480px) {
+    .modal-controls {
+        top: 15px !important;
+        right: 15px !important;
+    }
+    
+    .eventClose {
+        width: 55px !important;
+        height: 55px !important;
+        font-size: 1.6em !important;
+        border: 4px solid #fff !important;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6) !important;
+    }
+}
+
+/* Ultra small screens */
+@media screen and (max-width: 380px) {
+    .modal-controls {
+        top: 10px !important;
+        right: 10px !important;
+    }
+    
+    .eventClose {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 1.8em !important;
+        background: rgba(212, 175, 55, 1) !important;
+        border: 5px solid #fff !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7) !important;
+    }
+}
     
     /* Pagination improvements */
     .pagination-controls {
@@ -1006,12 +1091,23 @@
     }
     
     /* Ultra-mobile controls */
+    .modal-controls {
+        top: 10px;
+        right: 10px;
+        z-index: 9999;
+    }
+    
     .eventClose {
-        width: 35px;
-        height: 35px;
-        font-size: 1.1em;
-        top: 8px;
-        right: 8px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.4em;
+        background: rgba(212, 175, 55, 0.98);
+        border: 3px solid #fff;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .eventClose:active {
+        transform: scale(0.9);
     }
     
     /* Ultra-mobile pagination */
@@ -1045,6 +1141,22 @@
     
     .passport {
         max-height: 300px;
+    }
+    
+    /* Extra small screen controls */
+    .modal-controls {
+        top: 8px;
+        right: 8px;
+        z-index: 9999;
+    }
+    
+    .eventClose {
+        width: 55px;
+        height: 55px;
+        font-size: 1.5em;
+        background: rgba(212, 175, 55, 1);
+        border: 4px solid #fff;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
     }
     
     .soldiers-section {

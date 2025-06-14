@@ -7,6 +7,66 @@ let currentEventModal = null;
 let isLoadingAI = false;
 let eventsWithAIOutput = new Set(); // Track events that have shown AI output
 
+// Function to show default timeline content when no events are available
+function showDefaultTimelineContent(container, currentLang) {
+    container.innerHTML = '';
+    container.className = 'timeline-list';
+    
+    // Header
+    const header = document.createElement('div');
+    header.className = 'timeline-list-header';
+    const headerTitle = currentLang === 'he' ? 'ציר הזמן של מלחמת העולם השנייה' : 'World War II Timeline';
+    const headerInstruction = currentLang === 'he' ? 'אירועים מרכזיים במלחמת העולם השנייה' : 'Major events of World War II';
+    header.innerHTML = `<h2>${headerTitle}</h2><div class="timeline-instruction">${headerInstruction}</div>`;
+    container.appendChild(header);
+    
+    // Default timeline events
+    const defaultEvents = currentLang === 'he' ? [
+        { year: '1939', title: 'פלישה לפולין', description: 'גרמניה פולשת לפולין - תחילת המלחמה' },
+        { year: '1940', title: 'קרב על בריטניה', description: 'הלופטוואפה תוקפת את בריטניה' },
+        { year: '1941', title: 'פלישה לברית המועצות', description: 'מבצע ברברוסה - פלישת גרמניה לרוסיה' },
+        { year: '1941', title: 'פרל הארבור', description: 'יפן תוקפת את פרל הארבור' },
+        { year: '1942', title: 'קרב על סטלינגרד', description: 'נקודת המפנה במלחמה' },
+        { year: '1943', title: 'כניעת איטליה', description: 'איטליה נכנעת לבעלות הברית' },
+        { year: '1944', title: 'פלישת נורמנדי', description: 'יום ה-D - פתיחת החזית השנייה' },
+        { year: '1945', title: 'כניעת גרמניה', description: 'סיום המלחמה באירופה' },
+        { year: '1945', title: 'הפצצות הירושימה ונגסקי', description: 'שימוש בנשק גרעיני' },
+        { year: '1945', title: 'כניעת יפן', description: 'סיום מלחמת העולם השנייה' }
+    ] : [
+        { year: '1939', title: 'Invasion of Poland', description: 'Germany invades Poland - War begins' },
+        { year: '1940', title: 'Battle of Britain', description: 'Luftwaffe attacks Britain' },
+        { year: '1941', title: 'Invasion of Soviet Union', description: 'Operation Barbarossa - Germany invades Russia' },
+        { year: '1941', title: 'Pearl Harbor', description: 'Japan attacks Pearl Harbor' },
+        { year: '1942', title: 'Battle of Stalingrad', description: 'Turning point of the war' },
+        { year: '1943', title: 'Italy Surrenders', description: 'Italy surrenders to the Allies' },
+        { year: '1944', title: 'D-Day Normandy', description: 'D-Day - Opening of second front' },
+        { year: '1945', title: 'Germany Surrenders', description: 'End of war in Europe' },
+        { year: '1945', title: 'Hiroshima and Nagasaki', description: 'Use of nuclear weapons' },
+        { year: '1945', title: 'Japan Surrenders', description: 'End of World War II' }
+    ];
+    
+    // Create timeline cards for default events
+    defaultEvents.forEach(event => {
+        const card = document.createElement('div');
+        card.className = 'timeline-card timeline-event-card';
+        card.innerHTML = `
+            <div class="timeline-card-title">${event.title}</div>
+            <div class="timeline-card-date">${event.year}</div>
+            <div class="timeline-card-description">${event.description}</div>
+        `;
+        
+        // Add click handler for default events
+        card.addEventListener('click', () => {
+            const infoText = currentLang === 'he' ? 
+                'זהו תוכן ברירת מחדל. לצפייה באירועים מפורטים, נא לטעון את בסיס הנתונים.' :
+                'This is default content. For detailed events, please load the database.';
+            alert(infoText);
+        });
+        
+        container.appendChild(card);
+    });
+}
+
 export function initializeTimeline(map) {
     const timelineContainer = document.getElementById('timeline-events');
     
@@ -45,8 +105,9 @@ export function initializeTimeline(map) {
             createYearCards(years, eventsByYear, timelineContainer, map, currentLang);
         })
         .catch(error => {
-            const errorMessage = currentLang === 'he' ? `שגיאה: ${error.message}` : `Error: ${error.message}`;
-            timelineContainer.innerHTML = `<div class="timeline-error">${errorMessage}</div>`;
+            console.error('Timeline error:', error);
+            // Show default timeline content instead of error
+            showDefaultTimelineContent(timelineContainer, currentLang);
         });
 }
 
