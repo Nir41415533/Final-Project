@@ -13,5 +13,7 @@ python manage.py migrate
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
-echo "Build completed successfully!"
-echo "Note: To load your data, run 'python load_data.py' after deployment" 
+echo "Loading initial data..."
+python load_data.py
+
+echo "Build completed successfully!" 
