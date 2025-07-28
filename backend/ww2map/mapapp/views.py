@@ -129,11 +129,11 @@ def soldiers_list(request):
     if 'lang' in request.GET:
         language = request.GET.get('lang', 'en')
     
-    # סינון חיילים עם מגדר תקין ושמות תקינים בלבד
+    # סינון חיילים עם מגדר תקין ושמות תקינים בלבד - מוגבל ל-100 עבור performance
     valid_name_regex = r'^[A-Za-zא-ת\s\-]+$'
     soldiers = Soldier.objects.select_related('birth_country') \
         .exclude(gender__isnull=True).exclude(gender__exact='') \
-        .filter(first_name_he__regex=valid_name_regex, last_name_he__regex=valid_name_regex)[:1000]
+        .filter(first_name_he__regex=valid_name_regex, last_name_he__regex=valid_name_regex)[:100]
 
     data = []
     for soldier in soldiers:
