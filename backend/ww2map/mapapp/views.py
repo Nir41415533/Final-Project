@@ -63,12 +63,28 @@ class Home(View):
 
 
 def ww2map_view(request):
-    context = {
-        'MAPTILER_API_KEY': os.getenv('MAPTILER_API_KEY', ''),
-        'GEMINI_API_KEY': os.getenv('GEMINI_API_KEY', ''),
-        'DEBUG': settings.DEBUG
-    }
-    return render(request, 'mapapp/map.html', context)
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        logger.info("🗺️ Starting ww2map_view")
+        
+        context = {
+            'MAPTILER_API_KEY': os.getenv('MAPTILER_API_KEY', ''),
+            'GEMINI_API_KEY': os.getenv('GEMINI_API_KEY', ''),
+            'DEBUG': settings.DEBUG
+        }
+        
+        logger.info(f"📋 Context prepared - MAPTILER: {bool(context['MAPTILER_API_KEY'])}, GEMINI: {bool(context['GEMINI_API_KEY'])}")
+        
+        result = render(request, 'mapapp/map.html', context)
+        logger.info("✅ Map template rendered successfully")
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ Error in ww2map_view: {str(e)}", exc_info=True)
+        from django.http import HttpResponse
+        return HttpResponse(f"<h1>Map Error</h1><p>Error details: {str(e)}</p><p>Check server logs for more details.</p>", status=500)
 
 
 @api_view(['GET'])
