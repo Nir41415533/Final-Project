@@ -133,6 +133,7 @@
                 <button id="dark-mode-toggle-mobile" class="nav-button mobile-item" title="Dark Mode">
                     <i class="fas fa-moon"></i>
                     <span class="nav-text">
+
                         {% if LANGUAGE_CODE == 'he' %}
                             מצב לילה
                         {% else %}
@@ -662,15 +663,15 @@
                     
                     let results = [];
                     if (currentLang === 'he') {
-                        // Search in Hebrew names
+                        // Search in Hebrew names - return Hebrew names
                         results = Object.keys(window.countries || {}).filter(country => 
                             country.toLowerCase().includes(searchTerm)
                         );
                     } else {
-                        // Search in English names
-                        results = Object.keys(window.countries || {}).filter(country => 
-                            (window.countries[country] || '').toLowerCase().includes(searchTerm)
-                        );
+                        // Search in English names - return English names
+                        results = Object.keys(window.countries || {})
+                            .filter(country => (window.countries[country] || '').toLowerCase().includes(searchTerm))
+                            .map(country => window.countries[country]); // Return English names
                     }
                     
                     displayMobileResults(results);
@@ -687,12 +688,12 @@
                     // Get current language from document
                     const currentLang = document.documentElement.lang || 'he';
                     
-                    results.forEach(country => {
+                    results.forEach(countryName => {
                         const div = document.createElement('div');
-                        // Display the name in the current language
-                        div.textContent = currentLang === 'he' ? country : (window.countries[country] || country);
+                        // The countryName is already in the correct language from performMobileSearch
+                        div.textContent = countryName;
                         div.addEventListener('click', () => {
-                            selectMobileCountry(country);
+                            selectMobileCountry(countryName);
                         });
                         searchResultsMobile.appendChild(div);
                     });
@@ -700,15 +701,29 @@
                     searchResultsMobile.style.display = 'block';
                 }
                 
-                function selectMobileCountry(country) {
-                    if (window.countries && window.countries[country]) {
-                        const countryCode = window.countries[country];
-                        if (window.openCountryModal) {
-                            window.openCountryModal(countryCode, country);
-                        }
-                        searchResultsMobile.style.display = 'none';
-                        countrySearchMobile.value = country;
+                function selectMobileCountry(countryName) {
+                    // Get current language to determine how to process the country name
+                    const currentLang = document.documentElement.lang || 'he';
+                    
+                    let hebrewName, englishName, countryCode;
+                    
+                    if (currentLang === 'he') {
+                        // countryName is Hebrew, find the English equivalent
+                        hebrewName = countryName;
+                        englishName = window.countries[countryName];
+                        countryCode = englishName;
+                    } else {
+                        // countryName is English, find the Hebrew equivalent
+                        englishName = countryName;
+                        hebrewName = Object.keys(window.countries).find(key => window.countries[key] === countryName) || countryName;
+                        countryCode = englishName;
                     }
+                    
+                    if (window.openCountryModal) {
+                        window.openCountryModal(countryCode, hebrewName);
+                    }
+                    searchResultsMobile.style.display = 'none';
+                    countrySearchMobile.value = countryName;
                 }
                 
                 // Mobile search event listeners

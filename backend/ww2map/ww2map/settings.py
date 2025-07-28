@@ -4,6 +4,7 @@ Django settings for ww2map project.
 
 from pathlib import Path
 import os
+import dj_database_url
 from django.utils.translation import gettext_lazy as _
 from dotenv import load_dotenv
 
@@ -17,7 +18,7 @@ FRONTEND_DIR = BASE_DIR.parent.parent / "frontend"
 
 # Security settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
@@ -34,6 +35,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # For serving static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',  # Middleware תומך בהחלפת שפה
     'django.middleware.common.CommonMiddleware',
@@ -63,17 +65,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ww2map.wsgi.application'
 
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': os.getenv('DB_NAME', 'ww2map'),
-        'USER': os.getenv('DB_USER', 'ww2user'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+# Database - use DATABASE_URL if available (for Render), otherwise use individual env vars
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600, conn_health_checks=True)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+            'NAME': os.getenv('DB_NAME', 'ww2map'),
+            'USER': os.getenv('DB_USER', 'ww2user'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -115,9 +124,18 @@ STATICFILES_DIRS = [
     FRONTEND_DIR / "static",  # Point to frontend static files
 ]
 
+# WhiteNoise configuration for static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Security settings for production
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'

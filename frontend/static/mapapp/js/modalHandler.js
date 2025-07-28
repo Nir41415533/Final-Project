@@ -238,7 +238,11 @@
         } else {
             console.log("No events found for this country");
             if (eventsContainer) {
-                eventsContainer.innerHTML = '<div class="no-events">לא נמצאו אירועים למדינה זו</div>';
+                if (document.documentElement.lang === 'he') {
+                    eventsContainer.innerHTML = '<div class="no-events">לא נמצאו אירועים למדינה זו</div>';
+                } else {
+                    eventsContainer.innerHTML = '<div class="no-events">No events found for this country</div>';
+                }
             }
             if (eventDetails) {
                 eventDetails.style.display = 'none';

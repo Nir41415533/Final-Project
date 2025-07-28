@@ -23,7 +23,8 @@ function openCountryModal(countryCode, countryNameHeb) {
         .then(res => res.json())
         .then(countryData => {
             const displayCountryName = countryData.name || countryNameHeb;
-            const englishName = countryData.english_name || countryCode; // Get English name for flag URL
+            // Use the name_en from the response, or fallback to countryCode
+            const englishName = countryData.name_en || countryCode;
             
             // Now load events
             return fetch(`/events/?lang=${currentLang}`)
@@ -171,7 +172,6 @@ async function initializeMap() {
         updateLoadingProgress(3, 100);
         setTimeout(hideLoadingScreen, 500);
         
-        console.log("✅ המפה מוכנה, טוען שכבות...");
         loadEvents();
         loadCountries(map);
         setupModalClose(map);
@@ -466,15 +466,15 @@ function performSearch() {
     
     let results = [];
     if (currentLang === 'he') {
-        // Search in Hebrew names
+        // Search in Hebrew names - return Hebrew names
         results = Object.keys(countries).filter(country => 
             country.toLowerCase().includes(searchTerm)
         );
     } else {
-        // Search in English names
-        results = Object.keys(countries).filter(country => 
-            countries[country].toLowerCase().includes(searchTerm)
-        );
+        // Search in English names - return English names
+        results = Object.keys(countries)
+            .filter(country => countries[country].toLowerCase().includes(searchTerm))
+            .map(country => countries[country]); // Return English names
     }
     
     displayResults(results);
@@ -491,12 +491,12 @@ function displayResults(results) {
     // Get current language from document
     const currentLang = document.documentElement.lang || 'he';
     
-    results.forEach(country => {
+    results.forEach(countryName => {
         const div = document.createElement('div');
-        // Display the name in the current language
-        div.textContent = currentLang === 'he' ? country : countries[country];
+        // The countryName is already in the correct language from performSearch
+        div.textContent = countryName;
         div.addEventListener('click', () => {
-            selectCountry(country);
+            selectCountry(countryName);
         });
         searchResults.appendChild(div);
     });
@@ -504,11 +504,27 @@ function displayResults(results) {
     searchResults.style.display = 'block';
 }
 
-function selectCountry(country) {
-    const countryCode = countries[country];
-    openCountryModal(countryCode, country);
+function selectCountry(countryName) {
+    // Get current language to determine how to process the country name
+    const currentLang = document.documentElement.lang || 'he';
+    
+    let hebrewName, englishName, countryCode;
+    
+    if (currentLang === 'he') {
+        // countryName is Hebrew, find the English equivalent
+        hebrewName = countryName;
+        englishName = countries[countryName];
+        countryCode = englishName;
+    } else {
+        // countryName is English, find the Hebrew equivalent
+        englishName = countryName;
+        hebrewName = Object.keys(countries).find(key => countries[key] === countryName) || countryName;
+        countryCode = englishName;
+    }
+    
+    openCountryModal(countryCode, hebrewName);
     searchResults.style.display = 'none';
-    countrySearch.value = country; // Set search input to selected country
+    countrySearch.value = countryName; // Set search input to selected country
     
     // Add animation
     const searchContainer = document.querySelector('.search-input-container');
