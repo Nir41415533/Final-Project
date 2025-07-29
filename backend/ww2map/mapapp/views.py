@@ -95,12 +95,18 @@ def event_list(request):
         if 'lang' in request.GET:
             language = request.GET.get('lang', 'en')
         
-        events = Event.objects.all().values(
+        # Add pagination parameters
+        page = int(request.GET.get('page', 1))
+        limit = min(int(request.GET.get('limit', 1000)), 2000)  # Max 2000 events per request
+        offset = (page - 1) * limit
+        
+        # Optimize query with select_related and limit
+        events = Event.objects.select_related('country').values(
             "title", "title_en", "date", "description", "description_en", 
             "country__name_en", "country__name_he", 
             "country__latitude", "country__longitude",
             "image", "video"
-        )
+        )[offset:offset + limit]
         
         results = []
         for event in events:
@@ -114,6 +120,10 @@ def event_list(request):
             # Choose event title and description based on language
             event_title = get_field_by_language(event["title"], event["title_en"])
             event_description = get_field_by_language(event["description"], event["description_en"])
+            
+            # Limit description length to prevent huge responses
+            if event_description and len(event_description) > 500:
+                event_description = event_description[:500] + "..."
             
             # Choose country name based on language (keeping existing logic)
             country_name = event["country__name_he"] if language == 'he' else event["country__name_en"]
@@ -133,8 +143,23 @@ def event_list(request):
                 }
             }
             results.append(event_data)
-            
-        return JsonResponse(results, safe=False)
+        
+        # Add pagination info
+        total_events = Event.objects.count()
+        has_more = (offset + limit) < total_events
+        
+        response_data = {
+            "events": results,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total": total_events,
+                "has_more": has_more
+            }
+        }
+        
+        return JsonResponse(response_data, safe=False)
+        
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 

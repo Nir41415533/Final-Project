@@ -51,7 +51,7 @@ git push origin main
 
 ### Build & Deploy:
 - **Build Command:** `./build.sh`
-- **Start Command:** `gunicorn ww2map.wsgi:application --bind 0.0.0.0:$PORT`
+- **Start Command:** `gunicorn --config gunicorn.conf.py ww2map.wsgi:application`
 
 ## שלב 5: הגדרת Environment Variables
 
