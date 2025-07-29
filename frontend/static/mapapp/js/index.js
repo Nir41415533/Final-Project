@@ -27,12 +27,9 @@ function openCountryModal(countryCode, countryNameHeb) {
             const englishName = countryData.name_en || countryCode;
             
             // Now load events
-            return fetch(`/events/?lang=${currentLang}&limit=2000`)
+            return fetch(`/events/?lang=${currentLang}`)
                 .then(res => res.json())
-                .then(data => {
-                    // Handle new paginated format
-                    const events = data.events || data; // Fallback for backwards compatibility
-                    
+                .then(events => {
                     // Filter events for this country
                     const countryEvents = events.filter(ev => {
                         const eventCountry = (ev.country?.name || "").trim().toLowerCase();
@@ -64,11 +61,9 @@ function openCountryModal(countryCode, countryNameHeb) {
             console.error("Error loading country name or events:", error);
             // Fallback to original behavior if API fails
             const currentLang = document.documentElement.lang || 'he';
-            fetch(`/events/?lang=${currentLang}&limit=2000`)
+            fetch(`/events/?lang=${currentLang}`)
                 .then(res => res.json())
-                .then(data => {
-                    // Handle new paginated format
-                    const events = data.events || data;
+                .then(events => {
                     const englishName = countryCode;
                     const countryEvents = events.filter(ev => {
                         const eventCountry = (ev.country?.name || "").trim().toLowerCase();
@@ -91,13 +86,10 @@ function loadEvents() {
     // Get current language from document or default to 'he'
     const currentLang = document.documentElement.lang || 'he';
     
-    fetch(`/events/?lang=${currentLang}&limit=2000`)
+    fetch(`/events/?lang=${currentLang}`)
         .then(response => response.json())
-        .then(data => {
-            // Handle new paginated format
-            const events = data.events || data; // Fallback for backwards compatibility
+        .then(events => {
             window.historicalEvents = events;
-            console.log(`✅ Loaded ${events.length} events`);
         })
         .catch(error => console.error("❌ שגיאה בטעינת אירועים:", error));
 }

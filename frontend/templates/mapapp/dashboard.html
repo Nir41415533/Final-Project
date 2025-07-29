@@ -468,18 +468,12 @@
             fetch('{% url "dashboard_data" %}')
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        throw new Error('Network response was not ok');
                     }
                     return response.json();
                 })
                 .then(data => {
                     console.log('Dashboard data received:', data);
-                    
-                    // Check if we received an error response
-                    if (data.error) {
-                        throw new Error(data.error + (data.details ? ': ' + data.details : ''));
-                    }
-                    
                     dashboardData = data;
                     hideLoadingStates();
                     createOverviewCharts();
@@ -488,17 +482,6 @@
                 .catch(error => {
                     console.error('Error loading dashboard data:', error);
                     showErrorStates();
-                    
-                    // Show user-friendly error message
-                    document.querySelectorAll('.loading-state').forEach(loader => {
-                        loader.innerHTML = `
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>שגיאה בטעינת הנתונים</span>
-                            <button onclick="loadDashboardData()" style="margin-top: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                נסה שוב
-                            </button>
-                        `;
-                    });
                 });
         }
 

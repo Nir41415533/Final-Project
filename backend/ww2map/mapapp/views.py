@@ -95,18 +95,12 @@ def event_list(request):
         if 'lang' in request.GET:
             language = request.GET.get('lang', 'en')
         
-        # Add pagination parameters
-        page = int(request.GET.get('page', 1))
-        limit = min(int(request.GET.get('limit', 1000)), 2000)  # Max 2000 events per request
-        offset = (page - 1) * limit
-        
-        # Optimize query with select_related and limit
-        events = Event.objects.select_related('country').values(
+        events = Event.objects.all().values(
             "title", "title_en", "date", "description", "description_en", 
             "country__name_en", "country__name_he", 
             "country__latitude", "country__longitude",
             "image", "video"
-        )[offset:offset + limit]
+        )
         
         results = []
         for event in events:
@@ -120,10 +114,6 @@ def event_list(request):
             # Choose event title and description based on language
             event_title = get_field_by_language(event["title"], event["title_en"])
             event_description = get_field_by_language(event["description"], event["description_en"])
-            
-            # Limit description length to prevent huge responses
-            if event_description and len(event_description) > 500:
-                event_description = event_description[:500] + "..."
             
             # Choose country name based on language (keeping existing logic)
             country_name = event["country__name_he"] if language == 'he' else event["country__name_en"]
@@ -143,23 +133,8 @@ def event_list(request):
                 }
             }
             results.append(event_data)
-        
-        # Add pagination info
-        total_events = Event.objects.count()
-        has_more = (offset + limit) < total_events
-        
-        response_data = {
-            "events": results,
-            "pagination": {
-                "page": page,
-                "limit": limit,
-                "total": total_events,
-                "has_more": has_more
-            }
-        }
-        
-        return JsonResponse(response_data, safe=False)
-        
+            
+        return JsonResponse(results, safe=False)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
@@ -569,171 +544,162 @@ def dashboard_data(request):
     API endpoint to get dashboard data in JSON format
     """
     
-    try:
-        # Helper function to validate name using regex (same as in other endpoints)
-        def is_valid_name(name):
-            if not name:
-                return False
-            # Allow Hebrew letters, Latin letters, spaces, hyphens, and single quotes
-            pattern = r'^[\u0590-\u05FF\u0600-\u06FFa-zA-Z\s\-\']+$'
-            return bool(re.match(pattern, name))
+    # Helper function to validate name using regex (same as in other endpoints)
+    def is_valid_name(name):
+        if not name:
+            return False
+        # Allow Hebrew letters, Latin letters, spaces, hyphens, and single quotes
+        pattern = r'^[\u0590-\u05FF\u0600-\u06FFa-zA-Z\s\-\']+$'
+        return bool(re.match(pattern, name))
+    
+    # Filter soldiers with valid data (same filtering as other endpoints)
+    valid_soldiers = Soldier.objects.exclude(
+        Q(gender__isnull=True) | Q(gender='')
+    ).filter(
+        Q(first_name_he__isnull=False) & ~Q(first_name_he='') &
+        Q(last_name_he__isnull=False) & ~Q(last_name_he='')
+    )
+    
+    # Further filter by name validity
+    valid_soldier_ids = []
+    for soldier in valid_soldiers:
+        if (is_valid_name(soldier.first_name_he) and is_valid_name(soldier.last_name_he)):
+            valid_soldier_ids.append(soldier.id)
+    
+    # Apply the filtered soldier IDs to all queries
+    filtered_soldiers = Soldier.objects.filter(id__in=valid_soldier_ids)
+    
+    # Get statistics for soldiers by country
+    soldiers_by_country = filtered_soldiers.values('birth_country__name_he').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Group countries into regions
+    region_counts = {}
+    for item in soldiers_by_country:
+        country_name = item['birth_country__name_he'] or 'לא ידוע'
+        region = get_region_for_country(country_name)
+        region_counts[region] = region_counts.get(region, 0) + item['count']
+    
+    # Convert to list format
+    region_distribution = [{'region': region, 'count': count} 
+                         for region, count in region_counts.items()]
+    
+    # Sort regions by count
+    region_distribution.sort(key=lambda x: x['count'], reverse=True)
+    
+    # Get statistics for soldiers by gender - only valid gender values
+    soldiers_by_gender = filtered_soldiers.filter(
+        Q(gender='1') | Q(gender='1.0') | Q(gender='0') | Q(gender='0.0')
+    ).values('gender').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Get statistics for events by country
+    events_by_country = Event.objects.values('country__name_he').annotate(
+        count=Count('id')
+    ).order_by('-count')[:10]
+    
+    # Image distribution - soldiers with and without images
+    soldiers_with_images = filtered_soldiers.exclude(
+        Q(image_url__isnull=True) | Q(image_url='') | Q(image_url__exact=' ')
+    ).exclude(image_url__regex=r'^\s*$')
+    
+    with_images = soldiers_with_images.count()
+    without_images = len(valid_soldier_ids) - with_images
+    
+    image_distribution = [
+        {'image_status': 'עם תמונה', 'count': with_images},
+        {'image_status': 'ללא תמונה', 'count': without_images}
+    ]
+    
+    # Age distribution (calculate from date_of_birth if available)
+    age_distribution = []
+    current_year = 1945  # Using 1945 as reference year for WWII
+    soldiers_with_birth_date = filtered_soldiers.exclude(date_of_birth__isnull=True)
+    
+    for soldier in soldiers_with_birth_date:
+        age_at_war = current_year - soldier.date_of_birth.year
         
-        # Filter soldiers with valid data (same filtering as other endpoints)
-        valid_soldiers = Soldier.objects.exclude(
-            Q(gender__isnull=True) | Q(gender='')
-        ).filter(
-            Q(first_name_he__isnull=False) & ~Q(first_name_he='') &
-            Q(last_name_he__isnull=False) & ~Q(last_name_he='')
-        )
-        
-        # Further filter by name validity
-        valid_soldier_ids = []
-        for soldier in valid_soldiers:
-            if (is_valid_name(soldier.first_name_he) and is_valid_name(soldier.last_name_he)):
-                valid_soldier_ids.append(soldier.id)
-        
-        # Apply the filtered soldier IDs to all queries (limit for performance)
-        filtered_soldiers = Soldier.objects.filter(id__in=valid_soldier_ids[:5000])  # Limit to 5000 for performance
-        
-        # Get statistics for soldiers by country (limit results)
-        soldiers_by_country = filtered_soldiers.values('birth_country__name_he').annotate(
-            count=Count('id')
-        ).order_by('-count')[:20]  # Top 20 countries only
-        
-        # Group countries into regions with error handling
-        region_counts = {}
-        try:
-            for item in soldiers_by_country:
-                country_name = item['birth_country__name_he'] or 'לא ידוע'
-                region = get_region_for_country(country_name)
-                region_counts[region] = region_counts.get(region, 0) + item['count']
-        except Exception as e:
-            # Fallback if region grouping fails
-            region_counts = {'לא ידוע': len(valid_soldier_ids)}
-        
-        # Convert to list format
-        region_distribution = [{'region': region, 'count': count} 
-                             for region, count in region_counts.items()]
-        
-        # Sort regions by count
-        region_distribution.sort(key=lambda x: x['count'], reverse=True)
-        
-        # Get statistics for soldiers by gender - only valid gender values  
-        soldiers_by_gender = filtered_soldiers.filter(
-            Q(gender='1') | Q(gender='1.0') | Q(gender='0') | Q(gender='0.0')
-        ).values('gender').annotate(
-            count=Count('id')
-        ).order_by('-count')
-        
-        # Get statistics for events by country
-        events_by_country = Event.objects.values('country__name_he').annotate(
-            count=Count('id')
-        ).order_by('-count')[:10]  # Top 10 countries
-        
-        # Image distribution - soldiers with and without images (use count queries)
-        with_images = filtered_soldiers.exclude(
-            Q(image_url__isnull=True) | Q(image_url='') | Q(image_url__exact=' ')
-        ).exclude(image_url__regex=r'^\s*$').count()
-        
-        without_images = filtered_soldiers.count() - with_images
-        
-        image_distribution = [
-            {'image_status': 'עם תמונה', 'count': with_images},
-            {'image_status': 'ללא תמונה', 'count': without_images}
-        ]
-        
-        # Age distribution (calculate from date_of_birth if available) - sample only
-        soldiers_with_birth_date = filtered_soldiers.exclude(date_of_birth__isnull=True)[:1000]  # Sample 1000 for performance
-        
-        age_counts = {}
-        age_order = ["מתחת לגיל 18", "18-25", "26-35", "36-45", "מעל 45"]
-        
-        for soldier in soldiers_with_birth_date:
-            try:
-                age_at_war = 1945 - soldier.date_of_birth.year  # Using 1945 as reference year
-                
-                # Create meaningful age groups
-                if age_at_war < 18:
-                    age_group = "מתחת לגיל 18"
-                elif age_at_war < 25:
-                    age_group = "18-25"
-                elif age_at_war < 35:
-                    age_group = "26-35"
-                elif age_at_war < 45:
-                    age_group = "36-45"
-                else:
-                    age_group = "מעל 45"
-                
-                age_counts[age_group] = age_counts.get(age_group, 0) + 1
-            except:
-                # Skip invalid dates
-                continue
-        
-        age_distribution_data = [{'age_group': group, 'count': age_counts.get(group, 0)} 
-                               for group in age_order if age_counts.get(group, 0) > 0]
-        
-        # Decorations distribution - use count queries
-        with_decorations = filtered_soldiers.filter(
-            Q(decorations_he__isnull=False) & 
-            ~Q(decorations_he='') & 
-            ~Q(decorations_he__iexact='nan') &
-            ~Q(decorations_he__iexact='null') &
-            ~Q(decorations_he__exact=' ')
-        ).exclude(decorations_he__regex=r'^\s*$').count()
-        
-        without_decorations = filtered_soldiers.count() - with_decorations
-        
-        decorations_distribution = [
-            {'decoration_status': 'בעלי עיטורים', 'count': with_decorations},
-            {'decoration_status': 'ללא עיטורים', 'count': without_decorations}
-        ]
-        
-        # Army roles distribution (limit results)
-        army_roles_distribution = filtered_soldiers.exclude(
-            Q(army_role_he__isnull=True) | Q(army_role_he='') | 
-            Q(army_role_he__iexact='nan') | Q(army_role_he__iexact='null')
-        ).exclude(army_role_he__regex=r'^\s*$').values(
-            'army_role_he'
-        ).annotate(count=Count('id')).order_by('-count')[:15]  # Top 15 roles only
-        
-        # Cities distribution (limit results)
-        cities_distribution = filtered_soldiers.exclude(
-            birth_city_he__isnull=True
-        ).exclude(birth_city_he='').values(
-            'birth_city_he'
-        ).annotate(count=Count('id')).order_by('-count')[:20]  # Top 20 cities only
-        
-        # Timeline data - PostgreSQL compatible
-        timeline_data = Event.objects.exclude(date__isnull=True).extra(
-            select={'year': "EXTRACT(year FROM date)"}
-        ).values('year').annotate(count=Count('id')).order_by('year')
-        
-        data = {
-            'soldiers_by_country': list(soldiers_by_country),
-            'soldiers_by_gender': list(soldiers_by_gender),
-            'events_by_country': list(events_by_country), 
-            'image_distribution': image_distribution,
-            'decorations_distribution': decorations_distribution,
-            'army_roles_distribution': list(army_roles_distribution),
-            'cities_distribution': list(cities_distribution),
-            'timeline_data': list(timeline_data),
-            'region_distribution': region_distribution,
-            'total_soldiers': len(valid_soldier_ids),  # Use the actual filtered count
-            'total_events': Event.objects.count(),
-            'total_countries': Country.objects.count(),
-            'total_decorations': with_decorations,
-            'age_distribution': age_distribution_data,
-        }
-        
-        return JsonResponse(data)
-        
-    except Exception as e:
-        # Log the error for debugging
-        print(f"Dashboard data error: {str(e)}")
-        return JsonResponse({
-            'error': 'Unable to load dashboard data',
-            'details': str(e)
-        }, status=500)
+        # Create meaningful age groups
+        if age_at_war < 18:
+            age_group = "מתחת לגיל 18"
+        elif age_at_war < 25:
+            age_group = "18-24"
+        elif age_at_war < 35:
+            age_group = "25-34"  
+        elif age_at_war < 45:
+            age_group = "35-44"
+        elif age_at_war < 55:
+            age_group = "45-54"
+        else:
+            age_group = "55 ומעלה"
+            
+        age_distribution.append(age_group)
+    
+    # Count age groups
+    age_counts = Counter(age_distribution)
+    
+    # Sort age groups in logical order
+    age_order = ["מתחת לגיל 18", "18-24", "25-34", "35-44", "45-54", "55 ומעלה"]
+    age_distribution_data = [{'age_group': group, 'count': age_counts.get(group, 0)} 
+                           for group in age_order if age_counts.get(group, 0) > 0]
+    
+    # Decorations distribution - analyze real decorations data
+    soldiers_with_decorations = filtered_soldiers.filter(
+        Q(decorations_he__isnull=False) & 
+        ~Q(decorations_he='') & 
+        ~Q(decorations_he__iexact='nan') &
+        ~Q(decorations_he__iexact='null') &
+        ~Q(decorations_he__exact=' ')
+    ).exclude(decorations_he__regex=r'^\s*$')  # Exclude strings that are only whitespace
+    
+    # Count soldiers with and without decorations
+    with_decorations = soldiers_with_decorations.count()
+    without_decorations = len(valid_soldier_ids) - with_decorations  # Use filtered count here too
+    
+    decorations_distribution = [
+        {'decoration_status': 'בעלי עיטורים', 'count': with_decorations},
+        {'decoration_status': 'ללא עיטורים', 'count': without_decorations}
+    ]
+    
+    # Army roles distribution
+    army_roles_distribution = filtered_soldiers.exclude(
+        Q(army_role_he__isnull=True) | Q(army_role_he='') | 
+        Q(army_role_he__iexact='nan') | Q(army_role_he__iexact='null')
+    ).exclude(army_role_he__regex=r'^\s*$').values(
+        'army_role_he'
+    ).annotate(count=Count('id')).order_by('-count')
+    
+    # Cities distribution (using birth_city_he field)
+    cities_distribution = filtered_soldiers.exclude(birth_city_he__isnull=True).exclude(birth_city_he='').values(
+        'birth_city_he'
+    ).annotate(count=Count('id')).order_by('-count')
+    
+    # Timeline data - PostgreSQL compatible
+    timeline_data = Event.objects.exclude(date__isnull=True).extra(
+        select={'year': "EXTRACT(year FROM date)"}
+    ).values('year').annotate(count=Count('id')).order_by('year')
+    
+    data = {
+        'soldiers_by_country': list(soldiers_by_country),
+        'soldiers_by_gender': list(soldiers_by_gender),
+        'events_by_country': list(events_by_country), 
+        'image_distribution': image_distribution,
+        'decorations_distribution': decorations_distribution,
+        'army_roles_distribution': list(army_roles_distribution),
+        'cities_distribution': list(cities_distribution),
+        'timeline_data': list(timeline_data),
+        'region_distribution': region_distribution,
+        'total_soldiers': len(valid_soldier_ids),  # Use the actual filtered count
+        'total_events': Event.objects.count(),
+        'total_countries': Country.objects.count(),
+        'total_decorations': with_decorations,
+        'age_distribution': age_distribution_data,
+    }
+    
+    
+    return JsonResponse(data)
 
 @api_view(['GET'])
 def search_soldiers(request):
