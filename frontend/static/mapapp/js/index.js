@@ -111,14 +111,34 @@ const loadingText = document.getElementById('loadingText');
 
 // Loading progress tracking
 let loadingProgress = 0;
-const loadingSteps = [
-    { weight: 30, message: 'טוען נתוני מפה...' },
-    { weight: 20, message: 'מכין שכבות...' },
-    { weight: 30, message: 'טוען אירועים...' },
-    { weight: 20, message: 'מסיים טעינה...' }
-];
+
+// Get current language
+function getCurrentLanguage() {
+    return document.documentElement.lang || 'he';
+}
+
+// Language-dependent loading steps
+function getLoadingSteps() {
+    const currentLang = getCurrentLanguage();
+    if (currentLang === 'he') {
+        return [
+            { weight: 30, message: 'טוען נתוני מפה...' },
+            { weight: 20, message: 'מכין שכבות...' },
+            { weight: 30, message: 'טוען אירועים...' },
+            { weight: 20, message: 'מסיים טעינה...' }
+        ];
+    } else {
+        return [
+            { weight: 30, message: 'Loading map data...' },
+            { weight: 20, message: 'Preparing layers...' },
+            { weight: 30, message: 'Loading events...' },
+            { weight: 20, message: 'Finishing up...' }
+        ];
+    }
+}
 
 function updateLoadingProgress(step, progress) {
+    const loadingSteps = getLoadingSteps();
     const stepIndex = loadingSteps.findIndex((s, i) => i === step);
     if (stepIndex === -1) return;
 
@@ -131,6 +151,10 @@ function updateLoadingProgress(step, progress) {
 
     // Update UI
     progressBar.style.width = `${loadingProgress}%`;
+    const progressPercentage = document.getElementById('progressPercentage');
+    if (progressPercentage) {
+        progressPercentage.textContent = `${Math.round(loadingProgress)}%`;
+    }
     loadingText.textContent = loadingSteps[stepIndex].message;
 }
 
@@ -180,7 +204,9 @@ async function initializeMap() {
 
     // Add error handling
     map.on('error', (e) => {
-        loadingText.textContent = 'שגיאה בטעינת המפה';
+        const currentLang = getCurrentLanguage();
+        const errorText = currentLang === 'he' ? 'שגיאה בטעינת המפה' : 'Map loading error';
+        loadingText.textContent = errorText;
         loadingText.style.color = '#e74c3c';
         console.error('Map loading error:', e);
     });
@@ -643,7 +669,9 @@ function performSoldierSearch() {
     }
     
     // Add loading indicator
-    soldierSearchResults.innerHTML = '<div class="search-loading">מחפש...</div>';
+    const currentLang = getCurrentLanguage();
+    const searchingText = currentLang === 'he' ? 'מחפש...' : 'Searching...';
+    soldierSearchResults.innerHTML = `<div class="search-loading">${searchingText}</div>`;
     soldierSearchResults.style.display = 'block';
     
     // Debounce the search
@@ -658,7 +686,8 @@ function performSoldierSearch() {
             })
             .catch(error => {
                 console.error('Error searching soldiers:', error);
-                soldierSearchResults.innerHTML = '<div class="search-error">שגיאה בחיפוש</div>';
+                const errorText = currentLang === 'he' ? 'שגיאה בחיפוש' : 'Search error';
+                soldierSearchResults.innerHTML = `<div class="search-error">${errorText}</div>`;
             });
     }, 300);
 }
@@ -667,7 +696,9 @@ function displaySoldierResults(soldiers) {
     soldierSearchResults.innerHTML = '';
     
     if (soldiers.length === 0) {
-        soldierSearchResults.innerHTML = '<div class="no-results">לא נמצאו תוצאות</div>';
+        const currentLang = getCurrentLanguage();
+        const noResultsText = currentLang === 'he' ? 'לא נמצאו תוצאות' : 'No results found';
+        soldierSearchResults.innerHTML = `<div class="no-results">${noResultsText}</div>`;
         soldierSearchResults.style.display = 'block';
         return;
     }

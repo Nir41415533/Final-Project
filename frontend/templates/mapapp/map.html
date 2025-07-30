@@ -193,6 +193,13 @@
     <!-- מסך טעינה -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loading-content">
+            <div class="loading-logo">
+                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="30" cy="30" r="28" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                    <path d="M30 8L35 18L45 15L40 25L50 30L40 35L45 45L35 42L30 52L25 42L15 45L20 35L10 30L20 25L15 15L25 18L30 8Z" 
+                          fill="rgba(255,255,255,0.8)" stroke="rgba(255,255,255,0.9)" stroke-width="1"/>
+                </svg>
+            </div>
             <h1 class="loading-title">
                 {% if LANGUAGE_CODE == 'he' %}
                     טוען מפה אינטראקטיבית
@@ -200,9 +207,16 @@
                     Loading Interactive Map
                 {% endif %}
             </h1>
-            <div class="loading-spinner"></div>
+            <div class="loading-subtitle">
+                {% if LANGUAGE_CODE == 'he' %}
+                    מוזיאון הלוחם היהודי במלחמת העולם השנייה
+                {% else %}
+                    Jewish World War II Fighter Museum
+                {% endif %}
+            </div>
             <div class="loading-progress">
                 <div id="progressBar" class="progress-bar"></div>
+                <div class="progress-percentage" id="progressPercentage">0%</div>
             </div>
             <div id="loadingText" class="loading-text">
                 {% if LANGUAGE_CODE == 'he' %}
@@ -210,6 +224,11 @@
                 {% else %}
                     Loading map...
                 {% endif %}
+            </div>
+            <div class="loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
         </div>
     </div>

@@ -544,7 +544,9 @@ export function showCountryEvents(countryName, events) {
     
     // Clear previous events and show loading state
     if (eventsContainer) {
-        eventsContainer.innerHTML = '<div class="loading-events">טוען אירועים...</div>';
+        const currentLang = document.documentElement.lang || 'he';
+        const loadingText = currentLang === 'he' ? 'טוען אירועים...' : 'Loading events...';
+        eventsContainer.innerHTML = `<div class="loading-events">${loadingText}</div>`;
         
         // Use setTimeout to ensure DOM is updated before adding events
         setTimeout(() => {
@@ -602,7 +604,9 @@ export function showCountryEvents(countryName, events) {
                 
             } else {
                 console.log("No events available");
-                eventsContainer.innerHTML = '<div class="no-events">לא נמצאו אירועים למדינה זו</div>';
+                const currentLang = document.documentElement.lang || 'he';
+                const noEventsText = currentLang === 'he' ? 'לא נמצאו אירועים למדינה זו' : 'No events found for this country';
+                eventsContainer.innerHTML = `<div class="no-events">${noEventsText}</div>`;
             }
         }, 0);
     }

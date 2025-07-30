@@ -132,7 +132,9 @@
 
         if (soldiersTitle) {
             // Display loading message instead of hiding
-            soldiersTitle.textContent = "טוען לוחמים...";
+            const currentLang = document.documentElement.lang || 'he';
+            const loadingText = currentLang === 'he' ? 'טוען לוחמים...' : 'Loading soldiers...';
+            soldiersTitle.textContent = loadingText;
             soldiersTitle.style.display = "block";
         }
 
@@ -398,11 +400,14 @@
                     ? "https://media.istockphoto.com/id/666545204/vector/default-placeholder-profile-icon.jpg?s=612x612&w=0&k=20&c=UGYk-MX0pFWUZOr5hloXDREB6vfCqsyS7SgbQ1-heY8="
                     : "https://media.istockphoto.com/id/666545148/vector/default-placeholder-profile-icon.jpg?s=612x612&w=0&k=20&c=swBnLcHy6L9v5eaiRkDwfGLr5cfLkH9hKW-sZfH-m90=");
 
+            const currentLang = document.documentElement.lang || 'he';
+            const soldierFallback = currentLang === 'he' ? 'לוחם' : 'Soldier';
+            
             soldierDiv.innerHTML = `
                 <div class="soldier-image">
-                    <img src="${imageUrl}" alt="${soldier.name || 'לוחם'}">
+                    <img src="${imageUrl}" alt="${soldier.name || soldierFallback}">
                 </div>
-                <p class="soldier-name">${soldier.name || 'לוחם'}</p>
+                <p class="soldier-name">${soldier.name || soldierFallback}</p>
             `;
 
             soldierDiv.onclick = () => showSoldierDetails(soldier);
