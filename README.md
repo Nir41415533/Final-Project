@@ -12,7 +12,7 @@ An immersive, interactive web application developed for the **Jewish Soldier Mus
 ---
 
 ### 📺 **Project Demo**
-> **[Watch the Video Presentation](https://drive.google.com/drive/home)** 🎥
+> **[Watch the Video Presentation](https://drive.google.com/file/d/1OMX0xA1SwPvKojZ7UCjImVCnOtqHMref/view?usp=sharing)** 🎥
 
 ---
 
