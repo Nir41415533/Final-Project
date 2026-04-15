@@ -1,25 +1,66 @@
-# WW2 Historical Map Application
+cat << 'EOF' > README.md
+# 🌍 WWII Historical Map & Timeline 📜
 
-An interactive web application for exploring World War II historical events, soldier profiles, and geographical information.
+[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-4.2-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Award](https://img.shields.io/badge/Award-Dean's%20Honor-gold?style=for-the-badge&logo=google-scholar&logoColor=white)](#)
 
-## Project Structure
+An immersive, interactive web application developed for the **Jewish Soldier Museum**. This platform allows users to explore the complex geography and chronology of World War II through a data-driven map, detailed soldier biographies, and AI-powered historical insights.
 
-```
+---
+
+### 📺 **Project Demo**
+> **[Watch the Video Presentation](https://drive.google.com/drive/home)** 🎥
+
+---
+
+## ✨ Key Features
+
+| Feature | Description |
+| :--- | :--- |
+| 🗺️ **Interactive Map** | Deep-dive into global events using **MapLibre GL JS** with custom vector tiles. |
+| 📅 **Dynamic Timeline** | Navigate through the war's progression chronologically with a synced UI. |
+| 👥 **Soldier Biographies** | Detailed profiles and service records of those who served. |
+| 🤖 **Gemini AI Integration** | Smart historical context and event summaries powered by Google's Gemini AI. |
+| 🌐 **Bi-Directional UI** | Full support for **Hebrew (RTL)** and **English (LTR)**. |
+| 📱 **Adaptive Design** | Fully responsive interface optimized for both desktop and mobile devices. |
+| 🏴 **Flag Display** | Automated flag mapping for all historical events and country modals. |
+
+---
+
+## 🛠️ Technology Stack
+
+### **Backend (The Engine)**
+* **Django 4.2.16:** Robust MVC architecture and admin management.
+* **Django REST Framework:** For a clean, scalable API layer.
+* **PostgreSQL:** Relational database for complex historical data mapping.
+* **Python-dotenv:** Secure environment configuration management.
+
+### **Frontend (The Experience)**
+* **Vanilla JavaScript:** High-performance logic without heavy framework overhead.
+* **MapLibre GL JS:** High-performance rendering of interactive maps and layers.
+* **Modern CSS3:** Leveraging Grid and Flexbox for pixel-perfect layouts.
+* **API Integrations:** MapTiler (Mapping Data) & Google Gemini (AI Context).
+
+---
+
+## 📂 Project Structure
+
+```bash
 Final-Project/
-├── backend/              # Django backend API
-│   └── ww2map/          # Django project
-│       ├── ww2map/      # Django settings
-│       ├── mapapp/      # Main Django app
-│       ├── requirements.txt
-│       └── manage.py
-├── frontend/            # Static assets and templates
-│   ├── static/          # CSS, JS, images
-│   └── templates/       # HTML templates
-├── .env                 # Environment variables (create from env.example)
-├── env.example          # Environment template
-├── .gitignore          # Git ignore rules
-├── SETUP_FOR_PARTNER.md # Partner setup guide
-└── README.md           # This file
+├── 📁 backend/              # Django Core
+│   └── 📁 ww2map/           # Project settings & Logic
+│       ├── 📁 mapapp/       # Main API, Data Models & Views
+│       ├── requirements.txt # Python Dependencies
+│       └── manage.py        # Project CLI
+├── 📁 frontend/             # Client-side files
+│   ├── 📁 static/           # UI Assets (CSS, JS, Images)
+│   └── 📁 templates/        # HTML Structure
+├── .env                     # Secrets & Configuration (Hidden)
+├── SETUP_FOR_PARTNER.md     # Collaborative Developer Guide
+└── README.md                # Project Documentation
 ```
 
 ## Features
